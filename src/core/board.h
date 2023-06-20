@@ -31,72 +31,72 @@
 class Board {
 public:
 
-	constexpr Color get_stm() {
+	constexpr Color get_stm() const {
 		return state.stm;
 	}
 
-	constexpr Square get_ep() {
+	constexpr Square get_ep() const {
 		return state.ep;
 	}
 
-	constexpr Zobrist get_hash() {
+	constexpr Zobrist get_hash() const {
 		return state.hash;
 	}
 
-	constexpr unsigned int get_move50() {
+	constexpr unsigned int get_move50() const {
 		return state.move50;
 	}
 
-	constexpr CastlingRights get_rights() {
+	constexpr CastlingRights get_rights() const {
 		return state.rights;
 	}
 
-	constexpr Piece piece_at(Square square) {
+	constexpr Piece piece_at(Square square) const {
 		return mailbox[square];
 	}
 
 	template<Color color, PieceType pt>
-	constexpr Bitboard pieces() {
+	constexpr Bitboard pieces() const {
 		return bb_colors[color] & bb_pieces[pt];
 	}
 
 	template<Color color>
-	constexpr Bitboard pieces(PieceType pt) {
+	constexpr Bitboard pieces(PieceType pt) const {
 		return bb_colors[color] & bb_pieces[pt];
 	}
 
 	template<PieceType pt>
-	constexpr Bitboard pieces(Color color) {
+	constexpr Bitboard pieces(Color color) const {
 		return bb_colors[color] & bb_pieces[pt];
 	}
 
-	constexpr Bitboard pieces(Color color, PieceType pt) {
+	constexpr Bitboard pieces(Color color, PieceType pt) const {
 		return bb_colors[color] & bb_pieces[pt];
 	}
 
 	template<PieceType pt>
-	constexpr Bitboard pieces() {
+	constexpr Bitboard pieces() const {
 		return bb_pieces[pt];
 	}
 
-	constexpr Bitboard pieces(PieceType pt) {
+	constexpr Bitboard pieces(PieceType pt) const {
 		return bb_pieces[pt];
 	}
 
 	template<Color color>
-	constexpr Bitboard pieces() {
+	constexpr Bitboard pieces() const {
 		return bb_colors[color];
 	}
 
-	constexpr Bitboard pieces(Color color) {
+	constexpr Bitboard pieces(Color color) const {
 		return bb_colors[color];
 	}
 
-	constexpr Bitboard occupied() {
+	constexpr Bitboard occupied() const {
 		return bb_colors[WHITE] | bb_colors[BLACK];
 	}
 
-	constexpr Bitboard empty() {
+	constexpr Bitboard empty() const {
 		return ~occupied();
 	}
 
@@ -106,7 +106,7 @@ public:
 		Piece piece_moved = piece_at(from);
 		const Color stm = piece_moved.color;
 		const Color xstm = color_enemy(stm);
-		const BoardState state_old = state;
+		const BoardState &state_old = state;
 		const Direction UP = stm == WHITE ? NORTH : -NORTH;
 		const Direction DOWN = -UP;
 
@@ -159,7 +159,32 @@ public:
 
 		move_piece(piece_moved, from, to);
 
-		// TODO handle castling
+		if (move.eq_flag(KING_CASTLE)) {
+			if (stm == WHITE) {
+				move_piece(Piece(ROOK, WHITE), H1, F1);
+			} else {
+				move_piece(Piece(ROOK, BLACK), H8, F8);
+			}
+		} else if (move.eq_flag(QUEEN_CASTLE)) {
+			if (stm == WHITE) {
+				move_piece(Piece(ROOK, WHITE), A1, D1);
+			} else {
+				move_piece(Piece(ROOK, BLACK), A8, D8);
+			}
+		}
+
+		if (state.rights.get(WK_MASK) && (from == E1 || from == H1 || to == H1)) {
+			state.rights.remove(WK_MASK);
+		}
+		if (state.rights.get(WQ_MASK) && (from == E1 || from == A1 || to == A1)) {
+			state.rights.remove(WQ_MASK);
+		}
+		if (state.rights.get(BK_MASK) && (from == E8 || from == H8 || to == H8)) {
+			state.rights.remove(BK_MASK);
+		}
+		if (state.rights.get(BQ_MASK) && (from == E8 || from == A8 || to == A8)) {
+			state.rights.remove(BQ_MASK);
+		}
 
 		state.hash.xor_castle(state.rights);
 	}
@@ -169,8 +194,7 @@ public:
 		const Square to = move.get_to();
 		Piece piece_moved = piece_at(to);
 		const Color stm = piece_moved.color;
-		const Color xstm = color_enemy(stm);
-		const Direction UP = xstm == WHITE ? NORTH : -NORTH;
+		const Direction UP = stm == WHITE ? NORTH : -NORTH;
 		const Direction DOWN = -UP;
 
 		assert(states.size() > 1);
@@ -181,6 +205,20 @@ public:
 			piece_moved.type = PAWN;
 		}
 
+		if (move.eq_flag(KING_CASTLE)) {
+			if (stm == WHITE) {
+				move_piece(Piece(ROOK, WHITE), F1, H1);
+			} else {
+				move_piece(Piece(ROOK, BLACK), F8, H8);
+			}
+		} else if (move.eq_flag(QUEEN_CASTLE)) {
+			if (stm == WHITE) {
+				move_piece(Piece(ROOK, WHITE), D1, A1);
+			} else {
+				move_piece(Piece(ROOK, BLACK), D8, A8);
+			}
+		}
+
 		move_piece(piece_moved, to, from);
 
 		if (move.eq_flag(EP_CAPTURE)) {
@@ -188,8 +226,6 @@ public:
 		} else if (move.is_capture()) {
 			square_set(to, state.piece_captured);
 		}
-
-		// TODO handle castling
 
 		states.pop_back();
 	}
@@ -200,8 +236,8 @@ public:
 		logger.info("Board::board_load", "Loading fen", fen);
 
 		std::stringstream ss(fen);
-		std::string pieces, stm, rights, ep, move50, move_cnt;
-		ss >> pieces >> stm >> rights >> ep >> move50 >> move_cnt;
+		std::string pieces, stm, rights, ep, move50;
+		ss >> pieces >> stm >> rights >> ep >> move50;
 
 		Square square = A8;
 		for (char c : pieces) {
@@ -224,10 +260,13 @@ public:
 			logger.error("Board::board_load", "Invalid stm string!");
 		}
 
-		// TODO parse castling rights
-
+		state.rights = CastlingRights(rights);
 		state.ep = square_from_string(ep);
-		state.move50 = std::stoi(move50);
+		logger.info(move50);
+		if (!move50.empty() && std::all_of(move50.begin(), move50.end(), ::isdigit))
+			state.move50 = std::stoi(move50);
+		else
+			state.move50 = 0;
 
 		state.hash.xor_castle(state.rights);
 		if (state.ep != NULL_SQUARE) state.hash.xor_ep(state.ep);
@@ -235,7 +274,7 @@ public:
 		logger.info("Board::board_load", "Finished loading fen");
 	}
 
-	inline std::string get_fen() {
+	inline std::string get_fen() const {
 		std::string fen;
 
 		Square square = A8;
@@ -264,14 +303,15 @@ public:
 		fen += " ";
 		fen += (get_stm() == WHITE ? "w" : "b");
 		fen += " ";
-		fen += "- "; // TODO Castling
+		fen += get_rights().to_string();
+		fen += " ";
 		fen += get_ep() == NULL_SQUARE ? "-" : format_square(get_ep());
 		fen += " ";
 		fen += std::to_string(get_move50());
 		return fen;
 	}
 
-	inline void display() {
+	inline void display() const {
 		std::vector<std::string> text;
 		text.emplace_back(std::string("50-move draw counter: ") + std::to_string(state.move50));
 		text.emplace_back(std::string("Hash: ") + std::to_string(get_hash().hash));
@@ -279,9 +319,8 @@ public:
 
 		if (get_ep() != NULL_SQUARE)
 			text.emplace_back(std::string("En passant square: ") + format_square(get_ep()));
-		std::string cr = "None"; // TODO Castling rights
 
-		text.emplace_back(std::string("Castling rights: ") + cr);
+		text.emplace_back(std::string("Castling rights: ") + get_rights().to_string());
 		text.emplace_back(std::string("Side to move: ") + std::string(get_stm() == WHITE ? "White" : "Black"));
 
 		std::cout << "\n     A   B   C   D   E   F   G   H  \n";

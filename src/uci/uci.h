@@ -21,6 +21,7 @@
 #include "../utils/logger.h"
 #include "../utils/utilities.h"
 #include "../core/board.h"
+#include "../tests/perft.h"
 
 #include <iostream>
 
@@ -36,7 +37,7 @@ private:
 
 	std::vector<Command> commands;
 	bool should_continue = true;
-	Board position;
+	Board board;
 
 	void register_commands();
 
@@ -50,15 +51,25 @@ void UCI::register_commands() {
 	commands.emplace_back("quit", [&](context tokens) {
 		should_continue = false;
 	});
-	commands.emplace_back("position", [&](context tokens){
+	commands.emplace_back("pos", [&](context tokens){
 		std::string fen;
 		for (unsigned int idx = 1; idx < tokens.size(); idx++) {
 			fen += tokens[idx] + " ";
 		}
-		position.board_load(fen);
+		board.board_load(fen);
 	});
 	commands.emplace_back("d", [&](context tokens){
-		position.display();
+		board.display();
+	});
+	commands.emplace_back("perft", [&](context tokens) {
+		int depth = std::stoi(tokens[1]);
+		U64 node_count = perft<true, false>(board, depth);
+		std::cout << "Total node count: " << node_count << std::endl;
+	});
+	commands.emplace_back("pd", [&](context tokens) {
+		int depth = std::stoi(tokens[1]);
+		U64 node_count = perft<false, true>(board, depth);
+		std::cout << "Total node count: " << node_count << std::endl;
 	});
 
 	logger.info("UCI::register_commands", "Registered ", commands.size(), "commands");
@@ -69,7 +80,7 @@ void UCI::start() {
 	init_all();
 	register_commands();
 
-	position.board_load(STARTING_FEN);
+	board.board_load(STARTING_FEN);
 
 	logger.info("UCI::start", "UCI Loop has started!");
 

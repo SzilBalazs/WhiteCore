@@ -17,44 +17,30 @@
 
 #pragma once
 
-struct CastlingRights {
-	unsigned int data = 0;
+#include "../core/movegen.h"
 
-	CastlingRights() = default;
+template<bool bulk_counting, bool output>
+U64 perft(Board &board, int depth) {
+	Move moves[200];
+	Move *moves_end = Movegen::gen_moves(board, moves, false);
 
-	explicit CastlingRights(const std::string &str) {
-		for (char c : str) {
-			if (c == 'K') add(WK_MASK);
-			else if (c == 'Q') add(WQ_MASK);
-			else if (c == 'k') add(BK_MASK);
-			else if (c == 'q') add(BQ_MASK);
+	// Bulk counting the number of moves at depth 1.
+	if (depth == 1 && bulk_counting)
+		return moves_end - moves;
+	if (depth == 0)
+		return 1;
+
+	// DFS like routine, calling itself recursively with lowered depth.
+	U64 nodes = 0;
+	for (Move *it = moves; it != moves_end; it++) {
+		board.make_move(*it);
+		U64 node_count = perft<bulk_counting, false>(board, depth - 1);
+		if constexpr (output) {
+			std::cout << *it << ": " << node_count << std::endl; // Used for debugging purposes.
 		}
+		nodes += node_count;
+		board.undo_move(*it);
 	}
+	return nodes;
 
-	void add(unsigned int right) {
-		data |= right;
-	}
-
-	void remove(unsigned int right) {
-		data &= ~right;
-	}
-
-	bool get(unsigned int right) const {
-		return data & right;
-	}
-
-	std::string to_string() const {
-		std::string res;
-		if (get(WK_MASK))
-			res += 'K';
-		if (get(WQ_MASK))
-			res += 'Q';
-		if (get(BK_MASK))
-			res += 'k';
-		if (get(BQ_MASK))
-			res += 'q';
-		if (res.empty())
-			res = "-";
-		return res;
-	}
-};
+}
