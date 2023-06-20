@@ -19,10 +19,14 @@
 
 #include "../core/movegen.h"
 
+namespace Tests
+{
+
 template<bool bulk_counting, bool output>
-U64 perft(Board &board, int depth) {
+U64 perft(Board& board, int depth)
+{
 	Move moves[200];
-	Move *moves_end = Movegen::gen_moves(board, moves, false);
+	Move* moves_end = Movegen::gen_moves(board, moves, false);
 
 	// Bulk counting the number of moves at depth 1.
 	if (depth == 1 && bulk_counting)
@@ -32,15 +36,19 @@ U64 perft(Board &board, int depth) {
 
 	// DFS like routine, calling itself recursively with lowered depth.
 	U64 nodes = 0;
-	for (Move *it = moves; it != moves_end; it++) {
+	for (Move* it = moves; it != moves_end; it++)
+	{
 		board.make_move(*it);
 		U64 node_count = perft<bulk_counting, false>(board, depth - 1);
-		if constexpr (output) {
+		if constexpr (output)
+		{
 			std::cout << *it << ": " << node_count << std::endl; // Used for debugging purposes.
 		}
 		nodes += node_count;
 		board.undo_move(*it);
 	}
 	return nodes;
+
+}
 
 }

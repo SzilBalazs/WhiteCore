@@ -18,10 +18,23 @@
 #include "uci/uci.h"
 #include "tests/tests.h"
 
-int main() {
+int main(int argc, char* argv[]) {
 
-	UCI protocol;
-	protocol.start();
+	std::string mode;
+	if (argc >= 2) {
+		mode = std::string(argv[1]);
+	}
+
+	init_all();
+
+	if (mode == "test") {
+		Tests::run();
+	} else if (mode == "bench") {
+
+	} else {
+		UCI protocol;
+		protocol.start();
+	}
 
 	logger.info("main", "Exiting with return code 0");
 	return 0;

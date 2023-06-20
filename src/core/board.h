@@ -230,10 +230,10 @@ public:
 		states.pop_back();
 	}
 
-	inline void board_load(const std::string &fen) {
+	inline void load(const std::string &fen) {
 		board_clear();
 
-		logger.info("Board::board_load", "Loading fen", fen);
+		logger.info("Board::load", "Loading fen", fen);
 
 		std::stringstream ss(fen);
 		std::string pieces, stm, rights, ep, move50;
@@ -257,7 +257,7 @@ public:
 			state.stm = BLACK;
 			state.hash.xor_stm();
 		} else {
-			logger.error("Board::board_load", "Invalid stm string!");
+			logger.error("Board::load", "Invalid stm string!");
 		}
 
 		state.rights = CastlingRights(rights);
@@ -271,7 +271,7 @@ public:
 		state.hash.xor_castle(state.rights);
 		if (state.ep != NULL_SQUARE) state.hash.xor_ep(state.ep);
 
-		logger.info("Board::board_load", "Finished loading fen");
+		logger.info("Board::load", "Finished loading fen");
 	}
 
 	inline std::string get_fen() const {

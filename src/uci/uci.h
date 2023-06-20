@@ -56,19 +56,19 @@ void UCI::register_commands() {
 		for (unsigned int idx = 1; idx < tokens.size(); idx++) {
 			fen += tokens[idx] + " ";
 		}
-		board.board_load(fen);
+		board.load(fen);
 	});
 	commands.emplace_back("d", [&](context tokens){
 		board.display();
 	});
 	commands.emplace_back("perft", [&](context tokens) {
 		int depth = std::stoi(tokens[1]);
-		U64 node_count = perft<true, false>(board, depth);
+		U64 node_count = Tests::perft<true, false>(board, depth);
 		std::cout << "Total node count: " << node_count << std::endl;
 	});
 	commands.emplace_back("pd", [&](context tokens) {
 		int depth = std::stoi(tokens[1]);
-		U64 node_count = perft<false, true>(board, depth);
+		U64 node_count = Tests::perft<false, true>(board, depth);
 		std::cout << "Total node count: " << node_count << std::endl;
 	});
 
@@ -77,10 +77,9 @@ void UCI::register_commands() {
 
 void UCI::start() {
 
-	init_all();
 	register_commands();
 
-	board.board_load(STARTING_FEN);
+	board.load(STARTING_FEN);
 
 	logger.info("UCI::start", "UCI Loop has started!");
 
