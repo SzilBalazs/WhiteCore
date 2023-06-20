@@ -65,30 +65,10 @@ enum Square : int {
     NULL_SQUARE = 64
 };
 
-constexpr Square flipSquare(Square sq) {
-    return Square(int(sq) ^ 56);
-}
-
 constexpr unsigned char WK_MASK = 1;
 constexpr unsigned char WQ_MASK = 2;
 constexpr unsigned char BK_MASK = 4;
 constexpr unsigned char BQ_MASK = 8;
-
-inline Square operator+(Square &a, int b) {
-    return Square(int(a) + b);
-}
-
-inline Square operator-(Square &a, int b) {
-    return Square(int(a) - b);
-}
-
-inline Square operator+=(Square &a, int b) {
-    return a = a + b;
-}
-
-inline Square operator-=(Square &a, int b) {
-    return a = a - b;
-}
 
 const std::string ASCII_WHITE_PIECE = "\u001b[90;107m";
 const std::string ASCII_BLACK_PIECE = "\u001b[100;97m";
@@ -112,14 +92,6 @@ enum Direction : int {
 };
 
 constexpr Direction DIRECTIONS[8] = {NORTH, WEST, NORTH_EAST, NORTH_WEST, SOUTH, EAST, SOUTH_WEST, SOUTH_EAST};
-
-constexpr Direction opposite(Direction direction) {
-    return Direction(-direction);
-}
-
-constexpr Direction operator-(Direction direction) {
-    return opposite(direction);
-}
 
 enum PieceType {
     PIECE_EMPTY = 6,
@@ -151,45 +123,44 @@ struct Piece {
 
     constexpr Piece() = default;
 
-    constexpr Piece(PieceType t, Color c) {
-        type = t;
+    constexpr Piece(PieceType pt, Color c) {
+        type = pt;
         color = c;
     }
 
     constexpr bool is_null() const {
         return type == PIECE_EMPTY || color == COLOR_EMPTY;
     }
+
+	constexpr bool is_ok() const {
+		return !is_null();
+	}
 };
 
-void init_all();
-
+constexpr Piece NULL_PIECE = Piece();
 constexpr PieceType index_to_type[7] = {KING, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, PIECE_EMPTY};
 constexpr Color index_to_color[3] = {WHITE, BLACK, COLOR_EMPTY};
 
-template<Color color>
-constexpr Color color_enemy() {
-	if constexpr (color == WHITE)
-		return BLACK;
-	else
-		return WHITE;
-}
+constexpr unsigned int PROMO_FLAG = 0x8;    // 0b1000
+constexpr unsigned int CAPTURE_FLAG = 0x4;  // 0b0100
+constexpr unsigned int SPECIAL1_FLAG = 0x2; // 0b0010
+constexpr unsigned int SPECIAL2_FLAG = 0x1; // 0b0001
 
-inline Color color_enemy(Color color) {
-	return color == WHITE ? BLACK : WHITE;
-}
+constexpr unsigned int QUIET_MOVE = 0;
+constexpr unsigned int CAPTURE = CAPTURE_FLAG;
 
-constexpr unsigned int square_to_rank(Square square) {
-	return square >> 3;
-}
+constexpr unsigned int DOUBLE_PAWN_PUSH = SPECIAL2_FLAG;
+constexpr unsigned int EP_CAPTURE = CAPTURE_FLAG | SPECIAL2_FLAG;
 
-constexpr unsigned int square_to_file(Square square) {
-	return square & 7;
-}
+constexpr unsigned int PROMO_KNIGHT = PROMO_FLAG;
+constexpr unsigned int PROMO_BISHOP = PROMO_FLAG | SPECIAL2_FLAG;
+constexpr unsigned int PROMO_ROOK = PROMO_FLAG | SPECIAL1_FLAG;
+constexpr unsigned int PROMO_QUEEN = PROMO_FLAG | SPECIAL1_FLAG | SPECIAL2_FLAG;
 
-inline std::string format_square(Square square) {
-	return std::string() + (char) ('a' + (char) square % 8) + (char) ('1' + (char) (square / 8));
-}
+constexpr unsigned int PROMO_CAPTURE_KNIGHT = CAPTURE_FLAG | PROMO_FLAG;
+constexpr unsigned int PROMO_CAPTURE_BISHOP = CAPTURE_FLAG | PROMO_FLAG | SPECIAL2_FLAG;
+constexpr unsigned int PROMO_CAPTURE_ROOK = CAPTURE_FLAG | PROMO_FLAG | SPECIAL1_FLAG;
+constexpr unsigned int PROMO_CAPTURE_QUEEN = CAPTURE_FLAG | PROMO_FLAG | SPECIAL1_FLAG | SPECIAL2_FLAG;
 
-constexpr Square mirrorSquare(Square square) {
-	return Square(56 - square + square_to_file(square));
-}
+constexpr unsigned int KING_CASTLE = SPECIAL1_FLAG;
+constexpr unsigned int QUEEN_CASTLE = SPECIAL1_FLAG | SPECIAL2_FLAG;

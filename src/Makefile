@@ -73,7 +73,7 @@ all: clean build
 build: $(EXE)
 
 clean:
-	@rm -r objects $(EXE) *.gcda || true
+	@rm -r .tmp $(EXE) *.gcda || true
 
 .PHONY: all build clean
 

@@ -35,10 +35,10 @@ inline Bitboard attacks_queen(Square square, Bitboard occ) {
 	return attacks_rook(square, occ) | attacks_bishop(square, occ);
 }
 
-template<PieceType type>
+template<PieceType pt>
 constexpr Bitboard attacks_piece(Square square, Bitboard occupied) {
-	assert((type != PAWN) && (type != PIECE_EMPTY));
-	switch (type) {
+	assert((pt != PAWN) && (pt != PIECE_EMPTY));
+	switch (pt) {
 	case KNIGHT:
 		return masks_knight[square];
 	case BISHOP:
@@ -54,9 +54,9 @@ constexpr Bitboard attacks_piece(Square square, Bitboard occupied) {
 	}
 }
 
-inline Bitboard attacks_piece(PieceType type, Square square, Bitboard occupied) {
-	assert((type != PAWN) && (type != PIECE_EMPTY));
-	switch (type) {
+inline Bitboard attacks_piece(PieceType pt, Square square, Bitboard occupied) {
+	assert((pt != PAWN) && (pt != PIECE_EMPTY));
+	switch (pt) {
 	case KNIGHT:
 		return masks_knight[square];
 	case BISHOP:
@@ -73,9 +73,9 @@ inline Bitboard attacks_piece(PieceType type, Square square, Bitboard occupied) 
 }
 
 template<Color color>
-inline Bitboard attacks_piece(PieceType type, Square square, Bitboard occupied) {
-	assert((type != PAWN) && (type != PIECE_EMPTY));
-	switch (type) {
+inline Bitboard attacks_piece(PieceType pt, Square square, Bitboard occupied) {
+	assert((pt != PAWN) && (pt != PIECE_EMPTY));
+	switch (pt) {
 	case PAWN:
 		return masks_pawn[square][color];
 	case KNIGHT:

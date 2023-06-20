@@ -18,6 +18,7 @@
 #pragma once
 
 #include "bitboard.h"
+#include "../utils/utilities.h"
 
 // Stores a magic entry.
 struct Magic {
@@ -29,13 +30,11 @@ struct Magic {
 
 extern Bitboard attack_table_rook[102400];
 extern Bitboard attack_table_bishop[5248];
-extern const Magic magic_rook[64];
-extern const Magic magic_bishop[64];
 
 // Slow naive function of getting the attacked squares of a sliding piece.
-Bitboard attacks_sliding_slow(Square square, Bitboard occupied, PieceType type) {
-	assert((type == ROOK) || (type == BISHOP));
-	switch (type) {
+inline Bitboard attacks_sliding_slow(Square square, Bitboard occupied, PieceType pt) {
+	assert((pt == ROOK) || (pt == BISHOP));
+	switch (pt) {
 	case ROOK:
 		return slide<NORTH>(square, occupied) | slide<SOUTH>(square, occupied) | slide<WEST>(square, occupied) |
 			   slide<EAST>(square, occupied);
@@ -56,9 +55,9 @@ inline unsigned int get_magic_index(const Magic &m, Bitboard occ) {
 #endif
 }
 
-// Initializes magic bitboards by type.
-inline void init_magic(const Magic *magics, PieceType type) {
-	assert((type == ROOK) || (type == BISHOP));
+// Initializes magic bitboards by pt.
+inline void init_magic(const Magic *magics, PieceType pt) {
+	assert((pt == ROOK) || (pt == BISHOP));
 	Bitboard occupied[4096], attacked[4096];
 
 	for (Square square = A1; square < 64; square += 1) {
@@ -68,7 +67,7 @@ inline void init_magic(const Magic *magics, PieceType type) {
 		Bitboard occ = 0;
 		do {
 			occupied[length] = occ;
-			attacked[length] = attacks_sliding_slow(square, occ, type);
+			attacked[length] = attacks_sliding_slow(square, occ, pt);
 
 			length++;
 			occ = (occ - magic.mask) & magic.mask;
@@ -80,11 +79,6 @@ inline void init_magic(const Magic *magics, PieceType type) {
 			magic.ptr[index] = attacked[i];
 		}
 	}
-}
-
-inline void init_magic() {
-	init_magic(magic_rook, ROOK);
-	init_magic(magic_bishop, BISHOP);
 }
 
 /*
@@ -225,3 +219,8 @@ constexpr Magic magic_bishop[64] = {
 		{ attack_table_bishop + 5152, 0x20100804020000ULL, 0x10210240128120aULL,  5},
 		{ attack_table_bishop + 5184, 0x40201008040200ULL, 0x208600082060020ULL,  6},
 };
+
+inline void init_magic() {
+	init_magic(magic_rook, ROOK);
+	init_magic(magic_bishop, BISHOP);
+}

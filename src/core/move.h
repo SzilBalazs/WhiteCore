@@ -20,31 +20,7 @@
 #pragma once
 
 #include "constants.h"
-#include "utils.h"
-
-constexpr unsigned int PROMO_FLAG = 0x8;    // 0b1000
-constexpr unsigned int CAPTURE_FLAG = 0x4;  // 0b0100
-constexpr unsigned int SPECIAL1_FLAG = 0x2; // 0b0010
-constexpr unsigned int SPECIAL2_FLAG = 0x1; // 0b0001
-
-constexpr unsigned int QUIET_MOVE = 0;
-constexpr unsigned int CAPTURE = CAPTURE_FLAG;
-
-constexpr unsigned int DOUBLE_PAWN_PUSH = SPECIAL2_FLAG;
-constexpr unsigned int EP_CAPTURE = CAPTURE_FLAG | SPECIAL2_FLAG;
-
-constexpr unsigned int PROMO_KNIGHT = PROMO_FLAG;
-constexpr unsigned int PROMO_BISHOP = PROMO_FLAG | SPECIAL2_FLAG;
-constexpr unsigned int PROMO_ROOK = PROMO_FLAG | SPECIAL1_FLAG;
-constexpr unsigned int PROMO_QUEEN = PROMO_FLAG | SPECIAL1_FLAG | SPECIAL2_FLAG;
-
-constexpr unsigned int PROMO_CAPTURE_KNIGHT = CAPTURE_FLAG | PROMO_FLAG;
-constexpr unsigned int PROMO_CAPTURE_BISHOP = CAPTURE_FLAG | PROMO_FLAG | SPECIAL2_FLAG;
-constexpr unsigned int PROMO_CAPTURE_ROOK = CAPTURE_FLAG | PROMO_FLAG | SPECIAL1_FLAG;
-constexpr unsigned int PROMO_CAPTURE_QUEEN = CAPTURE_FLAG | PROMO_FLAG | SPECIAL1_FLAG | SPECIAL2_FLAG;
-
-constexpr unsigned int KING_CASTLE = SPECIAL1_FLAG;
-constexpr unsigned int QUEEN_CASTLE = SPECIAL1_FLAG | SPECIAL2_FLAG;
+#include "../utils/utilities.h"
 
 class Move {
 public:

@@ -19,30 +19,61 @@
 
 #include "command.h"
 #include "../utils/logger.h"
+#include "../utils/utilities.h"
+#include "../core/board.h"
 
 #include <iostream>
 
 class UCI {
-private:
 
-	std::vector<Command> commands;
-
-	static std::vector<std::string> convert_to_tokens(const std::string &line);
-
-	static void is_ready(std::vector<std::string> tokens);
+	using context = std::vector<std::string>;
 
 public:
 
 	void start();
+
+private:
+
+	std::vector<Command> commands;
+	bool should_continue = true;
+	Board position;
+
+	void register_commands();
+
+	static std::vector<std::string> convert_to_tokens(const std::string &line);
 };
+
+void UCI::register_commands() {
+	commands.emplace_back("isready", [&](context tokens) {
+		std::cout << "readyok" << std::endl;
+	});
+	commands.emplace_back("quit", [&](context tokens) {
+		should_continue = false;
+	});
+	commands.emplace_back("position", [&](context tokens){
+		std::string fen;
+		for (unsigned int idx = 1; idx < tokens.size(); idx++) {
+			fen += tokens[idx] + " ";
+		}
+		position.board_load(fen);
+	});
+	commands.emplace_back("d", [&](context tokens){
+		position.display();
+	});
+
+	logger.info("UCI::register_commands", "Registered ", commands.size(), "commands");
+}
 
 void UCI::start() {
 
-	commands.emplace_back("isready", is_ready);
+	init_all();
+	register_commands();
 
-	logger.info("UCI", "UCI loop has started");
+	position.board_load(STARTING_FEN);
 
-	while (true) {
+	logger.info("UCI::start", "UCI Loop has started!");
+
+	while (should_continue) {
 		std::string line;
 		getline(std::cin, line);
 
@@ -50,13 +81,9 @@ void UCI::start() {
 			break;
 		}
 
-		logger.info("UCI", "in> " + line);
+		logger.info("UCI::start", "in>", line);
 
 		std::vector<std::string> tokens = convert_to_tokens(line);
-
-		if (tokens[0] == "stop") {
-			break;
-		}
 
 		for (Command cmd : commands) {
 			if (cmd.is_match(tokens)) {
@@ -64,10 +91,6 @@ void UCI::start() {
 			}
 		}
 	}
-}
-
-void UCI::is_ready(std::vector<std::string> tokens) {
-	std::cout << "readyok" << std::endl;
 }
 
 std::vector<std::string> UCI::convert_to_tokens(const std::string& line) {

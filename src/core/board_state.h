@@ -15,13 +15,18 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "uci/uci.h"
+#pragma once
 
-int main() {
+#include "constants.h"
+#include "zobrist.h"
 
-	UCI protocol;
-	protocol.start();
+struct BoardState {
+	Color stm = WHITE;
+	Square ep = NULL_SQUARE;
+	Zobrist hash = Zobrist();
+	Piece piece_captured = NULL_PIECE;
+	CastlingRights rights = CastlingRights();
+	unsigned int move50 = 0;
+};
 
-	logger.info("main", "Exiting with return code 0");
-	return 0;
-}
+

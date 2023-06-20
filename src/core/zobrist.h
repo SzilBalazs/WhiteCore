@@ -15,13 +15,28 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "uci/uci.h"
+#pragma once
 
-int main() {
+#include "randoms.h"
+#include "castling_rights.h"
 
-	UCI protocol;
-	protocol.start();
+struct Zobrist {
 
-	logger.info("main", "Exiting with return code 0");
-	return 0;
-}
+	U64 hash = 0;
+
+	void xor_stm() {
+		hash ^= *rand_table_color;
+	}
+
+	void xor_piece(Square square, Piece piece) {
+		hash ^= rand_table_pieces[12 * square + 6 * piece.color + piece.type];
+	}
+
+	void xor_ep(Square square) {
+		hash ^= rand_table_ep[(square)];
+	}
+
+	void xor_castle(CastlingRights rights) {
+		hash ^= rand_table_castling[rights.data];
+	}
+};

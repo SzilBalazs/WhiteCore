@@ -19,6 +19,7 @@
 
 #include <string>
 #include <fstream>
+#include <iostream>
 
 static void exception_handler();
 
@@ -33,36 +34,34 @@ struct Logger {
 		std::set_terminate(exception_handler);
 	}
 
-	void info(const std::string& str) {
-		file << "[GLOBAL][INFO] " << str << std::endl;
+	template<typename T, typename... Args>
+	inline void info(T a, Args... args) {
+		file << "[INFO] " << a << "(): ";
+		log(args...);
 	}
 
-	void warning(const std::string& str) {
-		file << "[GLOBAL][WARNING] " << str << std::endl;
+	template<typename T, typename... Args>
+	inline void error(T a, Args... args) {
+		file << "[INFO] " << a << "(): ";
+		log(args...);
 	}
 
-	void error(const std::string& str) {
-		file << "[GLOBAL][ERROR] " << str << std::endl;
+	template<typename T, typename... Args>
+	inline void log(T a, Args... args) {
+		file << a << " ";
+		log(args...);
 	}
 
-	void info(const std::string& module, const std::string& str) {
-		file << "[" << module << "][INFO] " << str << std::endl;
-	}
-
-	void warning(const std::string& module, const std::string& str) {
-		file << "[" << module << "][WARNING] " << str << std::endl;
-	}
-
-	void error(const std::string& module, const std::string& str) {
-		file << "[" << module << "][ERROR] " << str << std::endl;
+	inline void log() {
+		file << std::endl;
 	}
 };
 
-static Logger logger;
+extern Logger logger;
 
 static void exception_handler() {
 	if (logger.file.is_open()) {
-		logger.error("exception_handler was called: closing log file and aborting");
+		logger.error("Logger", "exception_handler was called: closing log file and aborting");
 		logger.file.close();
 	}
 	std::abort();

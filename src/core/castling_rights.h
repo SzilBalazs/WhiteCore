@@ -15,13 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "uci/uci.h"
+#pragma once
 
-int main() {
+struct CastlingRights {
+	unsigned int data;
 
-	UCI protocol;
-	protocol.start();
+	void add_right(unsigned int right) {
+		data |= right;
+	}
 
-	logger.info("main", "Exiting with return code 0");
-	return 0;
-}
+	void remove_right(unsigned int right) {
+		data &= ~right;
+	}
+};
