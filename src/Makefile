@@ -52,6 +52,7 @@ CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall -Wn
 EXE = $(NAME)-v$(VERSION_MAJOR)-$(VERSION_MINOR)$(SUFFIX)
 
 default: $(EXE)
+	@echo > /dev/null
 
 $(OBJECTS): | $(TMP_DIR)
 $(DEPENDS): | $(TMP_DIR)
@@ -75,6 +76,6 @@ build: $(EXE)
 clean:
 	@rm -r .tmp $(EXE) *.gcda || true
 
-.PHONY: all build clean
+.PHONY: all
 
 -include ${DEPENDS}

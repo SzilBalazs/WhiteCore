@@ -262,7 +262,6 @@ public:
 
 		state.rights = CastlingRights(rights);
 		state.ep = square_from_string(ep);
-		logger.info(move50);
 		if (!move50.empty() && std::all_of(move50.begin(), move50.end(), ::isdigit))
 			state.move50 = std::stoi(move50);
 		else

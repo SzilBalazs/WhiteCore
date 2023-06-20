@@ -22,8 +22,21 @@
 #include "../utils/utilities.h"
 #include "../core/board.h"
 #include "../tests/perft.h"
+#include "../eval/eval.h"
+#include "../search/search.h"
 
 #include <iostream>
+
+inline Move move_from_string(Board &board, const std::string &str) {
+	Move moves[200];
+	Move *moves_end = Movegen::gen_moves(board, moves, false);
+	for (Move *it = moves; it != moves_end; it++) {
+		if (it->to_uci() == str) {
+			return *it;
+		}
+	}
+	return NULL_MOVE;
+}
 
 class UCI {
 
@@ -38,6 +51,7 @@ private:
 	std::vector<Command> commands;
 	bool should_continue = true;
 	Board board;
+	Searcher searcher;
 
 	void register_commands();
 
@@ -45,20 +59,38 @@ private:
 };
 
 void UCI::register_commands() {
+	commands.emplace_back("uci", [&](context tokens){
+		std::cout << "id name WhiteCore v0.1\nid author Balazs Szilagyi\nuciok\n" << std::flush;
+	});
 	commands.emplace_back("isready", [&](context tokens) {
 		std::cout << "readyok" << std::endl;
 	});
 	commands.emplace_back("quit", [&](context tokens) {
 		should_continue = false;
 	});
-	commands.emplace_back("pos", [&](context tokens){
-		std::string fen;
-		for (unsigned int idx = 1; idx < tokens.size(); idx++) {
-			fen += tokens[idx] + " ";
+	commands.emplace_back("position", [&](context tokens){
+		unsigned int idx = 2;
+		if (tokens[1] == "startpos") {
+			board.load(STARTING_FEN);
+		} else {
+			std::string fen;
+			for (;idx < tokens.size() && tokens[idx] != "moves"; idx++) {
+				fen += tokens[idx] + " ";
+			}
+			board.load(fen);
 		}
-		board.load(fen);
+		if (idx < tokens.size() && tokens[idx] == "moves") idx++;
+		for (;idx < tokens.size(); idx++) {
+			Move move = move_from_string(board, tokens[idx]);
+			if (move == NULL_MOVE) {
+				logger.error("load_position", "Invalid move", tokens[idx]);
+				break;
+			} else {
+				board.make_move(move);
+			}
+		}
 	});
-	commands.emplace_back("d", [&](context tokens){
+	commands.emplace_back("display", [&](context tokens){
 		board.display();
 	});
 	commands.emplace_back("perft", [&](context tokens) {
@@ -66,10 +98,16 @@ void UCI::register_commands() {
 		U64 node_count = Tests::perft<true, false>(board, depth);
 		std::cout << "Total node count: " << node_count << std::endl;
 	});
-	commands.emplace_back("pd", [&](context tokens) {
-		int depth = std::stoi(tokens[1]);
-		U64 node_count = Tests::perft<false, true>(board, depth);
-		std::cout << "Total node count: " << node_count << std::endl;
+	commands.emplace_back("go", [&](context tokens){
+		searcher.load_board(board);
+		Move best_move = searcher.search(1'000'000);
+		std::cout << "bestmove " << best_move << std::endl;
+	});
+	commands.emplace_back("stop", [&](context tokens){
+		// TODO
+	});
+	commands.emplace_back("ucinewgame", [&](context tokens){
+		// TODO
 	});
 
 	logger.info("UCI::register_commands", "Registered ", commands.size(), "commands");

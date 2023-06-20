@@ -54,7 +54,7 @@ void test_perft() {
 	if (failed.empty()) {
 		std::cout << "All perft test have passed!" << std::endl;
 	} else {
-		std::cout << failed.size() << " perf test have failed:" << std::endl;
+		std::cout << failed.size() << " perft test have failed:" << std::endl;
 		for (const Test& test : failed) {
 			std::cout << test.fen << std::endl;
 		}
