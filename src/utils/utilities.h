@@ -143,6 +143,10 @@ constexpr Direction operator-(Direction direction) {
 	return opposite(direction);
 }
 
+constexpr int64_t calculate_nps(int64_t time, int64_t nodes) {
+	return nodes * 1000 / (time + 1);
+}
+
 inline Square operator+(Square a, int b) {
 	return Square(int(a) + b);
 }

@@ -48,6 +48,10 @@ public:
 		return now() < end_time;
 	}
 
+	inline int64_t get_elapsed_time() {
+		return now() - start_time;
+	}
+
 	inline Depth get_max_depth() const {
 		return max_depth;
 	}

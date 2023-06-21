@@ -72,7 +72,11 @@ private:
 			Score score = search<ROOT_NODE>(depth, -INF_SCORE, INF_SCORE, 0);
 
 			if (shared.is_searching && id == 0) {
-				logger.print("info", "depth", int(depth), "nodes", shared.node_count, "score", "cp", score, "pv", get_pv_line());
+				int64_t elapsed_time = shared.tm.get_elapsed_time();
+				logger.print("info", "depth", int(depth), "nodes", shared.node_count,
+						"score", "cp", score, "time", elapsed_time,
+						"nps", calculate_nps(elapsed_time, shared.node_count),
+						"pv", get_pv_line());
 				shared.best_move = pv_array[0][0];
 			}
 

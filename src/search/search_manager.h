@@ -40,6 +40,10 @@ public:
 		shared.tm.init(limits);
 	}
 
+	inline int64_t get_elapsed_time() {
+		return shared.tm.get_elapsed_time();
+	}
+
 	template<bool wait_to_finish>
 	inline void join() {
 		if (!wait_to_finish) {
