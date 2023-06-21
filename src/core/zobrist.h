@@ -17,12 +17,17 @@
 
 #pragma once
 
+#include "../utils/utilities.h"
 #include "randoms.h"
 #include "castling_rights.h"
 
 struct Zobrist {
 
 	U64 hash = 0;
+
+	Zobrist() = default;
+
+	explicit Zobrist(U64 hash) : hash(hash) {}
 
 	inline operator U64() const {
 		return hash;
@@ -37,7 +42,7 @@ struct Zobrist {
 	}
 
 	void xor_ep(Square square) {
-		hash ^= rand_table_ep[(square)];
+		hash ^= rand_table_ep[square_to_file(square)];
 	}
 
 	void xor_castle(CastlingRights rights) {

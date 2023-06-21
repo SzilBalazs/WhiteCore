@@ -117,7 +117,7 @@ public:
 		Piece piece_moved = piece_at(from);
 		const Color stm = piece_moved.color;
 		const Color xstm = color_enemy(stm);
-		const BoardState &state_old = state;
+		const BoardState state_old = state;
 		const Direction UP = stm == WHITE ? NORTH : -NORTH;
 		const Direction DOWN = -UP;
 
@@ -279,7 +279,8 @@ public:
 			state.move50 = 0;
 
 		state.hash.xor_castle(state.rights);
-		if (state.ep != NULL_SQUARE) state.hash.xor_ep(state.ep);
+		if (state.ep != NULL_SQUARE)
+			state.hash.xor_ep(state.ep);
 
 		logger.info("Board::load", "Finished loading fen");
 	}
