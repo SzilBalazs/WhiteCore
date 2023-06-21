@@ -37,6 +37,8 @@ typedef int32_t Score;
 typedef int8_t Depth;
 typedef int8_t Ply;
 
+constexpr int64_t INF_TIME = 1'000'000'000'000'000;
+constexpr int64_t INF_NODES = 1'000'000'000'000'000;
 constexpr Score UNKNOWN_SCORE = 300000;
 constexpr Score INF_SCORE = 200000;
 constexpr Score MATE_VALUE = 100000;

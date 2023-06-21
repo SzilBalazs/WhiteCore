@@ -17,30 +17,26 @@
 
 #pragma once
 
-#include "randoms.h"
-#include "castling_rights.h"
+#include "../core/movegen.h"
 
-struct Zobrist {
+template<bool captures_only>
+class MoveList {
 
-	U64 hash = 0;
+public:
 
-	inline operator U64() const {
-		return hash;
+	MoveList(const Board &board) {
+		moves_end = Movegen::gen_moves(board, moves, captures_only);
+		it = moves;
 	}
 
-	void xor_stm() {
-		hash ^= *rand_table_color;
+	bool empty() {
+		return moves_end == it;
 	}
 
-	void xor_piece(Square square, Piece piece) {
-		hash ^= rand_table_pieces[12 * square + 6 * piece.color + piece.type];
+	Move next_move() {
+		return *it++;
 	}
 
-	void xor_ep(Square square) {
-		hash ^= rand_table_ep[(square)];
-	}
-
-	void xor_castle(CastlingRights rights) {
-		hash ^= rand_table_castling[rights.data];
-	}
+private:
+	Move moves[200], *it, *moves_end;
 };

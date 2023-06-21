@@ -100,6 +100,17 @@ public:
 		return ~occupied();
 	}
 
+	inline bool is_draw() const {
+		if (get_move50() >= 100) return true;
+		int cnt = 0;
+		for (const BoardState &st : states) {
+			if (st.hash == states.back().hash) {
+				cnt++;
+			}
+		}
+		return cnt >= 2;
+	}
+
 	inline void make_move(Move move) {
 		const Square from = move.get_from();
 		const Square to = move.get_to();
@@ -313,7 +324,7 @@ public:
 	inline void display() const {
 		std::vector<std::string> text;
 		text.emplace_back(std::string("50-move draw counter: ") + std::to_string(state.move50));
-		text.emplace_back(std::string("Hash: ") + std::to_string(get_hash().hash));
+		text.emplace_back(std::string("Hash: ") + std::to_string(get_hash()));
 		text.emplace_back(std::string("Fen: ") + get_fen());
 
 		if (get_ep() != NULL_SQUARE)

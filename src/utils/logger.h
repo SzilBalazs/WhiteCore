@@ -35,6 +35,16 @@ struct Logger {
 	}
 
 	template<typename T, typename... Args>
+	inline void print(T a, Args... args) {
+		std::cout << a << " ";
+		print(args...);
+	}
+
+	inline void print() {
+		std::cout << std::endl;
+	}
+
+	template<typename T, typename... Args>
 	inline void info(T a, Args... args) {
 		file << "[INFO] " << a << "(): ";
 		log(args...);
