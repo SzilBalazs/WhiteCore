@@ -41,7 +41,7 @@ public:
 		max_depth = limits.depth.value_or(MAX_PLY);
 
 		start_time = now();
-		end_time = start_time + allocated_time;
+		end_time = start_time + allocated_time - MOVE_OVERHEAD;
 	}
 
 	inline bool time_left() {

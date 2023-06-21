@@ -55,13 +55,25 @@ private:
 	SharedMemory &shared;
 	std::thread th;
 	unsigned int id;
+	Move pv_array[500][500];
+	Ply pv_length[500];
+
+	std::string get_pv_line() {
+		std::string pv;
+		for (int i = 0; i < pv_length[0]; i++) {
+			pv += pv_array[0][i].to_uci() + " ";
+		}
+		return pv;
+	}
+
 
 	void search() {
 		for (Depth depth = 1; depth <= shared.tm.get_max_depth(); depth++) {
 			Score score = search<ROOT_NODE>(depth, -INF_SCORE, INF_SCORE, 0);
 
 			if (shared.is_searching && id == 0) {
-				logger.print("info", "depth", int(depth), "nodes", shared.node_count, "score", "cp", score);
+				logger.print("info", "depth", int(depth), "nodes", shared.node_count, "score", "cp", score, "pv", get_pv_line());
+				shared.best_move = pv_array[0][0];
 			}
 
 			if (!shared.is_searching) {
@@ -70,6 +82,7 @@ private:
 		}
 		if (id == 0) {
 			shared.is_searching = false;
+			logger.print("bestmove", shared.best_move);
 		}
 	}
 
@@ -104,6 +117,9 @@ private:
 			}
 		}
 
+		if (id == 0)
+			pv_length[ply] = ply;
+
 		if (in_check) depth++;
 
 		MoveList<false> move_list(board);
@@ -133,6 +149,15 @@ private:
 			if (score > best_score) {
 				best_score = score;
 				best_move = move;
+
+				if (id == 0) {
+					pv_array[ply][ply] = move;
+					for (Ply i = ply + 1; i < pv_length[ply + 1]; i++) {
+						pv_array[ply][i] = pv_array[ply + 1][i];
+					}
+					pv_length[ply] = pv_length[ply + 1];
+				}
+
 
 				if (score > alpha) {
 					alpha = score;
