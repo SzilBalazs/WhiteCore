@@ -20,6 +20,7 @@
 #include "time_manager.h"
 #include "move_list.h"
 #include "tt.h"
+#include "history.h"
 
 #include <atomic>
 #include <thread>
@@ -57,6 +58,7 @@ private:
 	unsigned int id;
 	Move pv_array[500][500];
 	Ply pv_length[500];
+	History history;
 
 	std::string get_pv_line() {
 		std::string pv;
@@ -133,7 +135,7 @@ private:
 		if (depth <= 0)
 			return qsearch<node_type>(alpha, beta);
 
-		MoveList<false> move_list(board, entry.hash_move);
+		MoveList<false> move_list(board, entry.hash_move, history, ply);
 
 		if (move_list.empty()) {
 			return in_check ? mate_ply : 0;
@@ -164,6 +166,12 @@ private:
 			}
 
 			if (score >= beta) {
+
+				if (move.is_quiet()) {
+					history.killer_moves[ply][1] = history.killer_moves[ply][0];
+					history.killer_moves[ply][0] = move;
+				}
+
 				shared.tt.save(board.get_hash(), depth, beta, TT_BETA, move);
 				return beta;
 			}
@@ -200,7 +208,7 @@ private:
 			return UNKNOWN_SCORE;
 		}
 
-		MoveList<true> move_list(board, NULL_MOVE);
+		MoveList<true> move_list(board, NULL_MOVE, history, 0);
 
 		Score static_eval = eval(board);
 
