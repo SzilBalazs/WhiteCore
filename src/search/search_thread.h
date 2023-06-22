@@ -139,12 +139,24 @@ private:
 			return in_check ? mate_ply : 0;
 		}
 
+		bool pv_next = true;
 		while (!move_list.empty()) {
 			Move move = move_list.next_move();
 
 			shared.node_count++;
 			board.make_move(move);
-			Score score = -search<PV_NODE>(depth - 1, -beta, -alpha, ply + 1);
+			Score score;
+
+			if (pv_next) {
+				score = -search<PV_NODE>(depth - 1, -beta, -alpha, ply + 1);
+			} else {
+				score = -search<NON_PV_NODE>(depth - 1, -alpha-1, -alpha, ply + 1);
+
+				if (score > alpha) {
+					score = -search<PV_NODE>(depth - 1, -beta, -alpha, ply + 1);
+				}
+			}
+
 			board.undo_move(move);
 
 			if (!shared.is_searching) {
@@ -172,6 +184,7 @@ private:
 
 				if (score > alpha) {
 					alpha = score;
+					pv_next = false;
 				}
 			}
 		}
