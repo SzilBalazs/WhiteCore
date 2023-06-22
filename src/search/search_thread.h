@@ -70,6 +70,7 @@ private:
 
 
 	void search() {
+		history.clear(); // TODO remove this?
 		for (Depth depth = 1; depth <= shared.tm.get_max_depth(); depth++) {
 			Score score = search<ROOT_NODE>(depth, -INF_SCORE, INF_SCORE, 0);
 
