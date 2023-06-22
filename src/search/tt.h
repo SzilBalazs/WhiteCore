@@ -22,7 +22,7 @@
 
 #include <cstring>
 
-enum EntryFlag : uint8_t {
+enum TTFlag : uint8_t {
 	TT_NONE = 0,
 	TT_EXACT = 1,
 
@@ -38,7 +38,7 @@ struct TTEntry {    // Total: 16 bytes
 	Score eval;     // 4 bytes
 	Move hash_move;  // 2 bytes
 	Depth depth;    // 1 byte
-	EntryFlag flag; // 1 byte
+	TTFlag flag; // 1 byte
 };
 
 class TT {
@@ -74,7 +74,7 @@ public:
 		return entry;
 	}
 
-	void save(U64 hash, Depth depth, Score eval, EntryFlag flag, Move best_move) {
+	void save(U64 hash, Depth depth, Score eval, TTFlag flag, Move best_move) {
 		TTEntry *entry = get_entry(hash);
 
 		if (entry->hash != hash || best_move.is_ok()) {

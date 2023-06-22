@@ -126,14 +126,18 @@ private:
 
 		if (in_check) depth++;
 
-		MoveList<false> move_list(board);
+		bool hit = false;
+		TTEntry entry = shared.tt.probe(board.get_hash(), hit);
+		TTFlag flag = TT_ALPHA;
+
+		if (depth <= 0)
+			return qsearch<node_type>(alpha, beta);
+
+		MoveList<false> move_list(board, entry.hash_move);
 
 		if (move_list.empty()) {
 			return in_check ? mate_ply : 0;
 		}
-
-		if (depth <= 0)
-			return qsearch<node_type>(alpha, beta);
 
 		while (!move_list.empty()) {
 			Move move = move_list.next_move();
@@ -148,11 +152,14 @@ private:
 			}
 
 			if (score >= beta) {
+				shared.tt.save(board.get_hash(), depth, beta, TT_BETA, move);
 				return beta;
 			}
+
 			if (score > best_score) {
 				best_score = score;
 				best_move = move;
+				flag = TT_EXACT;
 
 				if (id == 0) {
 					pv_array[ply][ply] = move;
@@ -169,6 +176,7 @@ private:
 			}
 		}
 
+		shared.tt.save(board.get_hash(), depth, best_score, flag, best_move);
 		return alpha;
 	}
 
@@ -179,7 +187,7 @@ private:
 			return UNKNOWN_SCORE;
 		}
 
-		MoveList<true> move_list(board);
+		MoveList<true> move_list(board, NULL_MOVE);
 
 		Score static_eval = eval(board);
 

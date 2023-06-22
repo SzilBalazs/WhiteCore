@@ -24,7 +24,7 @@ class MoveList {
 
 public:
 
-	MoveList(const Board &board) : current(0), board(board) {
+	MoveList(const Board &board, const Move &hash_move) : current(0), board(board), hash_move(hash_move) {
 		size = Movegen::gen_moves(board, moves, captures_only) - moves;
 		for (unsigned int i = 0; i < size; i++) {
 			scores[i] = score_move(moves[i]);
@@ -50,9 +50,12 @@ private:
 	unsigned int size, current;
 	Score scores[200];
 	const Board &board;
+	const Move &hash_move;
 
-	Score score_move(Move move) {
-		if (move.is_capture()) {
+	Score score_move(const Move &move) {
+		if (move == hash_move) {
+			return 100;
+		} else if (move.is_capture()) {
 			return MVVLVA[board.piece_at(move.get_to()).type][board.piece_at(move.get_from()).type];
 		}
 		return 0;
