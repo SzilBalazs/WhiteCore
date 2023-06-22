@@ -107,6 +107,9 @@ private:
 		Move best_move = NULL_MOVE;
 		Score best_score = -INF_SCORE;
 
+		if (id == 0)
+			pv_length[ply] = ply;
+
 		if ((shared.node_count & 1023) == 0 && !shared.tm.time_left()) {
 			manage_resources();
 		}
@@ -120,9 +123,6 @@ private:
 				return 0;
 			}
 		}
-
-		if (id == 0)
-			pv_length[ply] = ply;
 
 		if (in_check) depth++;
 
