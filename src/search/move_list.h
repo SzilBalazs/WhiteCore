@@ -18,13 +18,15 @@
 #pragma once
 
 #include "../core/movegen.h"
+#include "history.h"
 
 template<bool captures_only>
 class MoveList {
 
 public:
 
-	MoveList(const Board &board, const Move &hash_move) : current(0), board(board), hash_move(hash_move) {
+	MoveList(const Board &board, const Move &hash_move, const History &history, const Ply &ply) : current(0), board(board),
+	hash_move(hash_move), history(history), ply(ply) {
 		size = Movegen::gen_moves(board, moves, captures_only) - moves;
 		for (unsigned int i = 0; i < size; i++) {
 			scores[i] = score_move(moves[i]);
@@ -51,13 +53,20 @@ private:
 	Score scores[200];
 	const Board &board;
 	const Move &hash_move;
+	const History &history;
+	const Ply &ply;
 
 	Score score_move(const Move &move) {
 		if (move == hash_move) {
 			return 100;
 		} else if (move.is_capture()) {
 			return MVVLVA[board.piece_at(move.get_to()).type][board.piece_at(move.get_from()).type];
+		} else if (move == history.killer_moves[ply][0]) {
+			return 5;
+		} else if (move == history.killer_moves[ply][1]) {
+			return 4;
+		} else {
+			return 0;
 		}
-		return 0;
 	}
 };
