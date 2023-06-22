@@ -64,7 +64,7 @@ void run_bench() {
 	sm.allocate_hash(32);
 
 	SearchLimits limits;
-	limits.depth = 3;
+	limits.depth = 4;
 
 	int64_t nodes = 0;
 	int64_t start_time = now();

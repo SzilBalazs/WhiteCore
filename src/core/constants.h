@@ -68,6 +68,17 @@ enum Square : int {
     NULL_SQUARE = 64
 };
 
+// clang-format off
+constexpr int MVVLVA[6][6] = {
+		{0,  0,  0,  0,  0,  0},      // KING
+		{0, 14, 13, 12, 11, 10},      // PAWN
+		{0, 24, 23, 22, 21, 20},      // KNIGHT
+		{0, 34, 33, 32, 31, 30},      // BISHOP
+		{0, 44, 43, 42, 41, 40},      // ROOK
+		{0, 54, 53, 52, 51, 50}       // QUEEN
+};
+// clang-format on
+
 constexpr unsigned char WK_MASK = 1;
 constexpr unsigned char WQ_MASK = 2;
 constexpr unsigned char BK_MASK = 4;
