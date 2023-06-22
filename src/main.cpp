@@ -17,6 +17,7 @@
 
 #include "uci/uci.h"
 #include "tests/tests.h"
+#include "utils/bench.h"
 
 int main(int argc, char* argv[]) {
 
@@ -30,7 +31,7 @@ int main(int argc, char* argv[]) {
 	if (mode == "test") {
 		Tests::run();
 	} else if (mode == "bench") {
-
+		run_bench();
 	} else {
 		UCI protocol;
 		protocol.start();

@@ -44,6 +44,10 @@ public:
 		return shared.tm.get_elapsed_time();
 	}
 
+	inline int64_t get_node_count() {
+		return shared.node_count;
+	}
+
 	template<bool wait_to_finish>
 	inline void join() {
 		if (!wait_to_finish) {

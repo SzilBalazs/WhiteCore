@@ -19,8 +19,6 @@
 
 #include "../core/movegen.h"
 
-#include <chrono>
-
 namespace Tests
 {
 
@@ -69,10 +67,6 @@ inline void test_perft() {
 			Test("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1 ", 5, 15833292),
 			Test("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8 ", 5, 89941194),
 			Test("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 ", 5, 164075551)
-	};
-
-	auto now = []() {
-		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 	};
 
 	std::cout << "Testing perft..." << std::endl;

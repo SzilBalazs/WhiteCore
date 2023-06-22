@@ -20,6 +20,8 @@
 #include "../core/constants.h"
 #include "logger.h"
 
+#include <chrono>
+
 void init_all();
 
 template<Color color>
@@ -162,3 +164,7 @@ inline Square operator+=(Square &a, int b) {
 inline Square operator-=(Square &a, int b) {
 	return a = a - b;
 }
+
+inline int64_t now() {
+	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+};

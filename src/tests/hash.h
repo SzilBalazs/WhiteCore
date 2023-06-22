@@ -36,7 +36,7 @@ void test_hash() {
 		Test(std::string fen, std::vector<std::string> moves, U64 hash) : fen(std::move(fen)), moves(std::move(moves)), hash(hash) {}
 	};
 
-	std::vector<Test> tests = {
+	const std::vector<Test> tests = {
 			Test(STARTING_FEN, {"d2d3", "d7d6", "e2e3", "e7e6"}, 12689034350543171487ULL),
 			Test(STARTING_FEN, {"e2e3", "e7e6", "d2d3", "d7d6"}, 12689034350543171487ULL),
 			Test(STARTING_FEN, {"e2e4", "e7e5", "d2d4", "d7d5"}, 12894059078872434213ULL),

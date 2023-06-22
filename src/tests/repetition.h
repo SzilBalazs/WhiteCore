@@ -32,7 +32,7 @@ void test_repetition() {
 		Test(std::string fen, std::vector<std::string> moves) : fen(std::move(fen)), moves(std::move(moves)) {}
 	};
 
-	std::vector<Test> tests = {
+	const std::vector<Test> tests = {
 			Test("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", {"g1f3", "b8c6", "f3g1", "c6b8"}),
 			Test("7k/2R5/2P1pp1p/2K5/7q/8/6R1/1q6 w - - 0 1", {"c7c8", "h8h7", "c8c7", "h7h8", "c7c8", "h8h7", "c8c7", "h7h8"})
 	};

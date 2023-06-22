@@ -18,7 +18,6 @@
 #pragma once
 
 #include "../core/constants.h"
-#include <chrono>
 
 struct SearchLimits {
 	std::optional<int64_t> time_left, increment, moves_to_go, depth, move_time, max_nodes;
@@ -62,8 +61,4 @@ public:
 
 private:
 	int64_t start_time, allocated_time, end_time, max_nodes, max_depth;
-
-	inline int64_t now() {
-		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-	}
 };
