@@ -8,6 +8,7 @@ TMP_DIR = .tmp
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(patsubst %.cpp, $(TMP_DIR)/%.o, $(SOURCES))
 DEPENDS := $(patsubst %.cpp, $(TMP_DIR)/%.d, $(SOURCES))
+HASH := $(shell git rev-parse --short HEAD)
 
 ifeq ($(OS),Windows_NT)
     uname_S := Windows
@@ -47,7 +48,7 @@ ifeq ($(build), debug)
 	DEFINE_FLAGS = -DNATIVE
 endif
 
-DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR)\" -DNDEBUG
+DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG
 CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall -Wno-class-memaccess -MMD
 EXE = $(NAME)-v$(VERSION_MAJOR)-$(VERSION_MINOR)$(SUFFIX)
 
