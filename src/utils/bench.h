@@ -64,12 +64,13 @@ void run_bench() {
 	sm.allocate_hash(32);
 
 	SearchLimits limits;
-	limits.depth = 4;
+	limits.depth = 5;
 
 	int64_t nodes = 0;
 	int64_t start_time = now();
 
 	for (const std::string &fen : fens) {
+		sm.tt_clear();
 		board.load(fen);
 		sm.set_limits(limits);
 		sm.search<true>(board);
