@@ -19,7 +19,6 @@
 
 #include "../core/movegen.h"
 #include "history.h"
-#include "see.h"
 
 template<bool captures_only>
 class MoveList {
@@ -69,10 +68,7 @@ private:
         } else if (move.is_promo()) {
             return 9'000'000;
         } else if (move.is_capture()) {
-            if (see(board, move, 0))
-                return 8'000'000 + get_mvv_lva(move);
-            else
-                return 5'000'000 + get_mvv_lva(move);
+            return 8'000'000 + get_mvv_lva(move);
         } else if (move == history.killer_moves[ply][0]) {
             return 7'000'000;
         } else if (move == history.killer_moves[ply][1]) {

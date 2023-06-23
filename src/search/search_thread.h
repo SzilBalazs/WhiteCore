@@ -114,7 +114,7 @@ private:
         if (id == 0)
             pv_length[ply] = ply;
 
-        if ((shared.node_count & 1023) == 0 && !shared.tm.time_left()) {
+        if ((shared.node_count & 1023) == 0) {
             manage_resources();
         }
 
