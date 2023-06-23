@@ -50,6 +50,9 @@ constexpr Score TB_LOSS_SCORE = -50000;
 constexpr Score WORST_MATE = MATE_VALUE - 100;
 constexpr Score DRAW_VALUE = 0;
 
+constexpr Score PIECE_VALUES[7] = {
+        0, 100, 300, 350, 500, 1000, 0};
+
 const Ply MAX_PLY = 100;
 
 const std::string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";

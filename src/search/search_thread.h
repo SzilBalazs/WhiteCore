@@ -102,6 +102,8 @@ private:
     Score search(Depth depth, Score alpha, Score beta, Ply ply) {
         constexpr bool root_node = node_type == ROOT_NODE;
         constexpr bool non_root_node = !root_node;
+        constexpr bool pv_node = node_type != NON_PV_NODE;
+        constexpr bool non_pv_node = !pv_node;
 
         const Score mate_ply = -MATE_VALUE + ply;
         const bool in_check = bool(movegen::get_attackers(board, board.pieces<KING>(board.get_stm()).lsb()));
@@ -135,6 +137,12 @@ private:
         if (depth <= 0)
             return qsearch<node_type>(alpha, beta);
 
+        if (root_node || in_check)
+            goto search_moves;
+
+
+
+    search_moves:
         MoveList<false> move_list(board, entry.hash_move, history, ply);
 
         if (move_list.empty()) {

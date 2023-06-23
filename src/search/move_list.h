@@ -19,6 +19,7 @@
 
 #include "../core/movegen.h"
 #include "history.h"
+#include "see.h"
 
 template<bool captures_only>
 class MoveList {
@@ -55,15 +56,27 @@ private:
     const History &history;
     const Ply &ply;
 
+    Score get_mvv_lva(const Move &move) {
+        if (move.eq_flag(EP_CAPTURE))
+            return MVVLVA[PAWN][PAWN];
+        else
+            return MVVLVA[board.piece_at(move.get_to()).type][board.piece_at(move.get_from()).type];
+    }
+
     Score score_move(const Move &move) {
         if (move == hash_move) {
-            return 100;
+            return 10'000'000;
+        } else if (move.is_promo()) {
+            return 9'000'000;
         } else if (move.is_capture()) {
-            return MVVLVA[board.piece_at(move.get_to()).type][board.piece_at(move.get_from()).type];
+            if (see(board, move, 0))
+                return 8'000'000 + get_mvv_lva(move);
+            else
+                return 5'000'000 + get_mvv_lva(move);
         } else if (move == history.killer_moves[ply][0]) {
-            return 5;
+            return 7'000'000;
         } else if (move == history.killer_moves[ply][1]) {
-            return 4;
+            return 6'000'000;
         } else {
             return 0;
         }
