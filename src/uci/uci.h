@@ -17,232 +17,236 @@
 
 #pragma once
 
-#include "command.h"
+#include "../core/board.h"
+#include "../search/search_manager.h"
+#include "../tests/perft.h"
 #include "../utils/logger.h"
 #include "../utils/utilities.h"
-#include "../core/board.h"
-#include "../tests/perft.h"
-#include "../search/search_manager.h"
+#include "command.h"
 #include "option.h"
 
-#include <iostream>
+namespace uci {
 
-inline Move move_from_string(Board &board, const std::string &str) {
-	Move moves[200];
-	Move *moves_end = Movegen::gen_moves(board, moves, false);
-	for (Move *it = moves; it != moves_end; it++) {
-		if (it->to_uci() == str) {
-			return *it;
-		}
-	}
-	return NULL_MOVE;
-}
+    inline Move move_from_string(Board &board, const std::string &str) {
+        Move moves[200];
+        Move *moves_end = movegen::gen_moves(board, moves, false);
+        for (Move *it = moves; it != moves_end; it++) {
+            if (it->to_uci() == str) {
+                return *it;
+            }
+        }
+        return NULL_MOVE;
+    }
 
-class UCI {
+    class UCI {
 
-	using context = std::vector<std::string>;
+        using context = std::vector<std::string>;
 
-public:
+    public:
+        void start();
 
-	void start();
+        template<typename T>
+        T get_option(const std::string &name);
 
-	template<typename T>
-	T get_option(const std::string &name);
+    private:
+        std::vector<Command> commands;
+        std::vector<Option> options;
+        bool should_continue = true;
+        Board board;
+        SearchManager sm;
 
-private:
+        void register_commands();
 
-	std::vector<Command> commands;
-	std::vector<Option> options;
-	bool should_continue = true;
-	Board board;
-	SearchManager sm;
+        void register_options();
 
-	void register_commands();
+        void greetings();
 
-	void register_options();
+        SearchLimits parse_limits(context tokens);
 
-	void greetings();
+        void parse_position(context tokens);
 
-	SearchLimits parse_limits(context tokens);
+        static std::vector<std::string> convert_to_tokens(const std::string &line);
 
-	void parse_position(context tokens);
+        template<typename T>
+        static std::optional<T> find_element(const context &haystack, std::string_view needle);
+    };
 
-	static std::vector<std::string> convert_to_tokens(const std::string &line);
+    void UCI::register_commands() {
+        commands.emplace_back("uci", [&](context tokens) {
+            greetings();
+        });
+        commands.emplace_back("isready", [&](context tokens) {
+            logger.print("readyok");
+        });
+        commands.emplace_back("position", [&](context tokens) {
+            parse_position(tokens);
+        });
+        commands.emplace_back("display", [&](context tokens) {
+            board.display();
+        });
+        commands.emplace_back("perft", [&](context tokens) {
+            int depth = find_element<int>(tokens, "perft").value_or(5);
+            U64 node_count = test::perft<true, false>(board, depth);
+            logger.print("Total node count: ", node_count);
+        });
+        commands.emplace_back("go", [&](context tokens) {
+            SearchLimits limits = parse_limits(tokens);
+            sm.set_limits(limits);
+            sm.search<false>(board);
+        });
+        commands.emplace_back("stop", [&](context tokens) {
+            sm.stop();
+        });
+        commands.emplace_back("quit", [&](context tokens) {
+            should_continue = false;
+            sm.stop();
+        });
+        commands.emplace_back("ucinewgame", [&](context tokens) {
+            sm.tt_clear();
+        });
+        commands.emplace_back("setoption", [&](context tokens) {
+            const std::string name = find_element<std::string>(tokens, "name").value_or("none");
+            const std::optional<std::string> value = find_element<std::string>(tokens, "value");
+            for (Option &opt : options) {
+                if (opt.get_name() == name) {
+                    opt.set_value(value);
+                }
+            }
+        });
 
-	template <typename T>
-	static std::optional<T> find_element(const context &haystack, std::string_view needle);
-};
+        logger.info("UCI::register_commands", "Registered ", commands.size(), "commands");
+    }
 
-void UCI::register_commands() {
-	commands.emplace_back("uci", [&](context tokens){
-		greetings();
-	});
-	commands.emplace_back("isready", [&](context tokens) {
-		logger.print("readyok");
-	});
-	commands.emplace_back("position", [&](context tokens){
-		parse_position(tokens);
-	});
-	commands.emplace_back("display", [&](context tokens){
-		board.display();
-	});
-	commands.emplace_back("perft", [&](context tokens) {
-		int depth = find_element<int>(tokens, "perft").value_or(5);
-		U64 node_count = Tests::perft<true, false>(board, depth);
-		logger.print("Total node count: ", node_count);
-	});
-	commands.emplace_back("go", [&](context tokens){
-		SearchLimits limits = parse_limits(tokens);
-		sm.set_limits(limits);
-		sm.search<false>(board);
-	});
-	commands.emplace_back("stop", [&](context tokens){
-		sm.stop();
-	});
-	commands.emplace_back("quit", [&](context tokens) {
-		should_continue = false;
-		sm.stop();
-	});
-	commands.emplace_back("ucinewgame", [&](context tokens){
-		sm.tt_clear();
-	});
-	commands.emplace_back("setoption", [&](context tokens){
-		const std::string name = find_element<std::string>(tokens, "name").value_or("none");
-		const std::optional<std::string> value = find_element<std::string>(tokens, "value");
-		for (Option &opt : options) {
-			if (opt.get_name() == name) {
-				opt.set_value(value);
-			}
-		}
-	});
+    void UCI::register_options() {
+        options.emplace_back(
+                "Hash", "32", "spin", [&]() {
+                    sm.allocate_hash(get_option<int>("Hash"));
+                },
+                1, 65536);
+        sm.allocate_hash(32);
 
-	logger.info("UCI::register_commands", "Registered ", commands.size(), "commands");
-}
+        options.emplace_back(
+                "Threads", "1", "spin", [&]() {
+                    sm.allocate_threads(get_option<int>("Threads"));
+                },
+                1, 4);
+        sm.allocate_threads(1);
+    }
 
-void UCI::register_options() {
-	options.emplace_back("Hash", "32", "spin", [&](){
-		sm.allocate_hash(get_option<int>("Hash"));
-	}, 1, 65536);
-	sm.allocate_hash(32);
+    void UCI::start() {
 
-	options.emplace_back("Threads", "1", "spin", [&](){
-		sm.allocate_threads(get_option<int>("Threads"));
-	}, 1, 4);
-	sm.allocate_threads(1);
-}
+        register_commands();
+        register_options();
 
-void UCI::start() {
+        board.load(STARTING_FEN);
 
-	register_commands();
-	register_options();
+        logger.info("UCI::start", "UCI Loop has started!");
 
-	board.load(STARTING_FEN);
+        while (should_continue) {
+            std::string line;
+            getline(std::cin, line);
 
-	logger.info("UCI::start", "UCI Loop has started!");
+            if (std::cin.eof()) {
+                break;
+            }
 
-	while (should_continue) {
-		std::string line;
-		getline(std::cin, line);
+            logger.info("UCI::start", "in>", line);
 
-		if (std::cin.eof()) {
-			break;
-		}
+            std::vector<std::string> tokens = convert_to_tokens(line);
 
-		logger.info("UCI::start", "in>", line);
+            for (const Command &cmd : commands) {
+                if (cmd.is_match(tokens)) {
+                    cmd.func(tokens);
+                }
+            }
+        }
+    }
 
-		std::vector<std::string> tokens = convert_to_tokens(line);
+    void UCI::greetings() {
+        logger.print("id", "name", "WhiteCore", VERSION);
+        logger.print("id author Balazs Szilagyi");
+        for (const Option &opt : options) {
+            logger.print(opt.to_string());
+        }
+        logger.print("uciok");
+    }
 
-		for (const Command& cmd : commands) {
-			if (cmd.is_match(tokens)) {
-				cmd.func(tokens);
-			}
-		}
-	}
-}
+    SearchLimits UCI::parse_limits(UCI::context tokens) {
+        SearchLimits limits;
+        if (board.get_stm() == WHITE) {
+            limits.time_left = find_element<int64_t>(tokens, "wtime");
+            limits.increment = find_element<int64_t>(tokens, "winc");
+        } else {
+            limits.time_left = find_element<int64_t>(tokens, "btime");
+            limits.increment = find_element<int64_t>(tokens, "binc");
+        }
+        limits.moves_to_go = find_element<int64_t>(tokens, "movestogo");
+        limits.depth = find_element<int64_t>(tokens, "depth");
+        limits.move_time = find_element<int64_t>(tokens, "movetime");
+        limits.max_nodes = find_element<int64_t>(tokens, "nodes");
+        return limits;
+    }
 
-void UCI::greetings() {
-	logger.print("id", "name", "WhiteCore", VERSION);
-	logger.print("id author Balazs Szilagyi");
-	for (const Option &opt : options) {
-		logger.print(opt.to_string());
-	}
-	logger.print("uciok");
-}
+    void UCI::parse_position(UCI::context tokens) {
+        unsigned int idx = 2;
+        if (tokens[1] == "startpos") {
+            board.load(STARTING_FEN);
+        } else {
+            std::string fen;
+            for (; idx < tokens.size() && tokens[idx] != "moves"; idx++) {
+                fen += tokens[idx] + " ";
+            }
+            board.load(fen);
+        }
+        if (idx < tokens.size() && tokens[idx] == "moves") idx++;
+        for (; idx < tokens.size(); idx++) {
+            Move move = move_from_string(board, tokens[idx]);
+            if (move == NULL_MOVE) {
+                logger.error("load_position", "Invalid move", tokens[idx]);
+                break;
+            } else {
+                board.make_move(move);
+            }
+        }
+    }
 
-SearchLimits UCI::parse_limits(UCI::context tokens) {
-	SearchLimits limits;
-	if (board.get_stm() == WHITE) {
-		limits.time_left = find_element<int64_t>(tokens, "wtime");
-		limits.increment = find_element<int64_t>(tokens, "winc");
-	} else {
-		limits.time_left = find_element<int64_t>(tokens, "btime");
-		limits.increment = find_element<int64_t>(tokens, "binc");
-	}
-	limits.moves_to_go = find_element<int64_t>(tokens, "movestogo");
-	limits.depth = find_element<int64_t>(tokens, "depth");
-	limits.move_time = find_element<int64_t>(tokens, "movetime");
-	limits.max_nodes = find_element<int64_t>(tokens, "nodes");
-	return limits;
-}
+    std::vector<std::string> UCI::convert_to_tokens(const std::string &line) {
+        std::vector<std::string> res = {""};
+        for (char c : line) {
+            if (c == ' ') {
+                res.emplace_back("");
+            } else {
+                res.back() += c;
+            }
+        }
+        return res;
+    }
 
-void UCI::parse_position(UCI::context tokens) {
-	unsigned int idx = 2;
-	if (tokens[1] == "startpos") {
-		board.load(STARTING_FEN);
-	} else {
-		std::string fen;
-		for (;idx < tokens.size() && tokens[idx] != "moves"; idx++) {
-			fen += tokens[idx] + " ";
-		}
-		board.load(fen);
-	}
-	if (idx < tokens.size() && tokens[idx] == "moves") idx++;
-	for (;idx < tokens.size(); idx++) {
-		Move move = move_from_string(board, tokens[idx]);
-		if (move == NULL_MOVE) {
-			logger.error("load_position", "Invalid move", tokens[idx]);
-			break;
-		} else {
-			board.make_move(move);
-		}
-	}
-}
+    template<typename T>
+    T UCI::get_option(const std::string &name) {
+        for (const Option &opt : options) {
+            if (opt.get_name() == name) {
+                return opt.get_value<T>();
+            }
+        }
+        logger.error("UCI::get_option", "Unable to find option", name);
+        throw std::invalid_argument("UCI::get_option(): unable to find option " + name);
+    }
 
-std::vector<std::string> UCI::convert_to_tokens(const std::string& line) {
-	std::vector<std::string> res = {""};
-	for (char c : line) {
-		if (c == ' ') {
-			res.emplace_back("");
-		} else {
-			res.back() += c;
-		}
-	}
-	return res;
-}
+    // Copied from fast-chess, I'm the co-author of the following code
+    template<typename T>
+    std::optional<T> UCI::find_element(const UCI::context &haystack, std::string_view needle) {
+        auto position = std::find(haystack.begin(), haystack.end(), needle);
+        auto index = position - haystack.begin();
+        if (position == haystack.end()) return std::nullopt;
+        if constexpr (std::is_same_v<T, int>)
+            return std::stoi(haystack[index + 1]);
+        else if constexpr (std::is_same_v<T, int64_t>)
+            return std::stoll(haystack[index + 1]);
+        else if constexpr (std::is_same_v<T, uint64_t>)
+            return std::stoull(haystack[index + 1]);
+        else
+            return haystack[index + 1];
+    }
 
-template<typename T>
-T UCI::get_option(const std::string &name) {
-	for (const Option &opt : options) {
-		if (opt.get_name() == name) {
-			return opt.get_value<T>();
-		}
-	}
-	logger.error("UCI::get_option", "Unable to find option", name);
-	throw std::invalid_argument("UCI::get_option(): unable to find option " + name);
-}
-
-// Copied from fast-chess, I'm the co-author of the following code
-template<typename T>
-std::optional<T> UCI::find_element(const UCI::context& haystack, std::string_view needle) {
-	auto position = std::find(haystack.begin(), haystack.end(), needle);
-	auto index = position - haystack.begin();
-	if (position == haystack.end()) return std::nullopt;
-	if constexpr (std::is_same_v<T, int>)
-		return std::stoi(haystack[index + 1]);
-	else if constexpr (std::is_same_v<T, int64_t>)
-		return std::stoll(haystack[index + 1]);
-	else if constexpr (std::is_same_v<T, uint64_t>)
-		return std::stoull(haystack[index + 1]);
-	else
-		return haystack[index + 1];
-}
+} // namespace uci

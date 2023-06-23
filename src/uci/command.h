@@ -17,18 +17,22 @@
 
 #pragma once
 
-#include <string>
 #include <functional>
+#include <string>
 #include <utility>
 
-struct Command {
+namespace uci {
 
-	std::string cmd;
-	std::function<void(std::vector<std::string>)> func;
+    struct Command {
 
-	Command(std::string c, std::function<void(std::vector<std::string>)> f) : cmd(std::move(c)), func(std::move(f)) {}
+        std::string cmd;
+        std::function<void(std::vector<std::string>)> func;
 
-	bool is_match(const std::vector<std::string>& tokens) const {
-		return tokens[0] == cmd;
-	}
-};
+        Command(std::string c, std::function<void(std::vector<std::string>)> f) : cmd(std::move(c)), func(std::move(f)) {}
+
+        bool is_match(const std::vector<std::string> &tokens) const {
+            return tokens[0] == cmd;
+        }
+    };
+
+} // namespace uci

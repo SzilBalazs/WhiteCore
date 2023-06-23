@@ -23,86 +23,84 @@
 #include <cstring>
 
 enum TTFlag : uint8_t {
-	TT_NONE = 0,
-	TT_EXACT = 1,
+    TT_NONE = 0,
+    TT_EXACT = 1,
 
-	// UPPERBOUND
-	TT_ALPHA = 2,
+    // UPPERBOUND
+    TT_ALPHA = 2,
 
-	// LOWERBOUND
-	TT_BETA = 3
+    // LOWERBOUND
+    TT_BETA = 3
 };
 
 struct TTEntry {    // Total: 16 bytes
-	U64 hash;       // 8 bytes
-	Score eval;     // 4 bytes
-	Move hash_move;  // 2 bytes
-	Depth depth;    // 1 byte
-	TTFlag flag; // 1 byte
+    U64 hash;       // 8 bytes
+    Score eval;     // 4 bytes
+    Move hash_move; // 2 bytes
+    Depth depth;    // 1 byte
+    TTFlag flag;    // 1 byte
 };
 
 class TT {
 public:
+    void resize(unsigned int MB) {
+        if (bucket_count)
+            free(table);
 
-	void resize(unsigned int MB) {
-		if (bucket_count)
-			free(table);
+        unsigned int i = 10;
+        while ((1ULL << i) <= MB * 1024ULL * 1024ULL / sizeof(TTEntry))
+            i++;
 
-		unsigned int i = 10;
-		while ((1ULL << i) <= MB * 1024ULL * 1024ULL / sizeof(TTEntry))
-			i++;
+        bucket_count = (1ULL << (i - 1));
+        mask = bucket_count - 1ULL;
 
-		bucket_count = (1ULL << (i - 1));
-		mask = bucket_count - 1ULL;
+        table = (TTEntry *) malloc(bucket_count * sizeof(TTEntry));
 
-		table = (TTEntry *) malloc(bucket_count * sizeof(TTEntry));
+        clear();
+    }
 
-		clear();
-	}
+    void clear() {
+        std::memset(table, 0, bucket_count * sizeof(TTEntry));
+    }
 
-	void clear() {
-		std::memset(table, 0, bucket_count * sizeof(TTEntry));
-	}
+    TTEntry probe(U64 hash, bool &hit) {
+        TTEntry entry = *get_entry(hash);
 
-	TTEntry probe(U64 hash, bool &hit) {
-		TTEntry entry = *get_entry(hash);
+        if (entry.hash != hash)
+            return {};
 
-		if (entry.hash != hash)
-			return {};
+        hit = true;
+        return entry;
+    }
 
-		hit = true;
-		return entry;
-	}
+    void save(U64 hash, Depth depth, Score eval, TTFlag flag, Move best_move) {
+        TTEntry *entry = get_entry(hash);
 
-	void save(U64 hash, Depth depth, Score eval, TTFlag flag, Move best_move) {
-		TTEntry *entry = get_entry(hash);
+        if (entry->hash != hash || best_move.is_ok()) {
+            entry->hash_move = best_move;
+        }
 
-		if (entry->hash != hash || best_move.is_ok()) {
-			entry->hash_move = best_move;
-		}
+        if (entry->hash != hash || flag == TT_EXACT || entry->depth <= depth + 4) {
+            entry->hash = hash;
+            entry->depth = depth;
+            entry->eval = eval;
+            entry->flag = flag;
+        }
+    }
 
-		if (entry->hash != hash || flag == TT_EXACT || entry->depth <= depth + 4) {
-			entry->hash = hash;
-			entry->depth = depth;
-			entry->eval = eval;
-			entry->flag = flag;
-		}
-	}
-
-	Move get_hash_move(U64 hash) {
-		TTEntry *entry = get_entry(hash);
-		if (entry->hash == hash)
-			return entry->hash_move;
-		return NULL_MOVE;
-	}
+    Move get_hash_move(U64 hash) {
+        TTEntry *entry = get_entry(hash);
+        if (entry->hash == hash)
+            return entry->hash_move;
+        return NULL_MOVE;
+    }
 
 private:
+    TTEntry *table;
+    unsigned int bucket_count = 0;
+    U64 mask = 0;
 
-	TTEntry *table;
-	unsigned int bucket_count = 0;
-	U64 mask = 0;
-
-	TTEntry *get_entry(U64 hash) {
-		return table + (hash & mask);
-	}
+    TTEntry *get_entry(U64 hash) {
+        return table + (hash & mask);
+    }
 };

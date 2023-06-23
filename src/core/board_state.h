@@ -21,12 +21,10 @@
 #include "zobrist.h"
 
 struct BoardState {
-	Color stm = WHITE;
-	Square ep = NULL_SQUARE;
-	Zobrist hash = Zobrist();
-	Piece piece_captured = NULL_PIECE;
-	CastlingRights rights = CastlingRights();
-	unsigned int move50 = 0;
+    Color stm = WHITE;
+    Square ep = NULL_SQUARE;
+    Zobrist hash = Zobrist();
+    Piece piece_captured = NULL_PIECE;
+    CastlingRights rights = CastlingRights();
+    unsigned int move50 = 0;
 };
-
-

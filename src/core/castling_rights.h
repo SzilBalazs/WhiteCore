@@ -18,43 +18,46 @@
 #pragma once
 
 struct CastlingRights {
-	unsigned int data = 0;
+    unsigned int data = 0;
 
-	CastlingRights() = default;
+    CastlingRights() = default;
 
-	explicit CastlingRights(const std::string &str) {
-		for (char c : str) {
-			if (c == 'K') add(WK_MASK);
-			else if (c == 'Q') add(WQ_MASK);
-			else if (c == 'k') add(BK_MASK);
-			else if (c == 'q') add(BQ_MASK);
-		}
-	}
+    explicit CastlingRights(const std::string &str) {
+        for (char c : str) {
+            if (c == 'K') add(WK_MASK);
+            else if (c == 'Q')
+                add(WQ_MASK);
+            else if (c == 'k')
+                add(BK_MASK);
+            else if (c == 'q')
+                add(BQ_MASK);
+        }
+    }
 
-	void add(unsigned int right) {
-		data |= right;
-	}
+    void add(unsigned int right) {
+        data |= right;
+    }
 
-	void remove(unsigned int right) {
-		data &= ~right;
-	}
+    void remove(unsigned int right) {
+        data &= ~right;
+    }
 
-	bool get(unsigned int right) const {
-		return data & right;
-	}
+    bool get(unsigned int right) const {
+        return data & right;
+    }
 
-	std::string to_string() const {
-		std::string res;
-		if (get(WK_MASK))
-			res += 'K';
-		if (get(WQ_MASK))
-			res += 'Q';
-		if (get(BK_MASK))
-			res += 'k';
-		if (get(BQ_MASK))
-			res += 'q';
-		if (res.empty())
-			res = "-";
-		return res;
-	}
+    std::string to_string() const {
+        std::string res;
+        if (get(WK_MASK))
+            res += 'K';
+        if (get(WQ_MASK))
+            res += 'Q';
+        if (get(BK_MASK))
+            res += 'k';
+        if (get(BQ_MASK))
+            res += 'q';
+        if (res.empty())
+            res = "-";
+        return res;
+    }
 };

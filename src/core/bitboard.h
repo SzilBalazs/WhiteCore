@@ -18,6 +18,7 @@
 #pragma once
 
 #include "constants.h"
+
 #include <cassert>
 #include <immintrin.h>
 
@@ -180,7 +181,7 @@ constexpr Bitboard RANK_6 = RANK_1 << (5 * 8);
 constexpr Bitboard RANK_7 = RANK_1 << (6 * 8);
 constexpr Bitboard RANK_8 = RANK_1 << (7 * 8);
 
-constexpr Bitboard masks_side[2] = { RANK_1 | RANK_2 | RANK_3 | RANK_4, RANK_5 | RANK_6 | RANK_7 | RANK_8};
+constexpr Bitboard masks_side[2] = {RANK_1 | RANK_2 | RANK_3 | RANK_4, RANK_5 | RANK_6 | RANK_7 | RANK_8};
 
 constexpr Bitboard WK_CASTLE_SAFE = 0x70ULL;
 constexpr Bitboard WK_CASTLE_EMPTY = 0x60ULL;

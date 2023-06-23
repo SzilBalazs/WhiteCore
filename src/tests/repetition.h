@@ -18,47 +18,45 @@
 #include "../core/board.h"
 #include "../uci/uci.h"
 
-#include <string>
 #include <vector>
 
-namespace Tests {
+namespace test {
 
-void test_repetition() {
+    void test_repetition() {
 
-	struct Test {
-		std::string fen;
-		std::vector<std::string> moves;
+        struct Test {
+            std::string fen;
+            std::vector<std::string> moves;
 
-		Test(std::string fen, std::vector<std::string> moves) : fen(std::move(fen)), moves(std::move(moves)) {}
-	};
+            Test(std::string fen, std::vector<std::string> moves) : fen(std::move(fen)), moves(std::move(moves)) {}
+        };
 
-	const std::vector<Test> tests = {
-			Test("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", {"g1f3", "b8c6", "f3g1", "c6b8"}),
-			Test("7k/2R5/2P1pp1p/2K5/7q/8/6R1/1q6 w - - 0 1", {"c7c8", "h8h7", "c8c7", "h7h8", "c7c8", "h8h7", "c8c7", "h7h8"})
-	};
+        const std::vector<Test> tests = {
+                Test("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", {"g1f3", "b8c6", "f3g1", "c6b8"}),
+                Test("7k/2R5/2P1pp1p/2K5/7q/8/6R1/1q6 w - - 0 1", {"c7c8", "h8h7", "c8c7", "h7h8", "c7c8", "h8h7", "c8c7", "h7h8"})};
 
-	Board board;
-	std::vector<Test> failed;
+        Board board;
+        std::vector<Test> failed;
 
-	for (const Test& test : tests) {
-		board.load(test.fen);
-		for (std::string str : test.moves) {
-			Move move = move_from_string(board, str);
-			board.make_move(move);
-		}
-		if (!board.is_draw()) {
-			failed.emplace_back(test);
-		}
-	}
+        for (const Test &test : tests) {
+            board.load(test.fen);
+            for (std::string str : test.moves) {
+                Move move = uci::move_from_string(board, str);
+                board.make_move(move);
+            }
+            if (!board.is_draw()) {
+                failed.emplace_back(test);
+            }
+        }
 
-	if (failed.empty()) {
-		std::cout << "All repetition test have passed!" << std::endl;
-	} else {
-		std::cout << failed.size() << " repetition test have failed:" << std::endl;
-		for (const Test& test : failed) {
-			std::cout << test.fen << std::endl;
-		}
-	}
-}
+        if (failed.empty()) {
+            std::cout << "All repetition test have passed!" << std::endl;
+        } else {
+            std::cout << failed.size() << " repetition test have failed:" << std::endl;
+            for (const Test &test : failed) {
+                std::cout << test.fen << std::endl;
+            }
+        }
+    }
 
-}
+} // namespace test

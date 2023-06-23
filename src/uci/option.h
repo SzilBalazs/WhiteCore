@@ -17,64 +17,68 @@
 
 #pragma once
 
+#include <functional>
 #include <optional>
 #include <string>
 #include <utility>
-#include <functional>
 
-class Option {
-public:
+namespace uci {
 
-	Option(const std::string &name, const std::string &default_value, const std::string &type, const std::optional<std::function<void()>> &func = std::nullopt,
-			const std::optional<int> &min_value = std::nullopt, const std::optional<int> &max_value = std::nullopt) {
-		this->name = name;
-		this->type = type;
-		this->func = func;
-		this->default_value = default_value;
-		this->value = default_value;
-		this->min_value = min_value;
-		this->max_value = max_value;
-	}
+    class Option {
+    public:
+        Option(const std::string &name, const std::string &default_value, const std::string &type,
+               const std::optional<std::function<void()>> &func = std::nullopt,
+               const std::optional<int> &min_value = std::nullopt, const std::optional<int> &max_value = std::nullopt) {
+            this->name = name;
+            this->type = type;
+            this->func = func;
+            this->default_value = default_value;
+            this->value = default_value;
+            this->min_value = min_value;
+            this->max_value = max_value;
+        }
 
-	std::string get_name() const {
-		return name;
-	}
+        std::string get_name() const {
+            return name;
+        }
 
-	std::string to_string() const {
-		std::string res = "option";
+        std::string to_string() const {
+            std::string res = "option";
 
-		res += " name " + name;
-		res += " type " + type;
-		res += " default " + default_value;
-		if (min_value && max_value) {
-			res += " min " + std::to_string(min_value.value());
-			res += " max " + std::to_string(max_value.value());
-		}
+            res += " name " + name;
+            res += " type " + type;
+            res += " default " + default_value;
+            if (min_value && max_value) {
+                res += " min " + std::to_string(min_value.value());
+                res += " max " + std::to_string(max_value.value());
+            }
 
-		return res;
-	}
+            return res;
+        }
 
-	void set_value(const std::optional<std::string> &new_value) {
-		value = new_value.value_or(default_value);
-		if (func) {
-			func.value()();
-		}
-	}
+        void set_value(const std::optional<std::string> &new_value) {
+            value = new_value.value_or(default_value);
+            if (func) {
+                func.value()();
+            }
+        }
 
-	template<typename T>
-	T get_value() const {
-		if constexpr (std::is_same_v<T, int>)
-			return std::stoi(value);
-		else
-			return value;
-	}
+        template<typename T>
+        T get_value() const {
+            if constexpr (std::is_same_v<T, int>)
+                return std::stoi(value);
+            else
+                return value;
+        }
 
 
-private:
-	std::string name;
-	std::string value;
-	std::string default_value;
-	std::string type;
-	std::optional<int> min_value, max_value;
-	std::optional<std::function<void()>> func;
-};
+    private:
+        std::string name;
+        std::string value;
+        std::string default_value;
+        std::string type;
+        std::optional<int> min_value, max_value;
+        std::optional<std::function<void()>> func;
+    };
+
+} // namespace uci

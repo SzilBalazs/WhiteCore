@@ -17,16 +17,16 @@
 
 #pragma once
 
-#include "perft.h"
 #include "hash.h"
+#include "perft.h"
 #include "repetition.h"
 
-namespace Tests {
+namespace test {
 
-inline void run() {
-	test_hash();
-	test_repetition();
-	test_perft();
-}
+    inline void run() {
+        test_hash();
+        test_repetition();
+        test_perft();
+    }
 
-}
+} // namespace test

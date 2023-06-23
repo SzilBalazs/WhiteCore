@@ -17,63 +17,62 @@
 
 #pragma once
 
-#include <string>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 static void exception_handler();
 
 struct Logger {
 
-	std::ofstream file;
+    std::ofstream file;
 
-	Logger() = default;
+    Logger() = default;
 
-	void init(const std::string& filename) {
-		file.open(filename, std::ios::out);
-		std::set_terminate(exception_handler);
-	}
+    void init(const std::string &filename) {
+        file.open(filename, std::ios::out);
+        std::set_terminate(exception_handler);
+    }
 
-	template<typename T, typename... Args>
-	inline void print(T a, Args... args) {
-		std::cout << a << " ";
-		print(args...);
-	}
+    template<typename T, typename... Args>
+    inline void print(T a, Args... args) {
+        std::cout << a << " ";
+        print(args...);
+    }
 
-	inline void print() {
-		std::cout << std::endl;
-	}
+    inline void print() {
+        std::cout << std::endl;
+    }
 
-	template<typename T, typename... Args>
-	inline void info(T a, Args... args) {
-		file << "[INFO] " << a << "(): ";
-		log(args...);
-	}
+    template<typename T, typename... Args>
+    inline void info(T a, Args... args) {
+        file << "[INFO] " << a << "(): ";
+        log(args...);
+    }
 
-	template<typename T, typename... Args>
-	inline void error(T a, Args... args) {
-		file << "[INFO] " << a << "(): ";
-		log(args...);
-	}
+    template<typename T, typename... Args>
+    inline void error(T a, Args... args) {
+        file << "[INFO] " << a << "(): ";
+        log(args...);
+    }
 
-	template<typename T, typename... Args>
-	inline void log(T a, Args... args) {
-		file << a << " ";
-		log(args...);
-	}
+    template<typename T, typename... Args>
+    inline void log(T a, Args... args) {
+        file << a << " ";
+        log(args...);
+    }
 
-	inline void log() {
-		file << std::endl;
-	}
+    inline void log() {
+        file << std::endl;
+    }
 };
 
 extern Logger logger;
 
 static void exception_handler() {
-	if (logger.file.is_open()) {
-		logger.error("Logger", "exception_handler was called: closing log file and aborting");
-		logger.file.close();
-	}
-	std::abort();
+    if (logger.file.is_open()) {
+        logger.error("Logger", "exception_handler was called: closing log file and aborting");
+        logger.file.close();
+    }
+    std::abort();
 }
-

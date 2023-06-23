@@ -15,25 +15,25 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "utils/logger.h"
 #include "core/magic.h"
 #include "core/masks.h"
+#include "utils/logger.h"
 
 // Declarations
 Bitboard masks_bit[64], masks_adjacent_file[64], masks_adjacent_north[64], masks_adjacent_south[64], masks_pawn[64][2],
-		 masks_knight[64], masks_king[64], masks_file[64], masks_rank[64], masks_rook[64], masks_diagonal[64],
-		 masks_anti_diagonal[64], masks_bishop[64], masks_common_ray[64][64];
+        masks_knight[64], masks_king[64], masks_file[64], masks_rank[64], masks_rook[64], masks_diagonal[64],
+        masks_anti_diagonal[64], masks_bishop[64], masks_common_ray[64][64];
 LineType line_type[64][64];
 Bitboard attack_table_rook[102400], attack_table_bishop[5248];
 Logger logger;
 
 void init_all() {
-	logger.init("log.txt");
-	logger.info("init_all", "Logger has been initialized");
+    logger.init("log.txt");
+    logger.info("init_all", "Logger has been initialized");
 
-	init_masks();
-	logger.info("init_all", "Bitboard masks have been initialized");
+    init_masks();
+    logger.info("init_all", "Bitboard masks have been initialized");
 
-	init_magic();
-	logger.info("init_all", "Magic has been initialized");
+    init_magic();
+    logger.info("init_all", "Magic has been initialized");
 }

@@ -146,9 +146,9 @@ struct Piece {
         return type == PIECE_EMPTY || color == COLOR_EMPTY;
     }
 
-	constexpr bool is_ok() const {
-		return !is_null();
-	}
+    constexpr bool is_ok() const {
+        return !is_null();
+    }
 };
 
 constexpr Piece NULL_PIECE = Piece();

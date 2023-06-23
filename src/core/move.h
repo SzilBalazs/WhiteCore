@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include "constants.h"
 #include "../utils/utilities.h"
+#include "constants.h"
 
 class Move {
 public:
@@ -104,19 +104,19 @@ public:
 
     // Returns the move in UCI format as a string
     inline std::string to_uci() const {
-		std::string res;
-		if (is_promo()) {
-			if (!is_special_1() && !is_special_2())
-				res += "n";
-			else if (!is_special_1() && is_special_2())
-				res += "b";
-			else if (is_special_1() && !is_special_2())
-				res += "r";
-			else
-				res += "q";
-		}
-		return format_square(get_from()) + format_square(get_to()) + res;
-	}
+        std::string res;
+        if (is_promo()) {
+            if (!is_special_1() && !is_special_2())
+                res += "n";
+            else if (!is_special_1() && is_special_2())
+                res += "b";
+            else if (is_special_1() && !is_special_2())
+                res += "r";
+            else
+                res += "q";
+        }
+        return format_square(get_from()) + format_square(get_to()) + res;
+    }
 
 private:
     uint16_t data = 0;
@@ -125,6 +125,6 @@ private:
 constexpr Move NULL_MOVE = Move();
 
 inline std::ostream &operator<<(std::ostream &os, const Move &move) {
-	os << move.to_uci();
-	return os;
+    os << move.to_uci();
+    return os;
 }

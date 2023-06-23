@@ -15,28 +15,28 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "uci/uci.h"
 #include "tests/tests.h"
+#include "uci/uci.h"
 #include "utils/bench.h"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
 
-	std::string mode;
-	if (argc >= 2) {
-		mode = std::string(argv[1]);
-	}
+    std::string mode;
+    if (argc >= 2) {
+        mode = std::string(argv[1]);
+    }
 
-	init_all();
+    init_all();
 
-	if (mode == "test") {
-		Tests::run();
-	} else if (mode == "bench") {
-		run_bench();
-	} else {
-		UCI protocol;
-		protocol.start();
-	}
+    if (mode == "test") {
+        test::run();
+    } else if (mode == "bench") {
+        run_bench();
+    } else {
+        uci::UCI protocol;
+        protocol.start();
+    }
 
-	logger.info("main", "Exiting with return code 0");
-	return 0;
+    logger.info("main", "Exiting with return code 0");
+    return 0;
 }
