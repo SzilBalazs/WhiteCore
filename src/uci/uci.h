@@ -23,6 +23,7 @@
 #include "../core/board.h"
 #include "../tests/perft.h"
 #include "../search/search_manager.h"
+#include "option.h"
 
 #include <iostream>
 
@@ -45,14 +46,20 @@ public:
 
 	void start();
 
+	template<typename T>
+	T get_option(const std::string &name);
+
 private:
 
 	std::vector<Command> commands;
+	std::vector<Option> options;
 	bool should_continue = true;
 	Board board;
 	SearchManager sm;
 
 	void register_commands();
+
+	void register_options();
 
 	void greetings();
 
@@ -99,17 +106,37 @@ void UCI::register_commands() {
 	commands.emplace_back("ucinewgame", [&](context tokens){
 		sm.tt_clear();
 	});
+	commands.emplace_back("setoption", [&](context tokens){
+		const std::string name = find_element<std::string>(tokens, "name").value_or("none");
+		const std::optional<std::string> value = find_element<std::string>(tokens, "value");
+		for (Option &opt : options) {
+			if (opt.get_name() == name) {
+				opt.set_value(value);
+			}
+		}
+	});
 
 	logger.info("UCI::register_commands", "Registered ", commands.size(), "commands");
+}
+
+void UCI::register_options() {
+	options.emplace_back("Hash", "32", "spin", [&](){
+		sm.allocate_hash(get_option<int>("Hash"));
+	}, 1, 65536);
+	sm.allocate_hash(32);
+
+	options.emplace_back("Threads", "1", "spin", [&](){
+		sm.allocate_threads(get_option<int>("Threads"));
+	}, 1, 4);
+	sm.allocate_threads(1);
 }
 
 void UCI::start() {
 
 	register_commands();
+	register_options();
 
 	board.load(STARTING_FEN);
-	sm.allocate_hash(64);
-	sm.allocate_threads(1);
 
 	logger.info("UCI::start", "UCI Loop has started!");
 
@@ -136,6 +163,9 @@ void UCI::start() {
 void UCI::greetings() {
 	logger.print("id", "name", "WhiteCore", VERSION);
 	logger.print("id author Balazs Szilagyi");
+	for (const Option &opt : options) {
+		logger.print(opt.to_string());
+	}
 	logger.print("uciok");
 }
 
@@ -188,6 +218,17 @@ std::vector<std::string> UCI::convert_to_tokens(const std::string& line) {
 		}
 	}
 	return res;
+}
+
+template<typename T>
+T UCI::get_option(const std::string &name) {
+	for (const Option &opt : options) {
+		if (opt.get_name() == name) {
+			return opt.get_value<T>();
+		}
+	}
+	logger.error("UCI::get_option", "Unable to find option", name);
+	throw std::invalid_argument("UCI::get_option(): unable to find option " + name);
 }
 
 // Copied from fast-chess, I'm the co-author of the following code
