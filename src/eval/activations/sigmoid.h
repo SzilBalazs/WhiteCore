@@ -17,9 +17,17 @@
 
 #pragma once
 
-#include "layers/dense_layer.h"
-#include "activations/sigmoid.h"
+#include <math.h>
 
-class Network {
-    DenseLayer<float, 768, 1, activation::sigmoid> feature_transformer;
-};
+namespace activation {
+    struct sigmoid {
+        static constexpr float forward(float in) {
+            return 1.0f / (1.0f + std::exp(-in));
+        }
+
+        static constexpr float backward(float in) {
+            float x = forward(in);
+            return x * (1 - x);
+        }
+    };
+} // namespace activation
