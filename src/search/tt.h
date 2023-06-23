@@ -63,13 +63,12 @@ public:
         std::memset(table, 0, bucket_count * sizeof(TTEntry));
     }
 
-    TTEntry probe(U64 hash, bool &hit) {
+    std::optional<TTEntry> probe(U64 hash) {
         TTEntry entry = *get_entry(hash);
 
         if (entry.hash != hash)
-            return {};
+            return std::nullopt;
 
-        hit = true;
         return entry;
     }
 

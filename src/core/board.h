@@ -110,6 +110,8 @@ public:
         return cnt >= 2;
     }
 
+    inline bool is_check() const;
+
     inline void make_move(Move move) {
         const Square from = move.get_from();
         const Square to = move.get_to();

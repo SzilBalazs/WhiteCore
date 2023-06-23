@@ -44,6 +44,10 @@ public:
         return shared.node_count;
     }
 
+    inline void set_uci_mode(bool uci_mode) {
+        shared.uci_mode = uci_mode;
+    }
+
     template<bool wait_to_finish>
     inline void join() {
         if (!wait_to_finish) {

@@ -15,30 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "tests/tests.h"
-#include "uci/uci.h"
-#include "utils/bench.h"
+#pragma once
 
-#include "selfplay/selfplay.h"
+class Network {
 
-int main(int argc, char *argv[]) {
-
-    std::string mode;
-    if (argc >= 2) {
-        mode = std::string(argv[1]);
-    }
-
-    init_all();
-
-    if (mode == "test") {
-        test::run();
-    } else if (mode == "bench") {
-        run_bench();
-    } else {
-        uci::UCI protocol;
-        protocol.start();
-    }
-
-    logger.info("main", "Exiting with return code 0");
-    return 0;
-}
+};

@@ -48,7 +48,6 @@ constexpr Score TB_WORST_WIN = 49000;
 constexpr Score TB_BEST_LOSS = -49000;
 constexpr Score TB_LOSS_SCORE = -50000;
 constexpr Score WORST_MATE = MATE_VALUE - 100;
-constexpr Score DRAW_VALUE = 0;
 
 constexpr Score PIECE_VALUES[7] = {
         0, 100, 300, 350, 500, 1000, 0};

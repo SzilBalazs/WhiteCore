@@ -15,30 +15,34 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "tests/tests.h"
-#include "uci/uci.h"
-#include "utils/bench.h"
+#pragma once
 
-#include "selfplay/selfplay.h"
+#include "../search/search_manager.h"
 
-int main(int argc, char *argv[]) {
+namespace selfplay {
 
-    std::string mode;
-    if (argc >= 2) {
-        mode = std::string(argv[1]);
-    }
+    class Engine {
+    public:
 
-    init_all();
+        Engine() {
+            sm.set_uci_mode(false);
+        }
 
-    if (mode == "test") {
-        test::run();
-    } else if (mode == "bench") {
-        run_bench();
-    } else {
-        uci::UCI protocol;
-        protocol.start();
-    }
+        void init(unsigned int hash_size, unsigned int thread_count) {
+            sm.allocate_hash(hash_size);
+            sm.allocate_threads(thread_count);
+        }
 
-    logger.info("main", "Exiting with return code 0");
-    return 0;
-}
+        Move search(const Board &board, const SearchLimits &limits) {
+            sm.set_limits(limits);
+            sm.search<true>(board);
+            return sm.get_best_move();
+        }
+
+
+    private:
+        SearchManager sm;
+        // Network net;
+    };
+
+} // namespace selfplay

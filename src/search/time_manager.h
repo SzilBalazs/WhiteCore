@@ -17,11 +17,7 @@
 
 #pragma once
 
-#include "../core/constants.h"
-
-struct SearchLimits {
-    std::optional<int64_t> time_left, increment, moves_to_go, depth, move_time, max_nodes;
-};
+#include "search_limits.h"
 
 class TimeManager {
 public:

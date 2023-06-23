@@ -29,6 +29,7 @@ struct SharedMemory {
     TimeManager tm;
     TT tt;
     std::atomic<bool> is_searching;
+    bool uci_mode = true;
     Move best_move;
     int64_t node_count;
 };
@@ -75,10 +76,14 @@ private:
 
             if (shared.is_searching && id == 0) {
                 int64_t elapsed_time = shared.tm.get_elapsed_time();
-                logger.print("info", "depth", int(depth), "nodes", shared.node_count,
-                             "score", "cp", score, "time", elapsed_time,
-                             "nps", calculate_nps(elapsed_time, shared.node_count),
-                             "pv", get_pv_line());
+
+                if (shared.uci_mode) {
+                    logger.print("info", "depth", int(depth), "nodes", shared.node_count,
+                                 "score", "cp", score, "time", elapsed_time,
+                                 "nps", calculate_nps(elapsed_time, shared.node_count),
+                                 "pv", get_pv_line());
+                }
+
                 shared.best_move = pv_array[0][0];
             }
 
@@ -88,7 +93,9 @@ private:
         }
         if (id == 0) {
             shared.is_searching = false;
-            logger.print("bestmove", shared.best_move);
+            if (shared.uci_mode) {
+                logger.print("bestmove", shared.best_move);
+            }
         }
     }
 
@@ -106,7 +113,7 @@ private:
         constexpr bool non_pv_node = !pv_node;
 
         const Score mate_ply = -MATE_VALUE + ply;
-        const bool in_check = bool(movegen::get_attackers(board, board.pieces<KING>(board.get_stm()).lsb()));
+        const bool in_check = board.is_check();
 
         Move best_move = NULL_MOVE;
         Score best_score = -INF_SCORE;
@@ -130,9 +137,9 @@ private:
 
         if (in_check) depth++;
 
-        bool hit = false;
-        TTEntry entry = shared.tt.probe(board.get_hash(), hit);
+        std::optional<TTEntry> entry = shared.tt.probe(board.get_hash());
         TTFlag flag = TT_ALPHA;
+        Move hash_move = entry ? entry->hash_move : NULL_MOVE;
 
         if (depth <= 0)
             return qsearch<node_type>(alpha, beta);
@@ -140,10 +147,8 @@ private:
         if (root_node || in_check)
             goto search_moves;
 
-
-
     search_moves:
-        MoveList<false> move_list(board, entry.hash_move, history, ply);
+        MoveList<false> move_list(board, hash_move, history, ply);
 
         if (move_list.empty()) {
             return in_check ? mate_ply : 0;

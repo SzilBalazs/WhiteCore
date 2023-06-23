@@ -543,3 +543,7 @@ namespace movegen {
     }
 
 } // namespace movegen
+
+bool Board::is_check() const {
+    return bool(movegen::get_attackers(*this, pieces<KING>(get_stm()).lsb()));
+}

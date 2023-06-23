@@ -15,30 +15,30 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "tests/tests.h"
-#include "uci/uci.h"
-#include "utils/bench.h"
+#pragma once
 
-#include "selfplay/selfplay.h"
+#include "../core/constants.h"
 
-int main(int argc, char *argv[]) {
+#include <optional>
 
-    std::string mode;
-    if (argc >= 2) {
-        mode = std::string(argv[1]);
-    }
+struct SearchLimits {
+    std::optional<int64_t> time_left, increment, moves_to_go, depth, move_time, max_nodes;
+};
 
-    init_all();
+inline SearchLimits create_node_limit(int64_t max_nodes) {
+    SearchLimits limit;
+    limit.max_nodes = max_nodes;
+    return limit;
+}
 
-    if (mode == "test") {
-        test::run();
-    } else if (mode == "bench") {
-        run_bench();
-    } else {
-        uci::UCI protocol;
-        protocol.start();
-    }
+inline SearchLimits create_depth_limit(int64_t max_depth) {
+    SearchLimits limit;
+    limit.depth = max_depth;
+    return limit;
+}
 
-    logger.info("main", "Exiting with return code 0");
-    return 0;
+inline SearchLimits create_time_limit(int64_t max_time) {
+    SearchLimits limit;
+    limit.move_time = max_time;
+    return limit;
 }
