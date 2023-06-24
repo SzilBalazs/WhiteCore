@@ -33,10 +33,10 @@ namespace selfplay {
             sm.allocate_threads(thread_count);
         }
 
-        Move search(const Board &board, const SearchLimits &limits) {
+        std::pair<Move, Score> search(const Board &board, const SearchLimits &limits) {
             sm.set_limits(limits);
             sm.search<true>(board);
-            return sm.get_best_move();
+            return sm.get_result();
         }
 
 

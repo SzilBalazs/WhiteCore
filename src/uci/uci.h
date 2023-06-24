@@ -22,6 +22,7 @@
 #include "../tests/perft.h"
 #include "../utils/logger.h"
 #include "../utils/utilities.h"
+#include "../selfplay/selfplay.h"
 #include "command.h"
 #include "option.h"
 
@@ -83,6 +84,14 @@ namespace uci {
         });
         commands.emplace_back("display", [&](context tokens) {
             board.display();
+        });
+        commands.emplace_back("gen", [&](context tokens){
+            SearchLimits limits;
+            limits.max_nodes = find_element<int64_t>(tokens, "nodes");
+            limits.depth = find_element<int64_t>(tokens, "depth");
+            std::optional<std::string> book = find_element<std::string>(tokens,  "book");
+            std::optional<int> thread_count = find_element<int>(tokens, "threads");
+            selfplay::start_generation(limits, book.value_or("book.epd"), thread_count.value_or(1));
         });
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);

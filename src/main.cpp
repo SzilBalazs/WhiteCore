@@ -19,8 +19,6 @@
 #include "uci/uci.h"
 #include "utils/bench.h"
 
-#include "selfplay/selfplay.h"
-
 int main(int argc, char *argv[]) {
 
     std::string mode;

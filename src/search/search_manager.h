@@ -81,9 +81,9 @@ public:
         join<false>();
     }
 
-    inline Move get_best_move() {
+    inline std::pair<Move, Score> get_result() {
         join<true>();
-        return shared.best_move;
+        return {shared.best_move, shared.eval};
     }
 
     inline void tt_clear() {

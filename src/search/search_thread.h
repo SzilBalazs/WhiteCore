@@ -31,6 +31,7 @@ struct SharedMemory {
     std::atomic<bool> is_searching;
     bool uci_mode = true;
     Move best_move;
+    Score eval;
     int64_t node_count;
 };
 
@@ -71,6 +72,7 @@ private:
 
     void search() {
         history.clear(); // TODO remove this?
+        shared.best_move = NULL_MOVE;
         for (Depth depth = 1; depth <= shared.tm.get_max_depth(); depth++) {
             Score score = search<ROOT_NODE>(depth, -INF_SCORE, INF_SCORE, 0);
 
@@ -85,6 +87,7 @@ private:
                 }
 
                 shared.best_move = pv_array[0][0];
+                shared.eval = score;
             }
 
             if (!shared.is_searching) {
@@ -100,7 +103,7 @@ private:
     }
 
     void manage_resources() {
-        if (!(shared.tm.time_left() && shared.node_count < shared.tm.get_max_nodes())) {
+        if (shared.best_move != NULL_MOVE && !(shared.tm.time_left() && shared.node_count < shared.tm.get_max_nodes())) {
             shared.is_searching = false;
         }
     }
@@ -109,8 +112,8 @@ private:
     Score search(Depth depth, Score alpha, Score beta, Ply ply) {
         constexpr bool root_node = node_type == ROOT_NODE;
         constexpr bool non_root_node = !root_node;
-        constexpr bool pv_node = node_type != NON_PV_NODE;
-        constexpr bool non_pv_node = !pv_node;
+        // constexpr bool pv_node = node_type != NON_PV_NODE;
+        // constexpr bool non_pv_node = !pv_node;
 
         const Score mate_ply = -MATE_VALUE + ply;
         const bool in_check = board.is_check();
