@@ -19,12 +19,14 @@
 
 #include "../core/move.h"
 
-struct History {
-    Move killer_moves[MAX_PLY + 10][2];
+namespace search {
+    struct History {
+        core::Move killer_moves[MAX_PLY + 10][2];
 
-    void clear() {
-        for (int i = 0; i < MAX_PLY + 2; i++) {
-            killer_moves[i][0] = killer_moves[i][1] = NULL_MOVE;
+        void clear() {
+            for (int i = 0; i < MAX_PLY + 2; i++) {
+                killer_moves[i][0] = killer_moves[i][1] = core::NULL_MOVE;
+            }
         }
-    }
-};
+    };
+} // namespace search

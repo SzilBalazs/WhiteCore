@@ -17,9 +17,11 @@
 
 #pragma once
 
-#include "layers/dense_layer.h"
 #include "activations/sigmoid.h"
+#include "layers/dense_layer.h"
 
-class Network {
-    DenseLayer<float, 768, 1, activation::sigmoid> feature_transformer;
-};
+namespace nn {
+    class Network {
+        layers::DenseLayer<768, 1, activations::sigmoid> feature_transformer;
+    };
+} // namespace nn

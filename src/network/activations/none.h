@@ -17,7 +17,7 @@
 
 #pragma once
 
-namespace activation {
+namespace nn::activations {
     struct none {
         static constexpr float forward(float value) {
             return value;
@@ -27,4 +27,4 @@ namespace activation {
             return 1.0f;
         }
     };
-} // namespace activation
+} // namespace nn::activations

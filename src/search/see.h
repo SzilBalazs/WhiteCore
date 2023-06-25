@@ -18,87 +18,64 @@
 #pragma once
 
 #include "../core/board.h"
-#include "../core/movegen.h"
 
-Bitboard get_all_attackers(const Board &board, Square square, Bitboard occ) {
-    return (((masks_pawn[square][WHITE] | masks_pawn[square][BLACK]) & board.pieces<PAWN>()) |
-            (attacks_piece<KNIGHT>(square, occ) & board.pieces<KNIGHT>()) |
-            (attacks_piece<BISHOP>(square, occ) & board.pieces<BISHOP>()) |
-            (attacks_piece<ROOK>(square, occ) & board.pieces<ROOK>()) |
-            (attacks_piece<QUEEN>(square, occ) & board.pieces<QUEEN>()) |
-            (attacks_piece<KING>(square, occ) & board.pieces<KING>())) &
-           occ;
-}
+namespace search {
 
-Bitboard least_valuable_piece(const Board &board, Bitboard attackers, Color stm, PieceType &type) {
+    bool see(const core::Board &board, core::Move move, Score threshold) {
+        assert(move.is_capture());
 
-    for (PieceType t : PIECE_TYPES_BY_VALUE) {
-        Bitboard s = attackers & board.pieces(stm, t);
-        if (s) {
-            type = t;
-            return s & -s.bb;
-        }
-    }
-    return 0;
-}
+        Square from = move.get_from();
+        Square to = move.get_to();
 
+        if (move.is_promo() || move.eq_flag(EP_CAPTURE)) return true;
 
-bool see(const Board &board, Move move, Score threshold) {
-    assert(move.is_capture());
+        Score value = PIECE_VALUES[board.piece_at(to).type] - threshold;
 
-    Square from = move.get_from();
-    Square to = move.get_to();
+        if (value < 0) return false;
 
-    if (move.is_promo() || move.eq_flag(EP_CAPTURE)) return true;
+        value -= PIECE_VALUES[board.piece_at(from).type];
 
-    Score value = PIECE_VALUES[board.piece_at(to).type] - threshold;
+        if (value >= 0) return true;
 
-    if (value < 0) return false;
+        core::Bitboard rooks = board.pieces<ROOK>() | board.pieces<QUEEN>();
+        core::Bitboard bishops = board.pieces<BISHOP>() | board.pieces<QUEEN>();
+        core::Bitboard occ = board.occupied() ^ core::Bitboard(from) ^ core::Bitboard(to);
 
-    value -= PIECE_VALUES[board.piece_at(from).type];
+        // Initialize the current attacker as the piece that made the capture
+        core::Bitboard attacker = from;
+        // Get all attackers to the destination square
+        core::Bitboard attackers = core::get_all_attackers(board, to, occ);
 
-    if (value >= 0) return true;
+        Color stm = color_enemy(board.piece_at(from).color);
 
-    Bitboard rooks = board.pieces<ROOK>() | board.pieces<QUEEN>();
-    Bitboard bishops = board.pieces<BISHOP>() | board.pieces<QUEEN>();
-    Bitboard occ = board.occupied() ^ Bitboard(from) ^ Bitboard(to);
+        while (true) {
+            attackers &= occ;
 
-    // Initialize the current attacker as the piece that made the capture
-    Bitboard attacker = from;
-    // Get all attackers to the destination square
-    Bitboard attackers = get_all_attackers(board, to, occ);
+            PieceType type;
+            attacker = core::least_valuable_piece(board, attackers, stm, type);
 
-    Color stm = color_enemy(board.piece_at(from).color);
+            if (!attacker)
+                break;
 
-    while (true) {
-        attackers &= occ;
+            value = -value - 1 - PIECE_VALUES[type];
+            stm = color_enemy(stm);
 
-        PieceType type;
-        attacker = least_valuable_piece(board, attackers, stm, type);
-
-        if (!attacker)
-            break;
-
-        value = -value - 1 - PIECE_VALUES[type];
-        stm = color_enemy(stm);
-
-        if (value >= 0) {
-            if (type == KING && (attackers & board.pieces(stm))) {
-                stm = color_enemy(stm);
+            if (value >= 0) {
+                if (type == KING && (attackers & board.pieces(stm))) {
+                    stm = color_enemy(stm);
+                }
+                break;
             }
-            break;
+
+
+            occ ^= attacker;
+
+            if (type == ROOK || type == QUEEN)
+                attackers |= attacks_rook(to, occ) & rooks & occ;
+            if (type == PAWN || type == BISHOP || type == QUEEN)
+                attackers |= attacks_bishop(to, occ) & bishops & occ;
         }
 
-
-        occ ^= attacker;
-
-        if (type == ROOK || type == QUEEN)
-            attackers |= attacks_rook(to, occ) & rooks & occ;
-        if (type == PAWN || type == BISHOP || type == QUEEN)
-            attackers |= attacks_bishop(to, occ) & bishops & occ;
+        return stm != board.piece_at(from).color;
     }
-
-    return stm != board.piece_at(from).color;
-}
-
-
+} // namespace search

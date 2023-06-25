@@ -16,12 +16,12 @@
 //
 
 #include "../search/time_manager.h"
-#include "engine.h"
 #include "data_entry.h"
+#include "engine.h"
 
+#include <ctime>
 #include <filesystem>
 #include <iomanip>
-#include <ctime>
 #include <sstream>
 
 namespace selfplay {
@@ -41,12 +41,12 @@ namespace selfplay {
         return ss.str();
     }
 
-    inline std::optional<GameResult> get_game_result(const Board &board) {
+    inline std::optional<GameResult> get_game_result(const core::Board &board) {
 
         if (board.is_draw()) return DRAW;
 
-        Move moves[200];
-        int cnt = movegen::gen_moves(board, moves, false) - moves;
+        core::Move moves[200];
+        int cnt = core::gen_moves(board, moves, false) - moves;
 
         if (cnt == 0) {
             if (board.is_check()) {
@@ -59,9 +59,9 @@ namespace selfplay {
         return std::nullopt;
     }
 
-    inline void run_game(Engine &engine, const SearchLimits &limits, const std::string &starting_fen, std::vector<DataEntry> &entries, unsigned int hash_size = DEFAULT_HASH_SIZE, const unsigned int thread_count = DEFAULT_THREAD_COUNT) {
+    inline void run_game(Engine &engine, const search::Limits &limits, const std::string &starting_fen, std::vector<DataEntry> &entries, unsigned int hash_size = DEFAULT_HASH_SIZE, const unsigned int thread_count = DEFAULT_THREAD_COUNT) {
         engine.init(hash_size, thread_count);
-        Board board;
+        core::Board board;
         board.load(starting_fen);
         unsigned int ply = 0;
         std::optional<GameResult> result;
@@ -83,7 +83,7 @@ namespace selfplay {
         }
     }
 
-    inline void gen_games(const SearchLimits &limits, const std::vector<std::string> &starting_fens, const std::string &output_path) {
+    inline void gen_games(const search::Limits &limits, const std::vector<std::string> &starting_fens, const std::string &output_path) {
 
         Engine engine;
 
@@ -99,8 +99,9 @@ namespace selfplay {
         file.close();
     }
 
-    inline void start_generation(const SearchLimits &limits, const std::string &book_path, unsigned int thread_count) {
-        game_count = 0; position_count = 0;
+    inline void start_generation(const search::Limits &limits, const std::string &book_path, unsigned int thread_count) {
+        game_count = 0;
+        position_count = 0;
 
         // TODO argument for network file
         if (!std::filesystem::exists(book_path)) {

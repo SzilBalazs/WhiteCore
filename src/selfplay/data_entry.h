@@ -18,7 +18,9 @@
 namespace selfplay {
 
     enum GameResult {
-        WHITE_WIN, DRAW, BLACK_WIN
+        WHITE_WIN,
+        DRAW,
+        BLACK_WIN
     };
 
     inline std::string get_wdl(const GameResult &result) {
@@ -36,7 +38,7 @@ namespace selfplay {
     struct DataEntry {
         std::string fen;
         unsigned int ply;
-        Move best_move;
+        core::Move best_move;
         Score eval;
         std::optional<GameResult> result;
 
@@ -54,4 +56,4 @@ namespace selfplay {
         }
     };
 
-}
+} // namespace selfplay

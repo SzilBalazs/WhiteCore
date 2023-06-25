@@ -22,9 +22,9 @@
 namespace test {
 
     template<bool bulk_counting, bool output>
-    int64_t perft(Board &board, int depth) {
-        Move moves[200];
-        Move *moves_end = movegen::gen_moves(board, moves, false);
+    int64_t perft(core::Board &board, int depth) {
+        core::Move moves[200];
+        core::Move *moves_end = core::gen_moves(board, moves, false);
 
         // Bulk counting the number of moves at depth 1.
         if (depth == 1 && bulk_counting)
@@ -34,7 +34,7 @@ namespace test {
 
         // DFS like routine, calling itself recursively with lowered depth.
         int64_t nodes = 0;
-        for (Move *it = moves; it != moves_end; it++) {
+        for (core::Move *it = moves; it != moves_end; it++) {
             board.make_move(*it);
             int64_t node_count = perft<bulk_counting, false>(board, depth - 1);
             if constexpr (output) {
@@ -64,7 +64,7 @@ namespace test {
                 Test("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 ", 5, 164075551)};
 
         std::cout << "Testing perft..." << std::endl;
-        Board board;
+        core::Board board;
         std::vector<Test> failed;
         int64_t start_time = now(), total_nodes = 0;
 

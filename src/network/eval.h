@@ -21,7 +21,7 @@
 #include "../core/board.h"
 #include "../core/constants.h"
 
-Score eval(const Board &board) {
+Score eval(const core::Board &board) {
     Score score = 0;
     score += 100 * (board.pieces<WHITE, PAWN>().pop_count() - board.pieces<BLACK, PAWN>().pop_count());
     score += 300 * (board.pieces<WHITE, KNIGHT>().pop_count() - board.pieces<BLACK, KNIGHT>().pop_count());
@@ -30,10 +30,10 @@ Score eval(const Board &board) {
     score += 900 * (board.pieces<WHITE, QUEEN>().pop_count() - board.pieces<BLACK, QUEEN>().pop_count());
 
     for (Color color : {WHITE, BLACK}) {
-        Bitboard occ = board.pieces(color) | board.pieces(color_enemy(color), PAWN);
+        core::Bitboard occ = board.pieces(color) | board.pieces(color_enemy(color), PAWN);
         Score mobility = 0;
         for (PieceType pt : {KNIGHT, BISHOP, ROOK, QUEEN}) {
-            Bitboard bb = board.pieces(color, pt);
+            core::Bitboard bb = board.pieces(color, pt);
             while (bb) {
                 Square sq = bb.pop_lsb();
                 mobility += attacks_piece(pt, sq, occ).pop_count();

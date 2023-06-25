@@ -23,7 +23,6 @@ namespace selfplay {
 
     class Engine {
     public:
-
         Engine() {
             sm.set_uci_mode(false);
         }
@@ -33,7 +32,7 @@ namespace selfplay {
             sm.allocate_threads(thread_count);
         }
 
-        std::pair<Move, Score> search(const Board &board, const SearchLimits &limits) {
+        std::pair<core::Move, Score> search(const core::Board &board, const search::Limits &limits) {
             sm.set_limits(limits);
             sm.search<true>(board);
             return sm.get_result();
@@ -41,7 +40,7 @@ namespace selfplay {
 
 
     private:
-        SearchManager sm;
+        search::SearchManager sm;
         // Network net;
     };
 

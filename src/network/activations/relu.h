@@ -17,17 +17,16 @@
 
 #pragma once
 
-#include <math.h>
+#include <algorithm>
 
-namespace activation {
-    struct sigmoid {
-        static constexpr float forward(float in) {
-            return 1.0f / (1.0f + std::exp(-in));
+namespace nn::activations {
+    struct relu {
+        static constexpr float forward(float value) {
+            return std::max(0.0f, value);
         }
 
-        static constexpr float backward(float in) {
-            float x = forward(in);
-            return x * (1 - x);
+        static constexpr float backward(float value) {
+            return value > 0.0f;
         }
     };
-} // namespace activation
+} // namespace nn::activations

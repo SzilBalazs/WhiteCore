@@ -20,7 +20,7 @@
 #include "attacks.h"
 #include "board.h"
 
-namespace movegen {
+namespace core {
 
     // Returns a bitboard of all the squares attacking a given square for the given color
     template<Color color>
@@ -542,8 +542,8 @@ namespace movegen {
         }
     }
 
-} // namespace movegen
+    bool Board::is_check() const {
+        return bool(core::get_attackers(*this, pieces<KING>(get_stm()).lsb()));
+    }
 
-bool Board::is_check() const {
-    return bool(movegen::get_attackers(*this, pieces<KING>(get_stm()).lsb()));
-}
+} // namespace core

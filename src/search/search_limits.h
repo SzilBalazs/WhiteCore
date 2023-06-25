@@ -21,24 +21,26 @@
 
 #include <optional>
 
-struct SearchLimits {
-    std::optional<int64_t> time_left, increment, moves_to_go, depth, move_time, max_nodes;
-};
+namespace search {
+    struct Limits {
+        std::optional<int64_t> time_left, increment, moves_to_go, depth, move_time, max_nodes;
+    };
 
-inline SearchLimits create_node_limit(int64_t max_nodes) {
-    SearchLimits limit;
-    limit.max_nodes = max_nodes;
-    return limit;
-}
+    inline Limits create_node_limit(int64_t max_nodes) {
+        Limits limit;
+        limit.max_nodes = max_nodes;
+        return limit;
+    }
 
-inline SearchLimits create_depth_limit(int64_t max_depth) {
-    SearchLimits limit;
-    limit.depth = max_depth;
-    return limit;
-}
+    inline Limits create_depth_limit(int64_t max_depth) {
+        Limits limit;
+        limit.depth = max_depth;
+        return limit;
+    }
 
-inline SearchLimits create_time_limit(int64_t max_time) {
-    SearchLimits limit;
-    limit.move_time = max_time;
-    return limit;
-}
+    inline Limits create_time_limit(int64_t max_time) {
+        Limits limit;
+        limit.move_time = max_time;
+        return limit;
+    }
+} // namespace search
