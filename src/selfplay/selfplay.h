@@ -20,6 +20,7 @@
 #include "engine.h"
 
 #include <ctime>
+#include <random>
 #include <filesystem>
 #include <iomanip>
 #include <sstream>
@@ -28,6 +29,7 @@ namespace selfplay {
 
     const unsigned int DEFAULT_HASH_SIZE = 32;
     const unsigned int DEFAULT_THREAD_COUNT = 1;
+    const unsigned int BLOCK_SIZE = 100000;
 
     std::atomic<unsigned int> game_count, position_count;
 
@@ -69,10 +71,14 @@ namespace selfplay {
         while (ply <= 500 && !result) {
 
             auto [move, eval] = engine.search(board, limits);
-            tmp.emplace_back(board.get_fen(), ply, move, eval, std::nullopt);
+
+            if (!board.is_check() && move.is_quiet() && std::abs(eval) < WORST_MATE) {
+                tmp.emplace_back(board.get_fen(), ply, move, eval, std::nullopt);
+                position_count++;
+            }
+
             board.make_move(move);
 
-            position_count++;
             ply++;
             result = get_game_result(board);
         }
@@ -88,18 +94,52 @@ namespace selfplay {
         Engine engine;
 
         std::ofstream file(output_path, std::ios::out | std::ios::app);
+        std::random_device rd;
+        std::mt19937 g(rd());
+
         std::vector<DataEntry> entries;
         for (const std::string &fen : starting_fens) {
             run_game(engine, limits, fen, entries);
             game_count++;
+
+            if (entries.size() >= BLOCK_SIZE) {
+                std::shuffle(entries.begin(), entries.end(), g);
+
+                for (const DataEntry &entry : entries) {
+                    file << entry.to_string() << "\n";
+                }
+                file.flush();
+
+                entries.clear();
+            }
         }
+
+        std::shuffle(entries.begin(), entries.end(), g);
         for (const DataEntry &entry : entries) {
             file << entry.to_string() << "\n";
         }
         file.close();
     }
 
-    inline void start_generation(const search::Limits &limits, const std::string &book_path, unsigned int thread_count) {
+    inline void combine_data(const std::string &path, const std::string &output_file) {
+
+        logger.print("Combining files...");
+
+        std::ofstream file(output_file, std::ios::app | std::ios::out);
+        for (const auto& entry : std::filesystem::directory_iterator(path)) {
+            std::ifstream in(entry.path());
+            std::string tmp;
+            while (std::getline(in, tmp)) {
+                file << tmp << "\n";
+            }
+            in.close();
+        }
+        file.close();
+
+        logger.print("Finished combining");
+    }
+
+    inline void start_generation(const search::Limits &limits, const std::string &book_path, const std::string &output_path, unsigned int thread_count) {
         game_count = 0;
         position_count = 0;
 
@@ -130,12 +170,13 @@ namespace selfplay {
 
         std::vector<std::thread> threads;
 
+        logger.print("Starting", thread_count, "threads...");
         for (unsigned int id = 0; id < thread_count; id++) {
             std::vector<std::string> fens;
             for (unsigned int i = id; i < starting_fens.size(); i += thread_count) {
                 fens.emplace_back(starting_fens[i]);
             }
-            threads.emplace_back(gen_games, limits, fens, directory_path + "/" + std::to_string(id) + ".txt");
+            threads.emplace_back(gen_games, limits, fens, directory_path + "/" + std::to_string(id) + ".plain");
         }
 
         const unsigned int total_games = starting_fens.size();
@@ -177,6 +218,10 @@ namespace selfplay {
             if (th.joinable())
                 th.join();
         }
+
+        logger.print("Finished generating data");
+
+        combine_data(directory_path, output_path);
     }
 
 } // namespace selfplay

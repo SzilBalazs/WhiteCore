@@ -90,8 +90,9 @@ namespace uci {
             limits.max_nodes = find_element<int64_t>(tokens, "nodes");
             limits.depth = find_element<int64_t>(tokens, "depth");
             std::optional<std::string> book = find_element<std::string>(tokens, "book");
+            std::optional<std::string> output = find_element<std::string>(tokens, "out");
             std::optional<int> thread_count = find_element<int>(tokens, "threads");
-            selfplay::start_generation(limits, book.value_or("book.epd"), thread_count.value_or(1));
+            selfplay::start_generation(limits, book.value_or("book.epd"), output.value_or("data.plain"), thread_count.value_or(1));
         });
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);
