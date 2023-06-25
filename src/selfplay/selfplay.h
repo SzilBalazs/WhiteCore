@@ -147,7 +147,11 @@ namespace selfplay {
             int64_t current_time = now();
             int64_t elapsed_time = current_time - start_time + 1;
 
-            float progress = float(game_count) / float(total_games);
+            float progress = float(game_count + 1) / float(total_games);
+
+            int64_t total_time = elapsed_time / progress;
+            int64_t eta = (1.0f - progress) * total_time;
+
             unsigned int percentage = progress * 100;
             unsigned int pos_per_s = position_count * 1000 / elapsed_time;
 
@@ -163,7 +167,7 @@ namespace selfplay {
                     std::cout << " ";
                 }
             }
-            std::cout << "] " << percentage << "% - " << game_count << "/" << total_games << " games - " << (elapsed_time / 1000) << "s - " << pos_per_s << " pos/s \r" << std::flush;
+            std::cout << "] " << percentage << "% - " << game_count << "/" << total_games << " games - ETA " << (eta / 1000) << "s - " << pos_per_s << " pos/s \r" << std::flush;
         }
 
         std::cout << std::endl;
