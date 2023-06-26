@@ -67,6 +67,7 @@ jobs:
       - name: Building BlackCore
         run: |
           cd src
+          ${{matrix.config.compiler}} --version
           make CXX=${{matrix.config.compiler}} EXE=${{matrix.config.target}} ARCH=${{matrix.config.target}}
       - name: Running tests
         run: |
