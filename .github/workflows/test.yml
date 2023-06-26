@@ -1,0 +1,83 @@
+name: Build & Run Tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  BlackCore:
+    name: ${{matrix.config.name}}
+    runs-on: ${{matrix.config.os}}
+    strategy:
+      matrix:
+        config:
+          - {
+            name: "Ubuntu g++ popcnt",
+            os: ubuntu-latest,
+            compiler: g++,
+            arch: popcnt,
+            target: WhiteCore-popcnt-linux,
+          }
+          - {
+            name: "Ubuntu g++ avx2",
+            os: ubuntu-latest,
+            compiler: g++,
+            arch: avx2,
+            target: WhiteCore-avx2-linux,
+          }
+          - {
+            name: "Ubuntu g++ bmi2",
+            os: ubuntu-latest,
+            compiler: g++,
+            arch: bmi2,
+            target: WhiteCore-bmi2-linux,
+          }
+          - {
+            name: "Windows g++ popcnt",
+            os: windows-latest,
+            compiler: g++,
+            arch: popcnt,
+            target: WhiteCore-popcnt-win.exe,
+          }
+          - {
+            name: "Windows g++ avx2",
+            os: windows-latest,
+            compiler: g++,
+            arch: avx2,
+            target: WhiteCore-avx2-win.exe,
+          }
+          - {
+            name: "Windows g++ bmi2",
+            os: windows-latest,
+            compiler: g++,
+            arch: bmi2,
+            target: WhiteCore-bmi2-win.exe,
+          }
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Installing required packages
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install clang-15
+
+      - name: Building BlackCore
+        run: |
+          cd src
+          make CXX=clang-15 EXE=${{matrix.config.target}} ARCH=${{matrix.config.target}}
+      - name: Running tests
+        run: |
+          cd src
+          ./${{matrix.config.target}} test
+      - name: Running benchmark test
+        run: |
+          cd src
+          ./${{matrix.config.target}} bench
+      - name: Uploading artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: BlackCore
+          path: src/${{matrix.config.target}}

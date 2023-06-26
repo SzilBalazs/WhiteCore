@@ -56,6 +56,7 @@ namespace test {
             for (const Test &test : failed) {
                 std::cout << test.fen << std::endl;
             }
+            std::abort();
         }
     }
 
