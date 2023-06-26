@@ -52,6 +52,7 @@ namespace selfplay {
             res += std::to_string(int(eval));
             res += ";";
             res += get_wdl(result.value_or(DRAW));
+            res += ";";
             return res;
         }
     };

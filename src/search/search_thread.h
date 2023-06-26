@@ -227,7 +227,7 @@ namespace search {
 
             MoveList<true> move_list(board, core::NULL_MOVE, history, 0);
 
-            Score static_eval = eval(board);
+            Score static_eval = nn::eval(board);
 
             if (static_eval >= beta)
                 return beta;

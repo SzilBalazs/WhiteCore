@@ -17,21 +17,15 @@
 
 #pragma once
 
-#include "activations/relu.h"
-#include "activations/sigmoid.h"
-#include "layers/dense_layer.h"
+#include "network.h"
+#include "../core/constants.h"
+#include "../utils/logger.h"
+
+#include <fstream>
 
 namespace nn {
 
-    struct Gradient {
-        layers::DenseLayerGradient<768, 1> pst;
-
-        void operator+=(const Gradient &g) {
-            pst += g.pst;
-        }
-    };
-
-    struct Network {
+    struct QNetwork {
 
         static constexpr int MAGIC = 1;
 
@@ -39,9 +33,11 @@ namespace nn {
             return (piece.color == WHITE) * 384 + piece.type * 64 + sq;
         }
 
-        layers::DenseLayer<768, 1, activations::sigmoid> pst;
+        layers::DenseLayer<768, 1, activations::none> pst;
 
-        Network(const std::string &network_path) {
+        QNetwork() = default;
+
+        QNetwork(const std::string &network_path) {
             std::ifstream file(network_path, std::ios::in | std::ios::binary);
             if (!file.is_open()) {
                 logger.print("Unable to open:", network_path);
@@ -61,35 +57,12 @@ namespace nn {
             file.close();
 
             logger.print("Loaded network file");
-
         }
 
-        Network() {
-            std::random_device rd;
-            std::mt19937 mt(rd());
-            pst.randomize(mt);
-        }
-
-        float forward(const std::vector<unsigned int> &features) const {
+        Score forward(const std::vector<unsigned int> &features) const {
             std::array<float, 1> output;
             pst.forward(features, output);
-            return output[0];
+            return output[0] * 400;
         }
-
-        void write_to_file(const std::string &output_path) {
-            std::ofstream file(output_path, std::ios::out | std::ios::binary);
-            if (!file.is_open()) {
-                logger.print("Unable to open:", output_path);
-                throw std::invalid_argument("Unable to open: " + output_path);
-            }
-
-            int magic = MAGIC;
-            file.write(reinterpret_cast<char *>(&magic), sizeof(magic));
-
-            pst.write_to_file(file);
-
-            file.close();
-        }
-
     };
 } // namespace nn

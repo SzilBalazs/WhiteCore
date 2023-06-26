@@ -19,26 +19,73 @@
 #include <functional>
 #include <thread>
 #include <vector>
+#include <random>
 
 #include "../activations/none.h"
 
 namespace nn::layers {
+
+    template<unsigned int IN, unsigned int OUT>
+    struct DenseLayerGradient {
+        std::array<float, OUT> biases;
+        std::array<float, IN * OUT> weights;
+
+        DenseLayerGradient() {
+            std::fill(biases.begin(), biases.end(), 0);
+            std::fill(weights.begin(), weights.end(), 0);
+        }
+
+        void operator+=(const DenseLayerGradient &g) {
+            for (unsigned int i = 0; i < OUT; i++) {
+                biases[i] += g.biases[i];
+            }
+            for (unsigned int i = 0; i < IN * OUT; i++) {
+                weights[i] += g.weights[i];
+            }
+        }
+    };
+
     template<unsigned int IN, unsigned int OUT, typename ACTIVATION = activations::none>
     class DenseLayer {
+    private:
 
         static_assert(std::is_invocable_r_v<float, decltype(ACTIVATION::forward), float>, "Invalid ACTIVATION::forward");
         static_assert(std::is_invocable_r_v<float, decltype(ACTIVATION::backward), float>, "Invalid ACTIVATION::backward");
 
-        std::array<float, OUT> biases;
-        std::array<float, IN * OUT> weights;
-
-        void activate(std::array<float, OUT> &output) {
+        void activate(std::array<float, OUT> &output) const {
             for (unsigned int i = 0; i < OUT; i++) {
                 output[i] = ACTIVATION::forward(output[i]);
             }
         }
 
-        void forward(const std::vector<unsigned int> &input_features, std::array<float, OUT> &output) {
+    public:
+
+        std::array<float, OUT> biases;
+        std::array<float, IN * OUT> weights;
+
+        void load_from_file(std::ifstream &file) {
+            file.read(reinterpret_cast<char *>(biases.data()), sizeof(biases));
+            file.read(reinterpret_cast<char *>(weights.data()), sizeof(weights));
+        }
+
+        void randomize(std::mt19937 &mt) {
+            std::uniform_real_distribution<float> dist(-0.1, 0.1);
+
+            for (unsigned int i = 0; i < IN * OUT; i++) {
+                weights[i] = dist(mt);
+            }
+
+            for (unsigned int i = 0; i < OUT; i++) {
+                biases[i] = dist(mt);
+            }
+        }
+
+        void write_to_file(std::ofstream &file) {
+            file.write(reinterpret_cast<char *>(biases.data()), sizeof(biases));
+            file.write(reinterpret_cast<char *>(weights.data()), sizeof(weights));
+        }
+
+        void forward(const std::vector<unsigned int> &input_features, std::array<float, OUT> &output) const {
             std::copy(biases.begin(), biases.end(), output.begin());
             for (unsigned int i : input_features) {
                 for (unsigned int j = 0; j < OUT; j++) {
@@ -48,7 +95,7 @@ namespace nn::layers {
             activate(output);
         }
 
-        void forward(const std::array<float, IN> &input, std::array<float, OUT> &output) {
+        void forward(const std::array<float, IN> &input, std::array<float, OUT> &output) const {
             std::copy(biases.begin(), biases.end(), output.begin());
             for (unsigned int i = 0; i < IN; i++) {
                 for (unsigned int j = 0; j < OUT; j++) {
@@ -58,7 +105,7 @@ namespace nn::layers {
             activate(output);
         }
 
-        void backward(const std::array<float, OUT> &loss, const std::array<float, IN> &input, std::array<float, IN> &input_loss, std::array<float, OUT> &bias_gradiant, std::array<float, IN * OUT> &weight_gradient) {
+        void backward(const std::array<float, OUT> &loss, const std::array<float, IN> &input, std::array<float, IN> &input_loss, std::array<float, OUT> &bias_gradiant, std::array<float, IN * OUT> &weight_gradient) const {
             std::array<float, OUT> loss_before_activation;
             for (unsigned int i = 0; i < OUT; i++) {
                 loss_before_activation[i] = loss[i] * ACTIVATION::backward(loss[i]);
@@ -73,7 +120,7 @@ namespace nn::layers {
             }
         }
 
-        void backward(const std::array<float, OUT> &loss, const std::vector<unsigned int> &input_features, std::array<float, OUT> &bias_gradiant, std::array<float, IN * OUT> &weight_gradient) {
+        void backward(const std::array<float, OUT> &loss, const std::vector<unsigned int> &input_features, std::array<float, OUT> &bias_gradiant, std::array<float, IN * OUT> &weight_gradient) const {
             std::array<float, OUT> loss_before_activation;
             for (unsigned int i = 0; i < OUT; i++) {
                 loss_before_activation[i] = loss[i] * ACTIVATION::backward(loss[i]);

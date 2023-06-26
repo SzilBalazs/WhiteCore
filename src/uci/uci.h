@@ -20,6 +20,7 @@
 #include "../core/board.h"
 #include "../search/search_manager.h"
 #include "../selfplay/selfplay.h"
+#include "../network/train.h"
 #include "../tests/perft.h"
 #include "../utils/logger.h"
 #include "../utils/utilities.h"
@@ -94,6 +95,16 @@ namespace uci {
             std::optional<int> thread_count = find_element<int>(tokens, "threads");
             selfplay::start_generation(limits, book.value_or("book.epd"), output.value_or("data.plain"), thread_count.value_or(1));
         });
+        commands.emplace_back("train", [&](context tokens){
+            std::optional<std::string> network_path = find_element<std::string>(tokens, "network");
+            std::optional<std::string> training_data = find_element<std::string>(tokens, "in");
+            std::optional<float> learning_rate = find_element<float>(tokens, "lr");
+            std::optional<int> epochs = find_element<int>(tokens, "epochs");
+            std::optional<int> batch_size = find_element<int>(tokens, "batch");
+            std::optional<int> threads = find_element<int>(tokens, "threads");
+            nn::Trainer trainer(training_data.value_or("data.plain"), network_path, learning_rate.value_or(0.001f),
+                                epochs.value_or(10), batch_size.value_or(16384), threads.value_or(4));
+        });
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);
             U64 node_count = test::perft<true, false>(board, depth);
@@ -141,6 +152,10 @@ namespace uci {
                 },
                 1, 4);
         sm.allocate_threads(1);
+
+        options.emplace_back("EvalFile", "corenet.bin", "string", [&]() {
+            nn::net = nn::QNetwork(get_option<std::string>("EvalFile"));
+        });
     }
 
     void UCI::start() {
@@ -251,6 +266,8 @@ namespace uci {
         if (position == haystack.end()) return std::nullopt;
         if constexpr (std::is_same_v<T, int>)
             return std::stoi(haystack[index + 1]);
+        else if constexpr (std::is_same_v<T, float>)
+            return std::stof(haystack[index + 1]);
         else if constexpr (std::is_same_v<T, int64_t>)
             return std::stoll(haystack[index + 1]);
         else if constexpr (std::is_same_v<T, uint64_t>)
