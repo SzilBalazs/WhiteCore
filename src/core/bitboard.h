@@ -21,6 +21,7 @@
 
 #include <cassert>
 #include <immintrin.h>
+#include <bit>
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -59,12 +60,7 @@ namespace core {
 
         // Returns the number of bits set to 1.
         constexpr int pop_count() const {
-
-#if defined(_MSC_VER) || defined(__INTEL_COMPILER)
-            return (int) _mm_popcnt_u64(bb);
-#else
-            return __builtin_popcountll(bb);
-#endif
+            return std::popcount(bb);
         }
 
         // Returns the square with the lowest index, that is set to 1.
