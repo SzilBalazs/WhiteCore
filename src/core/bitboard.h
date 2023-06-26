@@ -68,7 +68,7 @@ namespace core {
         }
 
         // Returns the square with the lowest index, that is set to 1.
-        constexpr Square lsb() const {
+        inline Square lsb() const {
 
 #ifdef __GNUC__
             return Square(__builtin_ctzll(bb));
