@@ -44,7 +44,7 @@ namespace nn {
 
         Gradient m_gradient, v_gradient;
 
-        template<unsigned long LEN>
+        template<uint64_t LEN>
         void update(std::array<float, LEN> &target, std::array<float, LEN> &m, std::array<float, LEN> &v, const std::array<float, LEN> &grad) {
             for (unsigned int i = 0; i < LEN; i++) {
                 apply_gradient(target[i], m[i], v[i], grad[i]);
