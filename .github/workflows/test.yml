@@ -16,21 +16,21 @@ jobs:
           - {
             name: "Ubuntu g++ popcnt",
             os: ubuntu-latest,
-            compiler: clang-15,
+            compiler: clang++,
             arch: popcnt,
             target: WhiteCore-popcnt-linux,
           }
           - {
             name: "Ubuntu g++ avx2",
             os: ubuntu-latest,
-            compiler: clang-15,
+            compiler: clang++,
             arch: avx2,
             target: WhiteCore-avx2-linux,
           }
           - {
             name: "Ubuntu g++ bmi2",
             os: ubuntu-latest,
-            compiler: clang-15,
+            compiler: clang++,
             arch: bmi2,
             target: WhiteCore-bmi2-linux,
           }
