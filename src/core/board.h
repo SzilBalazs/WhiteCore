@@ -24,6 +24,7 @@
 #include "move.h"
 
 #include <sstream>
+#include <algorithm>
 #include <vector>
 
 #define state states.back()
