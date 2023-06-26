@@ -16,36 +16,42 @@ jobs:
           - {
             name: "Ubuntu g++ popcnt",
             os: ubuntu-latest,
+            compiler: clang-15,
             arch: popcnt,
             target: WhiteCore-popcnt-linux,
           }
           - {
             name: "Ubuntu g++ avx2",
             os: ubuntu-latest,
+            compiler: clang-15,
             arch: avx2,
             target: WhiteCore-avx2-linux,
           }
           - {
             name: "Ubuntu g++ bmi2",
             os: ubuntu-latest,
+            compiler: clang-15,
             arch: bmi2,
             target: WhiteCore-bmi2-linux,
           }
           - {
             name: "Windows g++ popcnt",
             os: windows-latest,
+            compiler: clang,
             arch: popcnt,
             target: WhiteCore-popcnt-win.exe,
           }
           - {
             name: "Windows g++ avx2",
             os: windows-latest,
+            compiler: clang,
             arch: avx2,
             target: WhiteCore-avx2-win.exe,
           }
           - {
             name: "Windows g++ bmi2",
             os: windows-latest,
+            compiler: clang,
             arch: bmi2,
             target: WhiteCore-bmi2-win.exe,
           }
@@ -61,7 +67,7 @@ jobs:
       - name: Building BlackCore
         run: |
           cd src
-          make CXX=clang EXE=${{matrix.config.target}} ARCH=${{matrix.config.target}}
+          make CXX=${{matrix.config.compiler}} EXE=${{matrix.config.target}} ARCH=${{matrix.config.target}}
       - name: Running tests
         run: |
           cd src
