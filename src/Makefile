@@ -1,4 +1,4 @@
-CXX = g++
+CXX = clang++
 TARGET_FLAGS = -static -static-libgcc -static-libstdc++
 ARCH = native
 NAME = WhiteCore
@@ -49,7 +49,7 @@ ifeq ($(build), debug)
 endif
 
 DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG
-CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall -Wno-class-memaccess -MMD
+CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall -MMD
 EXE = $(NAME)-v$(VERSION_MAJOR)-$(VERSION_MINOR)$(SUFFIX)
 
 default: $(EXE)

@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "../core/movegen.h"
 
 namespace test {
@@ -52,6 +54,8 @@ namespace test {
             std::string fen;
             int depth;
             int64_t expected;
+
+            Test(std::string fen, int depth, int64_t expected) : fen(std::move(fen)), depth(depth), expected(expected) {}
         };
 
         std::vector<Test> tests = {

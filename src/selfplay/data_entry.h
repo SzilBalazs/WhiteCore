@@ -42,6 +42,10 @@ namespace selfplay {
         Score eval;
         std::optional<GameResult> result;
 
+        DataEntry(std::string fen, unsigned int ply, core::Move best_move, Score eval, std::optional<GameResult> result) : fen(std::move(fen)), ply(ply),
+                                                                                                                           best_move(best_move), eval(eval),
+                                                                                                                           result(result) {}
+
         std::string to_string() const {
             std::string res = fen;
             res += ";";
