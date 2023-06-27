@@ -57,12 +57,9 @@ default: $(EXE)
 $(OBJECTS): | $(TMP_DIR)
 $(DEPENDS): | $(TMP_DIR)
 
-$(TMP_DIR):
-	@mkdir $(TMP_DIR)
-
 $(EXE):
-	@echo Linking $(NAME)
-	clang++ *.cpp -o $@ $(TARGET_FLAGS) $(CXXFLAGS)
+	@echo Compiling $(NAME)
+	@clang++ *.cpp -o $@ -fuse-ld=lld $(TARGET_FLAGS) $(CXXFLAGS)
 	@echo Build has finished.
 
 all: clean build
@@ -70,7 +67,7 @@ all: clean build
 build: $(EXE)
 
 clean:
-	@rm -r .tmp $(EXE) *.gcda || true
+	@rm -r .tmp $(EXE) || true
 
 .PHONY: all
 
