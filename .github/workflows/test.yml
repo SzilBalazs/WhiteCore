@@ -14,42 +14,42 @@ jobs:
       matrix:
         config:
           - {
-            name: "Ubuntu g++ popcnt",
+            name: "Ubuntu clang popcnt",
             os: ubuntu-latest,
             compiler: clang++,
             arch: popcnt,
             target: WhiteCore-popcnt-linux,
           }
           - {
-            name: "Ubuntu g++ avx2",
+            name: "Ubuntu clang avx2",
             os: ubuntu-latest,
             compiler: clang++,
             arch: avx2,
             target: WhiteCore-avx2-linux,
           }
           - {
-            name: "Ubuntu g++ bmi2",
+            name: "Ubuntu clang bmi2",
             os: ubuntu-latest,
             compiler: clang++,
             arch: bmi2,
             target: WhiteCore-bmi2-linux,
           }
           - {
-            name: "Windows g++ popcnt",
+            name: "Windows clang popcnt",
             os: windows-latest,
             compiler: clang,
             arch: popcnt,
             target: WhiteCore-popcnt-win.exe,
           }
           - {
-            name: "Windows g++ avx2",
+            name: "Windows clang avx2",
             os: windows-latest,
             compiler: clang,
             arch: avx2,
             target: WhiteCore-avx2-win.exe,
           }
           - {
-            name: "Windows g++ bmi2",
+            name: "Windows clang bmi2",
             os: windows-latest,
             compiler: clang,
             arch: bmi2,

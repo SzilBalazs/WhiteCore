@@ -49,7 +49,7 @@ ifeq ($(build), debug)
 endif
 
 DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG
-CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall -MMD
+CXXFLAGS = -v $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall -MMD
 EXE = $(NAME)-v$(VERSION_MAJOR)-$(VERSION_MINOR)$(SUFFIX)
 
 default: $(EXE)
