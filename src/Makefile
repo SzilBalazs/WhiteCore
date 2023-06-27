@@ -1,11 +1,12 @@
 CXX = clang++
-TARGET_FLAGS = -static
+TARGET_FLAGS = -static -fuse-ld=lld
 ARCH = native
 NAME = WhiteCore
 VERSION_MAJOR = 0
-VERSION_MINOR = 1
+VERSION_MINOR = 2
 TMP_DIR = .tmp
 SOURCES := $(wildcard *.cpp)
+OBJECTS := $(patsubst %.cpp, $(TMP_DIR)/%.o, $(SOURCES))
 DEPENDS := $(patsubst %.cpp, $(TMP_DIR)/%.d, $(SOURCES))
 HASH := $(shell git rev-parse --short HEAD)
 
@@ -57,9 +58,16 @@ default: $(EXE)
 $(OBJECTS): | $(TMP_DIR)
 $(DEPENDS): | $(TMP_DIR)
 
-$(EXE):
-	@echo Compiling $(NAME)
-	@clang++ *.cpp -o $@ -fuse-ld=lld $(TARGET_FLAGS) $(CXXFLAGS)
+$(TMP_DIR):
+	mkdir .tmp
+
+$(TMP_DIR)/%.o: %.cpp
+	@echo Compiling $<
+	@$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(EXE): $(OBJECTS)
+	@echo Linking $(NAME)
+	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ $^
 	@echo Build has finished.
 
 all: clean build

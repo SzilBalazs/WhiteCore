@@ -27,13 +27,14 @@ namespace nn {
 
     struct QNetwork {
 
-        static constexpr int MAGIC = 1;
+        static constexpr int MAGIC = 2;
 
         static constexpr unsigned int get_feature_index(Piece piece, unsigned int sq) {
             return (piece.color == WHITE) * 384 + piece.type * 64 + sq;
         }
 
-        layers::DenseLayer<768, 1, activations::none> pst;
+        layers::DenseLayer<768, 2, activations::none> pst;
+        layers::TaperedEval<activations::none> tapered_eval;
 
         QNetwork() = default;
 
@@ -59,10 +60,12 @@ namespace nn {
             logger.print("Loaded network file");
         }
 
-        Score forward(const std::vector<unsigned int> &features) const {
-            std::array<float, 1> output;
-            pst.forward(features, output);
-            return output[0] * 400;
+        Score forward(const std::vector<unsigned int> &features, float phase) const {
+            std::array<float, 2> l1_output;
+            float l2_output;
+            pst.forward(features, l1_output);
+            tapered_eval.forward(l1_output, l2_output, phase);
+            return l2_output * 400;
         }
     };
 } // namespace nn

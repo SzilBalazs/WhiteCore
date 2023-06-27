@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <math.h>
+#include <cmath>
 
 namespace nn::activations {
     struct sigmoid {

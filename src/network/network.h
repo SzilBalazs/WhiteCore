@@ -19,12 +19,13 @@
 
 #include "activations/relu.h"
 #include "activations/sigmoid.h"
+#include "layers/tapered_eval.h"
 #include "layers/dense_layer.h"
 
 namespace nn {
 
     struct Gradient {
-        layers::DenseLayerGradient<768, 1> pst;
+        layers::DenseLayerGradient<768, 2> pst;
 
         void operator+=(const Gradient &g) {
             pst += g.pst;
@@ -33,13 +34,14 @@ namespace nn {
 
     struct Network {
 
-        static constexpr int MAGIC = 1;
+        static constexpr int MAGIC = 2;
 
         static constexpr unsigned int get_feature_index(Piece piece, unsigned int sq) {
             return (piece.color == WHITE) * 384 + piece.type * 64 + sq;
         }
 
-        layers::DenseLayer<768, 1, activations::sigmoid> pst;
+        layers::DenseLayer<768, 2, activations::none> pst;
+        layers::TaperedEval<activations::sigmoid> tapered_eval;
 
         Network(const std::string &network_path) {
             std::ifstream file(network_path, std::ios::in | std::ios::binary);
@@ -70,10 +72,12 @@ namespace nn {
             pst.randomize(mt);
         }
 
-        float forward(const std::vector<unsigned int> &features) const {
-            std::array<float, 1> output;
-            pst.forward(features, output);
-            return output[0];
+        float forward(const std::vector<unsigned int> &features, float phase) const {
+            std::array<float, 2> l1_output;
+            float l2_output;
+            pst.forward(features, l1_output);
+            tapered_eval.forward(l1_output, l2_output, phase);
+            return l2_output;
         }
 
         void write_to_file(const std::string &output_path) {

@@ -138,12 +138,14 @@ namespace nn {
             for (int i = id; i < batch_size; i += thread_count) {
                 TrainingEntry &entry = entries[i];
 
-                float prediction = network.forward(entry.features);
+                float prediction = network.forward(entry.features, entry.phase);
                 float error = (prediction - entry.wdl) * (prediction - entry.wdl);
                 errors[id] += error;
 
-                std::array<float, 1> loss = {2 * (prediction - entry.wdl)};
-                network.pst.backward(loss, entry.features, g.pst.biases, g.pst.weights);
+                float loss = {2 * (prediction - entry.wdl)};
+                std::array<float, 2> l1_loss;
+                network.tapered_eval.backward(loss, l1_loss, entry.phase);
+                network.pst.backward(l1_loss, entry.features, g.pst.biases, g.pst.weights);
             }
         }
 

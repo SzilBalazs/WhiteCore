@@ -25,9 +25,11 @@
 #include <vector>
 
 namespace nn {
+
     struct TrainingEntry {
         std::vector<unsigned int> features;
         float wdl;
+        float phase;
     };
 
     class DataParser {
@@ -57,6 +59,7 @@ namespace nn {
 
         TrainingEntry parse_entry(const std::string &entry) {
             TrainingEntry res;
+            res.phase = 0.0f;
             std::stringstream ss(entry);
             unsigned int sq = 56, idx = 0;
 
@@ -83,6 +86,7 @@ namespace nn {
                     sq -= 16;
                 } else {
                     Piece p = piece_from_char(c);
+                    res.phase += PIECE_TO_PHASE[p.type];
                     res.features.emplace_back(Network::get_feature_index(p, sq));
                     sq++;
                 }

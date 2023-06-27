@@ -30,14 +30,16 @@ namespace nn {
     inline Score eval(const core::Board &board) {
         core::Bitboard bb = board.occupied();
         std::vector<unsigned int> features;
+        float phase = 0.0;
         while (bb) {
             Square sq = bb.pop_lsb();
             Piece piece = board.piece_at(sq);
+            phase += PIECE_TO_PHASE[piece.type];
             features.emplace_back(QNetwork::get_feature_index(piece, sq));
         }
         if (board.get_stm() == WHITE)
-            return net.forward(features);
+            return net.forward(features, phase);
         else
-            return -net.forward(features);
+            return -net.forward(features, phase);
     }
 }
