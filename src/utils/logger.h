@@ -21,6 +21,8 @@
 #include <iostream>
 #include <string>
 
+// #define LOGGING
+
 static void exception_handler();
 
 struct Logger {
@@ -30,7 +32,9 @@ struct Logger {
     Logger() = default;
 
     void init(const std::string &filename) {
+#ifdef LOGGING
         file.open(filename, std::ios::out);
+#endif
         std::set_terminate(exception_handler);
     }
 
@@ -46,14 +50,18 @@ struct Logger {
 
     template<typename T, typename... Args>
     inline void info(T a, Args... args) {
+#ifdef LOGGING
         file << "[INFO] " << a << "(): ";
         log(args...);
+#endif
     }
 
     template<typename T, typename... Args>
     inline void error(T a, Args... args) {
+#ifdef LOGGING
         file << "[INFO] " << a << "(): ";
         log(args...);
+#endif
     }
 
     template<typename T, typename... Args>

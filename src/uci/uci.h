@@ -19,6 +19,8 @@
 
 #include "../core/board.h"
 #include "../search/search_manager.h"
+#include "../selfplay/selfplay.h"
+#include "../network/train.h"
 #include "../tests/perft.h"
 #include "../utils/logger.h"
 #include "../utils/utilities.h"
@@ -27,15 +29,15 @@
 
 namespace uci {
 
-    inline Move move_from_string(Board &board, const std::string &str) {
-        Move moves[200];
-        Move *moves_end = movegen::gen_moves(board, moves, false);
-        for (Move *it = moves; it != moves_end; it++) {
+    inline core::Move move_from_string(core::Board &board, const std::string &str) {
+        core::Move moves[200];
+        core::Move *moves_end = core::gen_moves(board, moves, false);
+        for (core::Move *it = moves; it != moves_end; it++) {
             if (it->to_uci() == str) {
                 return *it;
             }
         }
-        return NULL_MOVE;
+        return core::NULL_MOVE;
     }
 
     class UCI {
@@ -52,8 +54,8 @@ namespace uci {
         std::vector<Command> commands;
         std::vector<Option> options;
         bool should_continue = true;
-        Board board;
-        SearchManager sm;
+        core::Board board;
+        search::SearchManager sm;
 
         void register_commands();
 
@@ -61,7 +63,7 @@ namespace uci {
 
         void greetings();
 
-        SearchLimits parse_limits(context tokens);
+        search::Limits parse_limits(context tokens);
 
         void parse_position(context tokens);
 
@@ -84,13 +86,32 @@ namespace uci {
         commands.emplace_back("display", [&](context tokens) {
             board.display();
         });
+        commands.emplace_back("gen", [&](context tokens) {
+            search::Limits limits;
+            limits.max_nodes = find_element<int64_t>(tokens, "nodes");
+            limits.depth = find_element<int64_t>(tokens, "depth");
+            std::optional<std::string> book = find_element<std::string>(tokens, "book");
+            std::optional<std::string> output = find_element<std::string>(tokens, "out");
+            std::optional<int> thread_count = find_element<int>(tokens, "threads");
+            selfplay::start_generation(limits, book.value_or("book.epd"), output.value_or("data.plain"), thread_count.value_or(1));
+        });
+        commands.emplace_back("train", [&](context tokens){
+            std::optional<std::string> network_path = find_element<std::string>(tokens, "network");
+            std::optional<std::string> training_data = find_element<std::string>(tokens, "in");
+            std::optional<float> learning_rate = find_element<float>(tokens, "lr");
+            std::optional<int> epochs = find_element<int>(tokens, "epochs");
+            std::optional<int> batch_size = find_element<int>(tokens, "batch");
+            std::optional<int> threads = find_element<int>(tokens, "threads");
+            nn::Trainer trainer(training_data.value_or("data.plain"), network_path, learning_rate.value_or(0.001f),
+                                epochs.value_or(10), batch_size.value_or(16384), threads.value_or(4));
+        });
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);
             U64 node_count = test::perft<true, false>(board, depth);
             logger.print("Total node count: ", node_count);
         });
         commands.emplace_back("go", [&](context tokens) {
-            SearchLimits limits = parse_limits(tokens);
+            search::Limits limits = parse_limits(tokens);
             sm.set_limits(limits);
             sm.search<false>(board);
         });
@@ -131,6 +152,10 @@ namespace uci {
                 },
                 1, 4);
         sm.allocate_threads(1);
+
+        options.emplace_back("EvalFile", "corenet.bin", "string", [&]() {
+            nn::net = nn::QNetwork(get_option<std::string>("EvalFile"));
+        });
     }
 
     void UCI::start() {
@@ -171,8 +196,8 @@ namespace uci {
         logger.print("uciok");
     }
 
-    SearchLimits UCI::parse_limits(UCI::context tokens) {
-        SearchLimits limits;
+    search::Limits UCI::parse_limits(UCI::context tokens) {
+        search::Limits limits;
         if (board.get_stm() == WHITE) {
             limits.time_left = find_element<int64_t>(tokens, "wtime");
             limits.increment = find_element<int64_t>(tokens, "winc");
@@ -200,8 +225,8 @@ namespace uci {
         }
         if (idx < tokens.size() && tokens[idx] == "moves") idx++;
         for (; idx < tokens.size(); idx++) {
-            Move move = move_from_string(board, tokens[idx]);
-            if (move == NULL_MOVE) {
+            core::Move move = move_from_string(board, tokens[idx]);
+            if (move == core::NULL_MOVE) {
                 logger.error("load_position", "Invalid move", tokens[idx]);
                 break;
             } else {
@@ -241,6 +266,8 @@ namespace uci {
         if (position == haystack.end()) return std::nullopt;
         if constexpr (std::is_same_v<T, int>)
             return std::stoi(haystack[index + 1]);
+        else if constexpr (std::is_same_v<T, float>)
+            return std::stof(haystack[index + 1]);
         else if constexpr (std::is_same_v<T, int64_t>)
             return std::stoll(haystack[index + 1]);
         else if constexpr (std::is_same_v<T, uint64_t>)

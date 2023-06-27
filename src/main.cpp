@@ -19,6 +19,10 @@
 #include "uci/uci.h"
 #include "utils/bench.h"
 
+namespace nn {
+    QNetwork net;
+}
+
 int main(int argc, char *argv[]) {
 
     std::string mode;
@@ -26,6 +30,7 @@ int main(int argc, char *argv[]) {
         mode = std::string(argv[1]);
     }
 
+    nn::net = nn::QNetwork("corenet.bin");
     init_all();
 
     if (mode == "test") {

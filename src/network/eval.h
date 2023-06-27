@@ -17,16 +17,27 @@
 
 #pragma once
 
-#include "constants.h"
-#include "zobrist.h"
+#include "../core/attacks.h"
+#include "../core/board.h"
+#include "../core/constants.h"
 
-namespace core {
-    struct BoardState {
-        Color stm = WHITE;
-        Square ep = NULL_SQUARE;
-        Zobrist hash = Zobrist();
-        Piece piece_captured = NULL_PIECE;
-        CastlingRights rights = CastlingRights();
-        unsigned int move50 = 0;
-    };
-} // namespace core
+#include "qnetwork.h"
+
+namespace nn {
+
+    extern QNetwork net;
+
+    inline Score eval(const core::Board &board) {
+        core::Bitboard bb = board.occupied();
+        std::vector<unsigned int> features;
+        while (bb) {
+            Square sq = bb.pop_lsb();
+            Piece piece = board.piece_at(sq);
+            features.emplace_back(QNetwork::get_feature_index(piece, sq));
+        }
+        if (board.get_stm() == WHITE)
+            return net.forward(features);
+        else
+            return -net.forward(features);
+    }
+}

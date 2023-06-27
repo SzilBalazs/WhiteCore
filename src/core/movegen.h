@@ -20,7 +20,7 @@
 #include "attacks.h"
 #include "board.h"
 
-namespace movegen {
+namespace core {
 
     // Returns a bitboard of all the squares attacking a given square for the given color
     template<Color color>
@@ -28,7 +28,7 @@ namespace movegen {
         constexpr Color enemy_color = color_enemy<color>();
 
         Bitboard occupied = board.occupied();
-        Bitboard enemy = board.pieces<enemy_color>();
+        Bitboard enemy = board.sides<enemy_color>();
         return ((masks_pawn[square][color] & board.pieces<PAWN>()) |
                 (attacks_piece<KNIGHT>(square, occupied) & board.pieces<KNIGHT>()) |
                 (attacks_piece<BISHOP>(square, occupied) & board.pieces<BISHOP>()) |
@@ -75,7 +75,7 @@ namespace movegen {
 
         // Get the pawns of the given color and all other pieces
         Bitboard pawns = board.pieces<color, PAWN>();
-        Bitboard pieces = board.pieces<color>() & ~pawns;
+        Bitboard pieces = board.sides<color>() & ~pawns;
 
         // Initially add the attacks of the pawns
         Bitboard result = step<UP_LEFT>(pawns) | step<UP_RIGHT>(pawns);
@@ -174,7 +174,7 @@ namespace movegen {
 
         // Get the empty and the enemy bitboards
         Bitboard empty = board.empty();
-        Bitboard enemy = board.pieces<enemy_color>();
+        Bitboard enemy = board.sides<enemy_color>();
 
         // Get the bitboard of pawns to generate moves for
         Bitboard pawns = board.pieces<color, PAWN>();
@@ -410,9 +410,9 @@ namespace movegen {
         assert(king != NULL_SQUARE);
 
         // Define bitboards used for move generation
-        Bitboard pieces_friendly = board.pieces<color>();
+        Bitboard pieces_friendly = board.sides<color>();
         Bitboard empty = board.empty();
-        Bitboard enemy = board.pieces<enemyColor>();
+        Bitboard enemy = board.sides<enemyColor>();
         Bitboard occupied = board.occupied();
         Bitboard checkers = get_attackers<color>(board, king);
 
@@ -542,4 +542,8 @@ namespace movegen {
         }
     }
 
-} // namespace movegen
+    bool Board::is_check() const {
+        return bool(core::get_attackers(*this, pieces<KING>(get_stm()).lsb()));
+    }
+
+} // namespace core

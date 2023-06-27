@@ -17,16 +17,14 @@
 
 #pragma once
 
-#include "constants.h"
-#include "zobrist.h"
+namespace nn::activations {
+    struct none {
+        static constexpr float forward(float value) {
+            return value;
+        }
 
-namespace core {
-    struct BoardState {
-        Color stm = WHITE;
-        Square ep = NULL_SQUARE;
-        Zobrist hash = Zobrist();
-        Piece piece_captured = NULL_PIECE;
-        CastlingRights rights = CastlingRights();
-        unsigned int move50 = 0;
+        static constexpr float backward(float value) {
+            return 1.0f;
+        }
     };
-} // namespace core
+} // namespace nn::activations

@@ -22,85 +22,86 @@
 
 #include <cstring>
 
-enum TTFlag : uint8_t {
-    TT_NONE = 0,
-    TT_EXACT = 1,
+namespace search {
+    enum TTFlag : uint8_t {
+        TT_NONE = 0,
+        TT_EXACT = 1,
 
-    // UPPERBOUND
-    TT_ALPHA = 2,
+        // UPPERBOUND
+        TT_ALPHA = 2,
 
-    // LOWERBOUND
-    TT_BETA = 3
-};
+        // LOWERBOUND
+        TT_BETA = 3
+    };
 
-struct TTEntry {    // Total: 16 bytes
-    U64 hash;       // 8 bytes
-    Score eval;     // 4 bytes
-    Move hash_move; // 2 bytes
-    Depth depth;    // 1 byte
-    TTFlag flag;    // 1 byte
-};
+    struct TTEntry {          // Total: 16 bytes
+        U64 hash;             // 8 bytes
+        Score eval;           // 4 bytes
+        core::Move hash_move; // 2 bytes
+        Depth depth;          // 1 byte
+        TTFlag flag;          // 1 byte
+    };
 
-class TT {
-public:
-    void resize(unsigned int MB) {
-        if (bucket_count)
-            free(table);
+    class TT {
+    public:
+        void resize(unsigned int MB) {
+            if (bucket_count)
+                free(table);
 
-        unsigned int i = 10;
-        while ((1ULL << i) <= MB * 1024ULL * 1024ULL / sizeof(TTEntry))
-            i++;
+            unsigned int i = 10;
+            while ((1ULL << i) <= MB * 1024ULL * 1024ULL / sizeof(TTEntry))
+                i++;
 
-        bucket_count = (1ULL << (i - 1));
-        mask = bucket_count - 1ULL;
+            bucket_count = (1ULL << (i - 1));
+            mask = bucket_count - 1ULL;
 
-        table = (TTEntry *) malloc(bucket_count * sizeof(TTEntry));
+            table = (TTEntry *) malloc(bucket_count * sizeof(TTEntry));
 
-        clear();
-    }
-
-    void clear() {
-        std::memset(table, 0, bucket_count * sizeof(TTEntry));
-    }
-
-    TTEntry probe(U64 hash, bool &hit) {
-        TTEntry entry = *get_entry(hash);
-
-        if (entry.hash != hash)
-            return {};
-
-        hit = true;
-        return entry;
-    }
-
-    void save(U64 hash, Depth depth, Score eval, TTFlag flag, Move best_move) {
-        TTEntry *entry = get_entry(hash);
-
-        if (entry->hash != hash || best_move.is_ok()) {
-            entry->hash_move = best_move;
+            clear();
         }
 
-        if (entry->hash != hash || flag == TT_EXACT || entry->depth <= depth + 4) {
-            entry->hash = hash;
-            entry->depth = depth;
-            entry->eval = eval;
-            entry->flag = flag;
+        void clear() {
+            std::memset(table, 0, bucket_count * sizeof(TTEntry));
         }
-    }
 
-    Move get_hash_move(U64 hash) {
-        TTEntry *entry = get_entry(hash);
-        if (entry->hash == hash)
-            return entry->hash_move;
-        return NULL_MOVE;
-    }
+        std::optional<TTEntry> probe(U64 hash) {
+            TTEntry entry = *get_entry(hash);
 
-private:
-    TTEntry *table;
-    unsigned int bucket_count = 0;
-    U64 mask = 0;
+            if (entry.hash != hash)
+                return std::nullopt;
 
-    TTEntry *get_entry(U64 hash) {
-        return table + (hash & mask);
-    }
-};
+            return entry;
+        }
+
+        void save(U64 hash, Depth depth, Score eval, TTFlag flag, core::Move best_move) {
+            TTEntry *entry = get_entry(hash);
+
+            if (entry->hash != hash || best_move.is_ok()) {
+                entry->hash_move = best_move;
+            }
+
+            if (entry->hash != hash || flag == TT_EXACT || entry->depth <= depth + 4) {
+                entry->hash = hash;
+                entry->depth = depth;
+                entry->eval = eval;
+                entry->flag = flag;
+            }
+        }
+
+        core::Move get_hash_move(U64 hash) {
+            TTEntry *entry = get_entry(hash);
+            if (entry->hash == hash)
+                return entry->hash_move;
+            return core::NULL_MOVE;
+        }
+
+    private:
+        TTEntry *table;
+        unsigned int bucket_count = 0;
+        U64 mask = 0;
+
+        TTEntry *get_entry(U64 hash) {
+            return table + (hash & mask);
+        }
+    };
+} // namespace search

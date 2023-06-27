@@ -35,13 +35,13 @@ namespace test {
                 Test("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", {"g1f3", "b8c6", "f3g1", "c6b8"}),
                 Test("7k/2R5/2P1pp1p/2K5/7q/8/6R1/1q6 w - - 0 1", {"c7c8", "h8h7", "c8c7", "h7h8", "c7c8", "h8h7", "c8c7", "h7h8"})};
 
-        Board board;
+        core::Board board;
         std::vector<Test> failed;
 
         for (const Test &test : tests) {
             board.load(test.fen);
             for (std::string str : test.moves) {
-                Move move = uci::move_from_string(board, str);
+                core::Move move = uci::move_from_string(board, str);
                 board.make_move(move);
             }
             if (!board.is_draw()) {
@@ -56,6 +56,7 @@ namespace test {
             for (const Test &test : failed) {
                 std::cout << test.fen << std::endl;
             }
+            std::abort();
         }
     }
 

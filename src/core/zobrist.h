@@ -21,31 +21,33 @@
 #include "castling_rights.h"
 #include "randoms.h"
 
-struct Zobrist {
+namespace core {
+    struct Zobrist {
 
-    U64 hash = 0;
+        U64 hash = 0;
 
-    Zobrist() = default;
+        Zobrist() = default;
 
-    explicit Zobrist(U64 hash) : hash(hash) {}
+        explicit Zobrist(U64 hash) : hash(hash) {}
 
-    inline operator U64() const {
-        return hash;
-    }
+        inline operator U64() const {
+            return hash;
+        }
 
-    void xor_stm() {
-        hash ^= *rand_table_color;
-    }
+        void xor_stm() {
+            hash ^= *rand_table_color;
+        }
 
-    void xor_piece(Square square, Piece piece) {
-        hash ^= rand_table_pieces[12 * square + 6 * piece.color + piece.type];
-    }
+        void xor_piece(Square square, Piece piece) {
+            hash ^= rand_table_pieces[12 * square + 6 * piece.color + piece.type];
+        }
 
-    void xor_ep(Square square) {
-        hash ^= rand_table_ep[square_to_file(square)];
-    }
+        void xor_ep(Square square) {
+            hash ^= rand_table_ep[square_to_file(square)];
+        }
 
-    void xor_castle(CastlingRights rights) {
-        hash ^= rand_table_castling[rights.data];
-    }
-};
+        void xor_castle(CastlingRights rights) {
+            hash ^= rand_table_castling[rights.data];
+        }
+    };
+} // namespace core

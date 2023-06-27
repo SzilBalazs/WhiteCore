@@ -17,16 +17,31 @@
 
 #pragma once
 
-#include "constants.h"
-#include "zobrist.h"
+#include "../search/search_manager.h"
 
-namespace core {
-    struct BoardState {
-        Color stm = WHITE;
-        Square ep = NULL_SQUARE;
-        Zobrist hash = Zobrist();
-        Piece piece_captured = NULL_PIECE;
-        CastlingRights rights = CastlingRights();
-        unsigned int move50 = 0;
+namespace selfplay {
+
+    class Engine {
+    public:
+        Engine() {
+            sm.set_uci_mode(false);
+        }
+
+        void init(unsigned int hash_size, unsigned int thread_count) {
+            sm.allocate_hash(hash_size);
+            sm.allocate_threads(thread_count);
+        }
+
+        std::pair<core::Move, Score> search(const core::Board &board, const search::Limits &limits) {
+            sm.set_limits(limits);
+            sm.search<true>(board);
+            return sm.get_result();
+        }
+
+
+    private:
+        search::SearchManager sm;
+        // Network net;
     };
-} // namespace core
+
+} // namespace selfplay
