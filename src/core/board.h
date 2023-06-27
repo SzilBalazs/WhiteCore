@@ -82,16 +82,12 @@ namespace core {
             return bb_pieces[pt];
         }
 
-        constexpr Bitboard pieces(PieceType pt) const {
-            return bb_pieces[pt];
-        }
-
         template<Color color>
-        constexpr Bitboard pieces() const {
+        constexpr Bitboard sides() const {
             return bb_colors[color];
         }
 
-        constexpr Bitboard pieces(Color color) const {
+        constexpr Bitboard sides(Color color) const {
             return bb_colors[color];
         }
 

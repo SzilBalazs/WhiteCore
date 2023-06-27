@@ -109,7 +109,7 @@ enum Direction : int {
 
 constexpr Direction DIRECTIONS[8] = {NORTH, WEST, NORTH_EAST, NORTH_WEST, SOUTH, EAST, SOUTH_WEST, SOUTH_EAST};
 
-enum PieceType : int16_t {
+enum PieceType {
     PIECE_EMPTY = 6,
     KING = 0,
     PAWN = 1,
@@ -119,7 +119,7 @@ enum PieceType : int16_t {
     QUEEN = 5
 };
 
-enum Color : int8_t {
+enum Color {
     COLOR_EMPTY = 2,
     WHITE = 0,
     BLACK = 1
