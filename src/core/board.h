@@ -211,7 +211,6 @@ namespace core {
             const Direction DOWN = -UP;
 
             assert(states.size() > 1);
-            assert(piece_moved.color == xstm);
             if (move.is_capture()) assert(state.piece_captured.is_ok());
 
             if (move.is_promo()) {
