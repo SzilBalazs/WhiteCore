@@ -1,5 +1,5 @@
 CXX = clang++
-TARGET_FLAGS = -static -static-libgcc -static-libstdc++
+TARGET_FLAGS = -static
 ARCH = native
 NAME = WhiteCore
 VERSION_MAJOR = 0
