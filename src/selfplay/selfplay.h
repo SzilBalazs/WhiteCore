@@ -139,7 +139,7 @@ namespace selfplay {
         logger.print("Finished combining");
     }
 
-    inline void start_generation(const search::Limits &limits, const std::string &book_path, const std::string &output_path, unsigned int thread_count) {
+    inline void start_generation(const search::Limits &limits, const std::string &book_path, const std::string &output_path, unsigned int thread_count, int dropout) {
         game_count = 0;
         position_count = 0;
 
@@ -162,8 +162,14 @@ namespace selfplay {
         std::ifstream book(book_path, std::ios::in);
         std::vector<std::string> starting_fens;
         std::string tmp;
+
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::uniform_int_distribution<int> dist(0, dropout-1);
+
         while (std::getline(book, tmp)) {
-            starting_fens.emplace_back(tmp);
+            if (dist(g) == 0)
+                starting_fens.emplace_back(tmp);
         }
 
         book.close();

@@ -93,7 +93,8 @@ namespace uci {
             std::optional<std::string> book = find_element<std::string>(tokens, "book");
             std::optional<std::string> output = find_element<std::string>(tokens, "out");
             std::optional<int> thread_count = find_element<int>(tokens, "threads");
-            selfplay::start_generation(limits, book.value_or("book.epd"), output.value_or("data.plain"), thread_count.value_or(1));
+            std::optional<int> dropout = find_element<int>(tokens, "dropout");
+            selfplay::start_generation(limits, book.value_or("book.epd"), output.value_or("data.plain"), thread_count.value_or(1), dropout.value_or(1));
         });
         commands.emplace_back("train", [&](context tokens){
             std::optional<std::string> network_path = find_element<std::string>(tokens, "network");
@@ -104,6 +105,27 @@ namespace uci {
             std::optional<int> threads = find_element<int>(tokens, "threads");
             nn::Trainer trainer(training_data.value_or("data.plain"), network_path, learning_rate.value_or(0.001f),
                                 epochs.value_or(10), batch_size.value_or(16384), threads.value_or(4));
+        });
+        commands.emplace_back("learn", [&](context tokens){
+            std::optional<int> thread_count = find_element<int>(tokens, "threads");
+            std::optional<int> iterations = find_element<int>(tokens, "iter");
+            std::optional<int> nodes = find_element<int>(tokens, "nodes");
+            std::optional<std::string> book = find_element<std::string>(tokens, "book");
+            std::optional<int> dropout = find_element<int>(tokens, "dropout");
+            std::optional<std::string> data = find_element<std::string>(tokens, "data");
+            search::Limits limits = search::create_node_limit(nodes.value_or(5000));
+
+            const std::string data_path = data.value_or("data.plain");
+
+            for (int it = 1; it <= iterations.value_or(100); it++) {
+                logger.print("Starting iteration", it);
+                selfplay::start_generation(limits, book.value_or("book.epd"), data_path, thread_count.value_or(4), dropout.value_or(200));
+                nn::Trainer trainer(data_path, "corenet.bin", 0.001f, 3, 16384, thread_count.value_or(4));
+                system(("rm " + data_path).c_str());
+                system("cp networks/3.bin corenet.bin");
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                nn::net = nn::QNetwork("corenet.bin");
+            }
         });
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);

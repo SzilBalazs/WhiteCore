@@ -42,22 +42,24 @@ namespace nn {
             std::ifstream file(network_path, std::ios::in | std::ios::binary);
             if (!file.is_open()) {
                 logger.print("Unable to open:", network_path);
-                throw std::invalid_argument("Unable to open: " + network_path);
+                std::random_device rd;
+                std::mt19937 mt(rd());
+                pst.randomize(mt);
+            } else {
+                int magic;
+                file.read(reinterpret_cast<char *>(&magic), sizeof(magic));
+
+                if (magic != MAGIC) {
+                    logger.print("Invalid network file", network_path, "with magic", magic);
+                    throw std::invalid_argument("Invalid network file with magic " + std::to_string(magic));
+                }
+
+                pst.load_from_file(file);
+
+                file.close();
+
+                logger.print("Loaded qnetwork", network_path);
             }
-
-            int magic;
-            file.read(reinterpret_cast<char *>(&magic), sizeof(magic));
-
-            if (magic != MAGIC) {
-                logger.print("Invalid network file", network_path, "with magic", magic);
-                throw std::invalid_argument("Invalid network file with magic " + std::to_string(magic));
-            }
-
-            pst.load_from_file(file);
-
-            file.close();
-
-            logger.print("Loaded network file");
         }
 
         Score forward(const std::vector<unsigned int> &features, float phase) const {

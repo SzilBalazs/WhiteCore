@@ -33,25 +33,23 @@ int main(int argc, char *argv[]) {
     nn::net = nn::QNetwork("corenet.bin");
     init_all();
 
-    /*
-    for (Color color : {WHITE, BLACK}) {
-        for (PieceType pt : {KING, PAWN, BISHOP, KNIGHT, ROOK, QUEEN}) {
-            for (bool eg : {true, false}) {
-                std::cout << char_from_piece(Piece(pt, color)) << std::endl;
-                for (unsigned int i = 0; i < 64; i++) {
-                    unsigned int feature = nn::Network::get_feature_index(Piece(pt, color), i);
-                    std::cout << round(400 * nn::net.pst.weights[feature * 2 + eg]) << " ";
-                    if (i % 8 == 7) std::cout << std::endl;
-                }
-            }
-        }
-    }
-     */
-
     if (mode == "test") {
         test::run();
     } else if (mode == "bench") {
         run_bench();
+    } else if (mode == "viz") {
+        for (Color color : {WHITE, BLACK}) {
+            for (PieceType pt : {KING, PAWN, BISHOP, KNIGHT, ROOK, QUEEN}) {
+                for (bool eg : {true, false}) {
+                    std::cout << char_from_piece(Piece(pt, color)) << std::endl;
+                    for (unsigned int i = 0; i < 64; i++) {
+                        unsigned int feature = nn::Network::get_feature_index(Piece(pt, color), i);
+                        std::cout << round(400 * nn::net.pst.weights[feature * 2 + eg]) << " ";
+                        if (i % 8 == 7) std::cout << std::endl;
+                    }
+                }
+            }
+        }
     } else {
         uci::UCI protocol;
         protocol.start();
