@@ -66,19 +66,16 @@ jobs:
 
       - name: Building BlackCore
         run: |
-          cd src
           ${{matrix.config.compiler}} --version
           make CXX=${{matrix.config.compiler}} EXE=${{matrix.config.target}} ARCH=${{matrix.config.target}}
       - name: Running tests
         run: |
-          cd src
           ./${{matrix.config.target}} test
       - name: Running benchmark test
         run: |
-          cd src
           ./${{matrix.config.target}} bench
       - name: Uploading artifacts
         uses: actions/upload-artifact@v3
         with:
           name: BlackCore
-          path: src/${{matrix.config.target}}
+          path: ${{matrix.config.target}}
