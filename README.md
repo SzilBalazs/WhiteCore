@@ -24,6 +24,6 @@ A WIP c++ chess engine created as a rewrite of BlackCore with big focus on origi
   - LMR
   - LMP
   - SE
-- Self play built-in TODO
-- RL NNUE trainer built-in TODO
-- Add & train PST tables on some self play TODO 
+- Self play built-in DONE
+- RL NNUE trainer built-in DONE
+- Add & train PST tables on some self play DONE 
