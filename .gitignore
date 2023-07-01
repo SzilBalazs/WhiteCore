@@ -1,4 +1,4 @@
 /.idea/
-/src/WhiteCore-v*
-/src/log.txt
-/src/.tmp/
+/WhiteCore-v*
+/log.txt
+/train/
