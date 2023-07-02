@@ -73,13 +73,16 @@ jobs:
           ./${{matrix.config.target}} test
       - name: Obtain bench
         id: obtain_bench
+        if: runner.os == 'Linux'
         run: |
           BENCH=$(./${{matrix.config.target}} bench | grep -Eo '^[0-9]+ nodes' | grep -o '[0-9]*')
           COMMIT_BENCH=$(git log -1 --pretty=%B | grep -Eo '^Bench: *[0-9]+' | grep -o '[0-9]*')
           echo "::set-output name=BENCH::$BENCH"
           echo "::set-output name=COMMIT_BENCH::$COMMIT_BENCH"
       - name: Invalid bench
-        if: ${{steps.obtain_bench.outputs.BENCH != steps.obtain_bench.outputs.COMMIT_BENCH}}
+        if: |
+          ${{steps.obtain_bench.outputs.BENCH != steps.obtain_bench.outputs.COMMIT_BENCH}}
+          runner.os == 'Linux'
         run: |
           echo "::error::The commit bench ${{steps.obtain_bench.outputs.COMMIT_BENCH}} is not equal to the actual bench ${{steps.obtain_bench.outputs.BENCH}}!"
       - name: Upload artifacts
