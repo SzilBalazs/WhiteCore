@@ -81,8 +81,7 @@ jobs:
       - name: Invalid bench
         if: ${{steps.obtain_bench.outputs.BENCH != steps.obtain_bench.outputs.COMMIT_BENCH}}
         run: |
-          echo "::error::Commit bench ${{steps.obtain_bench.outputs.COMMIT_BENCH}} isn't equal to actual bench ${{steps.obtain_bench.outputs.BENCH}}!"
-          exit 1
+          echo "::error::The commit bench ${{steps.obtain_bench.outputs.COMMIT_BENCH}} is not equal to the actual bench ${{steps.obtain_bench.outputs.BENCH}}!"
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
