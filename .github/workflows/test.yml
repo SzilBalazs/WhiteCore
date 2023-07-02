@@ -84,9 +84,8 @@ jobs:
           echo "::set-output name=BENCH::$BENCH"
           echo "::set-output name=COMMIT_BENCH::$COMMIT_BENCH"
       - name: Invalid bench
-        if: |
-          runner.os == 'Linux' && 
-          ${{steps.obtain_bench.outputs.BENCH != steps.obtain_bench.outputs.COMMIT_BENCH}}
+        if:
+          ${{steps.obtain_bench.outputs.BENCH != steps.obtain_bench.outputs.COMMIT_BENCH && runner.os == 'Linux'}}
         run: |
           echo "::error::The commit bench ${{steps.obtain_bench.outputs.COMMIT_BENCH}} is not equal to the actual bench ${{steps.obtain_bench.outputs.BENCH}}!"
           exit 1
