@@ -1,4 +1,6 @@
 /.idea/
+/src/corenet.cpp
 /WhiteCore-v*
+/incbin_tool
 /log.txt
 /train/

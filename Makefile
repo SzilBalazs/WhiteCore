@@ -46,22 +46,31 @@ ifeq ($(build), debug)
 	DEFINE_FLAGS = -DNATIVE
 endif
 
-EVALFILE = corenet.bin
 DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG
 CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall
 EXE = $(NAME)-v$(VERSION_MAJOR)-$(VERSION_MINOR)
 OUTPUT_BINARY = $(EXE)$(SUFFIX)
+INCBIN_TOOL = incbin_tool$(SUFFIX)
 
 build: $(OUTPUT_BINARY)
 	@echo > /dev/null
 
 clean:
-	@rm $(OUTPUT_BINARY) || true
+	@rm $(OUTPUT_BINARY) $(INCBIN_TOOL) src/corenet.cpp || true
 
 bench: $(OUTPUT_BINARY)
-	@echo Bench: $(shell ./WhiteCore-v0-2 bench | grep -Eo '^[0-9]+ nodes' | grep -o '[0-9]*')
+	@echo Bench: $(shell ./$(OUTPUT_BINARY) bench | grep -Eo '^[0-9]+ nodes' | grep -o '[0-9]*')
 
-$(OUTPUT_BINARY): $(HEADERS) $(SOURCES)
+$(INCBIN_TOOL):
+ifeq ($(uname_S), Windows)
+	@echo Compiling $(INCBIN_TOOL)
+	@clang -o $@ src/external/incbin/incbin.c
+endif
+
+$(OUTPUT_BINARY): $(HEADERS) $(SOURCES) $(INCBIN_TOOL)
+ifeq ($(uname_S), Windows)
+	@./$(INCBIN_TOOL) src/main.cpp -o src/corenet.cpp
+endif
 	@echo Compiling $(NAME)
 	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ src/*.cpp
 	@echo Build has finished.

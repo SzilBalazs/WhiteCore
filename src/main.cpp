@@ -22,13 +22,7 @@
 
 namespace nn {
     QNetwork net;
-
-#ifndef EVALFILE
     INCBIN(DefaultNetwork, "corenet.bin");
-#else
-    INCBIN(DefaultNetwork, EVALFILE);
-#endif
-
 }
 
 int main(int argc, char *argv[]) {
