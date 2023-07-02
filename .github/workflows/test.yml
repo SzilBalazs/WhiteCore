@@ -58,23 +58,32 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Installing required packages
+      - name: Install required packages
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install clang-15
 
-      - name: Building BlackCore
+      - name: Build BlackCore
         run: |
           ${{matrix.config.compiler}} --version
           make CXX=${{matrix.config.compiler}} EXE=${{matrix.config.target}} ARCH=${{matrix.config.target}}
-      - name: Running tests
+      - name: Run tests
         run: |
           ./${{matrix.config.target}} test
-      - name: Running benchmark test
+      - name: Obtain bench
+        id: obtain_bench
         run: |
-          ./${{matrix.config.target}} bench
-      - name: Uploading artifacts
+          BENCH=$(./${{matrix.config.target}} bench | grep -Eo '^[0-9]+ nodes' | grep -o '[0-9]*')
+          COMMIT_BENCH=$(git log -1 --pretty=%B | grep -Eo '^Bench: *[0-9]+' | grep -o '[0-9]*')
+          echo "::set-output name=BENCH::$BENCH"
+          echo "::set-output name=COMMIT_BENCH::$COMMIT_BENCH"
+      - name: Invalid bench
+        if: ${{steps.obtain_bench.outputs.BENCH != steps.obtain_bench.outputs.COMMIT_BENCH}}
+        run: |
+          echo "::error::Commit bench ${{steps.obtain_bench.outputs.COMMIT_BENCH}} isn't equal to actual bench ${{steps.obtain_bench.outputs.BENCH}}!"
+          exit 1
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: BlackCore

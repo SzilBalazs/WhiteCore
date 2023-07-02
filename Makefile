@@ -5,6 +5,8 @@ NAME = WhiteCore
 VERSION_MAJOR = 0
 VERSION_MINOR = 2
 HASH := $(shell git rev-parse --short HEAD)
+SOURCES := $(shell find $(SOURCEDIR) -name '*.cpp')
+HEADERS := $(shell find $(SOURCEDIR) -name '*.h')
 
 ifeq ($(OS),Windows_NT)
     uname_S := Windows
@@ -50,15 +52,16 @@ CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall
 EXE = $(NAME)-v$(VERSION_MAJOR)-$(VERSION_MINOR)
 OUTPUT_BINARY = $(EXE)$(SUFFIX)
 
-all: clean build
-
 build: $(OUTPUT_BINARY)
 	@echo > /dev/null
 
 clean:
 	@rm $(OUTPUT_BINARY) || true
 
-$(OUTPUT_BINARY):
+bench: $(OUTPUT_BINARY)
+	@echo Bench: $(shell ./WhiteCore-v0-2 bench | grep -Eo '^[0-9]+ nodes' | grep -o '[0-9]*')
+
+$(OUTPUT_BINARY): $(HEADERS) $(SOURCES)
 	@echo Compiling $(NAME)
 	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ src/*.cpp
 	@echo Build has finished.
