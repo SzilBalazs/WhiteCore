@@ -28,6 +28,7 @@
 namespace nn {
 
     constexpr unsigned int PROGRESS_BAR_WIDTH = 25;
+    constexpr float EVAL_INFLUENCE = 0.2;
 
     class Trainer {
     public:
@@ -139,10 +140,11 @@ namespace nn {
                 TrainingEntry &entry = entries[i];
 
                 float prediction = network.forward(entry.features, entry.phase);
-                float error = (prediction - entry.wdl) * (prediction - entry.wdl);
+                float error = (1.0f - EVAL_INFLUENCE) * (prediction - entry.wdl) * (prediction - entry.wdl)
+                              + EVAL_INFLUENCE * (prediction - entry.eval) * (prediction - entry.eval);
                 errors[id] += error;
 
-                float loss = {2 * (prediction - entry.wdl)};
+                float loss = {(1 - EVAL_INFLUENCE) * 2.0f * (prediction - entry.wdl) + EVAL_INFLUENCE * 2.0f * (prediction - entry.eval)};
                 std::array<float, 2> l1_loss;
                 network.tapered_eval.backward(loss, l1_loss, entry.phase);
                 network.pst.backward(l1_loss, entry.features, g.pst.biases, g.pst.weights);

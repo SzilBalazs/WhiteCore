@@ -17,6 +17,7 @@
 
 #include "../core/constants.h"
 #include "../utils/utilities.h"
+#include "activations/sigmoid.h"
 #include "network.h"
 
 #include <fstream>
@@ -29,6 +30,7 @@ namespace nn {
     struct TrainingEntry {
         std::vector<unsigned int> features;
         float wdl;
+        float eval;
         float phase;
     };
 
@@ -77,6 +79,9 @@ namespace nn {
             } else {
                 res.wdl = 0.0f;
             }
+
+            int eval_int = std::stoi(eval);
+            res.eval = activations::sigmoid::forward(float(eval_int)/400.0f);
 
             for (; idx < fen.size() && fen[idx] != ' '; idx++) {
                 char c = fen[idx];
