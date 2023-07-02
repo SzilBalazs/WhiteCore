@@ -71,7 +71,11 @@ jobs:
       - name: Run tests
         run: |
           ./${{matrix.config.target}} test
-      - name: Obtain bench
+      - name: Run bench on Windows
+        if: runner.os == 'Windows'
+        run: |
+          ./${{matrix.config.target}} bench
+      - name: Run bench on Linux
         id: obtain_bench
         if: runner.os == 'Linux'
         run: |
