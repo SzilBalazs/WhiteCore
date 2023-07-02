@@ -20,6 +20,7 @@
 #include <thread>
 #include <vector>
 #include <random>
+#include <cstring>
 
 #include "../activations/none.h"
 
@@ -66,6 +67,15 @@ namespace nn::layers {
         void load_from_file(std::ifstream &file) {
             file.read(reinterpret_cast<char *>(biases.data()), sizeof(biases));
             file.read(reinterpret_cast<char *>(weights.data()), sizeof(weights));
+        }
+
+        int load_from_pointer(const unsigned char *ptr, int offset) {
+            std::memcpy(biases.data(), ptr + offset, sizeof(float) * OUT);
+            offset += sizeof(float) * OUT;
+            std::memcpy(weights.data(), ptr + offset, sizeof(float) * IN * OUT);
+            offset += sizeof(float) * IN * OUT;
+
+            return offset;
         }
 
         void randomize(std::mt19937 &mt) {

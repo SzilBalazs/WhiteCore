@@ -18,9 +18,17 @@
 #include "tests/tests.h"
 #include "uci/uci.h"
 #include "utils/bench.h"
+#include "external/incbin/incbin.h"
 
 namespace nn {
     QNetwork net;
+
+#ifndef EVALFILE
+    INCBIN(DefaultNetwork, "corenet.bin");
+#else
+    INCBIN(DefaultNetwork, EVALFILE);
+#endif
+
 }
 
 int main(int argc, char *argv[]) {
@@ -30,7 +38,7 @@ int main(int argc, char *argv[]) {
         mode = std::string(argv[1]);
     }
 
-    nn::net = nn::QNetwork("corenet.bin");
+    nn::net = nn::QNetwork(nn::gDefaultNetworkData);
     init_all();
 
     if (mode == "test") {

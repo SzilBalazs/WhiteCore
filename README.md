@@ -12,6 +12,10 @@ A WIP c++ chess engine created as a rewrite of BlackCore with big focus on origi
 - TT DONE
 - Basic tests DONE
 - Bench DONE
+- Self play built-in DONE
+- RL NNUE trainer built-in DONE
+- Add & train PST tables on some self play DONE
+- Make better readme TODO
 - Add more search heuristics TODO
   - Asp window
   - History heuristics
@@ -24,6 +28,3 @@ A WIP c++ chess engine created as a rewrite of BlackCore with big focus on origi
   - LMR
   - LMP
   - SE
-- Self play built-in DONE
-- RL NNUE trainer built-in DONE
-- Add & train PST tables on some self play DONE 

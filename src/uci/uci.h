@@ -116,6 +116,7 @@ namespace uci {
             search::Limits limits = search::create_node_limit(nodes.value_or(5000));
 
             const std::string data_path = data.value_or("data.plain");
+            nn::net = nn::QNetwork("corenet.bin");
 
             for (int it = 1; it <= iterations.value_or(100); it++) {
                 logger.print("Starting iteration", it);
@@ -175,7 +176,7 @@ namespace uci {
                 1, 4);
         sm.allocate_threads(1);
 
-        options.emplace_back("EvalFile", "corenet.bin", "string", [&]() {
+        options.emplace_back("EvalFile", "default", "string", [&]() {
             nn::net = nn::QNetwork(get_option<std::string>("EvalFile"));
         });
     }

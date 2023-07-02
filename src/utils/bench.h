@@ -58,6 +58,7 @@ void run_bench() {
 
     core::Board board;
     search::SearchManager sm;
+    sm.set_uci_mode(false);
     sm.allocate_threads(1);
     sm.allocate_hash(32);
 

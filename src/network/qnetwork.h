@@ -21,6 +21,7 @@
 #include "../core/constants.h"
 #include "../utils/logger.h"
 
+#include <cstring>
 #include <fstream>
 
 namespace nn {
@@ -60,6 +61,21 @@ namespace nn {
 
                 logger.print("Loaded qnetwork", network_path);
             }
+        }
+
+        QNetwork(const unsigned char *ptr) {
+
+            int magic;
+            std::memcpy(&magic, ptr, sizeof(int));
+            int offset = sizeof(int);
+
+            if (magic != MAGIC) {
+                logger.print("Invalid default network file");
+                throw std::invalid_argument("Invalid default network file");
+            }
+
+            offset = pst.load_from_pointer(ptr, offset);
+            logger.print("Loaded default network");
         }
 
         Score forward(const std::vector<unsigned int> &features, float phase) const {

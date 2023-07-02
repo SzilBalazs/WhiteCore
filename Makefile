@@ -44,23 +44,23 @@ ifeq ($(build), debug)
 	DEFINE_FLAGS = -DNATIVE
 endif
 
+EVALFILE = corenet.bin
 DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG
 CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall
-EXE = $(NAME)-v$(VERSION_MAJOR)-$(VERSION_MINOR)$(SUFFIX)
-
-default: $(EXE)
-	@echo > /dev/null
-
-$(EXE):
-	@echo Compiling $(NAME)
-	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ src/*.cpp
-	@echo Build has finished.
+EXE = $(NAME)-v$(VERSION_MAJOR)-$(VERSION_MINOR)
+OUTPUT_BINARY = $(EXE)$(SUFFIX)
 
 all: clean build
 
-build: $(EXE)
+build: $(OUTPUT_BINARY)
+	@echo > /dev/null
 
 clean:
-	@rm $(EXE) || true
+	@rm $(OUTPUT_BINARY) || true
+
+$(OUTPUT_BINARY):
+	@echo Compiling $(NAME)
+	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ src/*.cpp
+	@echo Build has finished.
 
 .PHONY: all
