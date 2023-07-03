@@ -75,7 +75,7 @@ namespace search {
             } else if (move == history.killer_moves[ply][1]) {
                 return 6'000'000;
             } else {
-                return 0;
+                return history.butterfly[move.get_from()][move.get_to()];
             }
         }
     };
