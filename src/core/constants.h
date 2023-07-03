@@ -133,6 +133,7 @@ enum NodeType {
 
 constexpr PieceType PIECE_TYPES_BY_VALUE[6] = {PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING};
 constexpr float PIECE_TO_PHASE[6] = {0.0f, 1.0f, 2.0f, 2.0f, 4.0f, 8.0f};
+constexpr int PIECE_TO_PHASE_INT[6] = {0, 1, 2, 2, 4, 8};
 
 struct Piece {
     PieceType type = PIECE_EMPTY;
