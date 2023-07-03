@@ -32,10 +32,6 @@
 #define AVX2
 #endif
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
 typedef uint64_t U64;
 typedef int32_t Score;
 typedef int8_t Depth;

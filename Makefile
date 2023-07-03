@@ -4,9 +4,12 @@ ARCH = native
 NAME = WhiteCore
 VERSION_MAJOR = 0
 VERSION_MINOR = 2
-HASH := $(shell git rev-parse --short HEAD)
-SOURCES := $(shell find $(SOURCEDIR) -name '*.cpp')
-HEADERS := $(shell find $(SOURCEDIR) -name '*.h')
+
+ifneq ($(wildcard .git/*),)
+	HASH := $(shell git rev-parse --short HEAD)
+else
+	HASH := unknown
+endif
 
 ifeq ($(OS),Windows_NT)
     uname_S := Windows
@@ -18,6 +21,8 @@ ifeq ($(uname_S), Windows)
 	SUFFIX = .exe
 else
 	SUFFIX =
+	SOURCES := $(shell find $(SOURCEDIR) -name '*.cpp')
+    HEADERS := $(shell find $(SOURCEDIR) -name '*.h')
 endif
 
 ifeq ($(ARCH), native)
@@ -46,7 +51,7 @@ ifeq ($(build), debug)
 	DEFINE_FLAGS = -DNATIVE
 endif
 
-DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG
+DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG -D_CRT_SECURE_NO_WARNINGS
 CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall
 EXE = $(NAME)-v$(VERSION_MAJOR)-$(VERSION_MINOR)
 OUTPUT_BINARY = $(EXE)$(SUFFIX)
