@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     } else if (mode == "bench") {
         run_bench();
     } else if (mode == "viz") {
+        nn::net = nn::QNetwork("corenet.bin");
         for (Color color : {WHITE, BLACK}) {
             for (PieceType pt : {KING, PAWN, BISHOP, KNIGHT, ROOK, QUEEN}) {
                 for (bool eg : {true, false}) {

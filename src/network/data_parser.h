@@ -80,9 +80,6 @@ namespace nn {
                 res.wdl = 0.0f;
             }
 
-            int eval_int = std::stoi(eval);
-            res.eval = activations::sigmoid::forward(float(eval_int)/400.0f);
-
             for (; idx < fen.size() && fen[idx] != ' '; idx++) {
                 char c = fen[idx];
                 if ('1' <= c && c <= '8') {
@@ -96,6 +93,18 @@ namespace nn {
                     sq++;
                 }
             }
+
+            Color stm = COLOR_EMPTY;
+            idx++;
+            if (fen[idx] == 'w') stm = WHITE;
+            else if (fen[idx] == 'b') stm = BLACK;
+            else {
+                throw 1;
+            }
+
+            int eval_int = std::stoi(eval);
+            if (stm == BLACK) eval_int *= -1;
+            res.eval = activations::sigmoid::forward(float(eval_int)/400.0f);
 
             return res;
         }
