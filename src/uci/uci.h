@@ -86,6 +86,9 @@ namespace uci {
         commands.emplace_back("display", [&](context tokens) {
             board.display();
         });
+        commands.emplace_back("eval", [&](context tokens){
+            logger.print("Eval:", nn::eval(board));
+        });
         commands.emplace_back("gen", [&](context tokens) {
             search::Limits limits;
             limits.max_nodes = find_element<int64_t>(tokens, "nodes");
