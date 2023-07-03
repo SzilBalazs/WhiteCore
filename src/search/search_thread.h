@@ -206,6 +206,19 @@ namespace search {
             if (non_pv_node && depth <= 6 && static_eval - depth * 100 >= beta && std::abs(beta) < WORST_MATE)
                 return static_eval;
 
+            if (non_pv_node && depth >= 3 && static_eval >= beta && board.has_non_pawn()) {
+                Depth R = 3 + std::min(3, depth / 4);
+                board.make_null_move();
+                Score score = -search<NON_PV_NODE>(depth - R, -beta, -beta + 1, ply + 1);
+                board.undo_null_move();
+
+                if (score >= beta) {
+                    if (std::abs(score) > WORST_MATE)
+                        return beta;
+                    return score;
+                }
+            }
+
         search_moves:
             MoveList<false> move_list(board, hash_move, history, ply);
 
