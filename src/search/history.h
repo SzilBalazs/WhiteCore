@@ -22,10 +22,22 @@
 namespace search {
     struct History {
         core::Move killer_moves[MAX_PLY + 10][2];
+        Score butterfly[64][64];
+
+        void add_cutoff(core::Move move, Depth depth, Ply ply) {
+            killer_moves[ply][1] = killer_moves[ply][0];
+            killer_moves[ply][0] = move;
+            butterfly[move.get_from()][move.get_to()] += 100 * depth;
+        }
 
         void clear() {
             for (int i = 0; i < MAX_PLY + 2; i++) {
                 killer_moves[i][0] = killer_moves[i][1] = core::NULL_MOVE;
+            }
+            for (int i = 0; i < 64; i++) {
+                for (int j = 0; j < 64; j++) {
+                    butterfly[i][j] = 0;
+                }
             }
         }
     };

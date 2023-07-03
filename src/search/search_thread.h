@@ -70,7 +70,6 @@ namespace search {
             return pv;
         }
 
-
         void search() {
             history.clear(); // TODO remove this?
             shared.best_move = core::NULL_MOVE;
@@ -185,8 +184,7 @@ namespace search {
                 if (score >= beta) {
 
                     if (move.is_quiet()) {
-                        history.killer_moves[ply][1] = history.killer_moves[ply][0];
-                        history.killer_moves[ply][0] = move;
+                        history.add_cutoff(move, depth, ply);
                     }
 
                     shared.tt.save(board.get_hash(), depth, beta, TT_BETA, move);
