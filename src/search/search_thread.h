@@ -198,8 +198,13 @@ namespace search {
             if (depth <= 0)
                 return qsearch<node_type>(alpha, beta);
 
+            Score static_eval = nn::eval(board);
+
             if (root_node || in_check)
                 goto search_moves;
+
+            if (non_pv_node && depth <= 6 && static_eval - depth * 100 >= beta && std::abs(beta) < WORST_MATE)
+                return static_eval;
 
         search_moves:
             MoveList<false> move_list(board, hash_move, history, ply);
