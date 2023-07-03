@@ -28,6 +28,7 @@ namespace search {
             if (limits.time_left) {
                 int64_t time_left = limits.time_left.value();
                 allocated_time = (time_left + moves_to_go * increment) / moves_to_go;
+                allocated_time = std::min(allocated_time, time_left);
             } else {
                 allocated_time = limits.move_time.value_or(INF_TIME);
             }
