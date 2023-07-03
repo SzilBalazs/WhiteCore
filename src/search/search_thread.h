@@ -84,8 +84,9 @@ namespace search {
         void search() {
             history.clear(); // TODO remove this?
             shared.best_move = core::NULL_MOVE;
+            Score prev_score = 0;
             for (Depth depth = 1; depth <= shared.tm.get_max_depth(); depth++) {
-                Score score = search<ROOT_NODE>(depth, -INF_SCORE, INF_SCORE, 0);
+                Score score = prev_score = aspiration_window(depth, prev_score);
 
                 if (shared.is_searching && id == 0) {
                     int64_t elapsed_time = shared.tm.get_elapsed_time();
@@ -111,6 +112,45 @@ namespace search {
                     logger.print("bestmove", shared.best_move);
                 }
             }
+        }
+
+        Score aspiration_window(Depth depth, Score prev_score) {
+
+            static constexpr Score DELTA = 30;
+            static constexpr Score BOUND = 1500;
+
+            Score delta = DELTA;
+            Score alpha = -INF_SCORE;
+            Score beta = INF_SCORE;
+
+            if (depth >= 6) {
+                alpha = prev_score - delta;
+                beta = prev_score + delta;
+            }
+
+            while (true) {
+                if (!shared.is_searching) {
+                    break;
+                }
+
+                if (alpha <= -BOUND) alpha = -INF_SCORE;
+                if (beta >= BOUND) beta = INF_SCORE;
+
+                Score score = search<ROOT_NODE>(depth, alpha, beta, 0);
+
+                if (score <= alpha) {
+                    beta = (alpha + beta) / 2;
+                    alpha = std::max(-BOUND, score - delta);
+                } else if (score >= beta) {
+                    beta = std::min(BOUND, score + delta);
+                } else {
+                    return score;
+                }
+
+                delta += delta / 2;
+            }
+
+            return UNKNOWN_SCORE;
         }
 
         void manage_resources() {
