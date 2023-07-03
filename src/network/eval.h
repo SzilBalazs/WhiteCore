@@ -26,14 +26,25 @@
 namespace nn {
 
     Score pawn_table[64] = {
-             0,   0,   0,   0,   0,   0,   0,   0,
+            0,   0,   0,   0,   0,   0,   0,   0,
             50,  50,  50,  50,  50,  50,  50,  50,
             15,  20,  20,  25,  25,  20,  20,  15,
-             5,  10,  10,  15,  15,  10,  10,   5,
-             0,   0,   0,  20,  20,   0,   0,   0,
-             5,  -5,  -5,   0,   0,  -5,  -5,   5,
-             5,  10,  10, -20, -20,  10,  10,   5,
-             0,   0,   0,   0,   0,   0,   0,   0,
+            5,  10,  10,  15,  15,  10,  10,   5,
+            0,   0,   0,  20,  20,   0,   0,   0,
+            5,  -5,  -5,   0,   0,  -5,  -5,   5,
+            5,  10,  10, -20, -20,  10,  10,   5,
+            0,   0,   0,   0,   0,   0,   0,   0,
+    };
+
+    Score bishop_table[64] = {
+            0,   0,   0,   0,   0,   0,   0,   0,
+            0,   0,   0,   0,   0,   0,   0,   0,
+            0,   0,   0,   0,   0,   0,   0,   0,
+            -5,   0,   0,   0,   0,   0,   0,  -5,
+            -10,   0,   0,   0,   0,   0,   0, -10,
+            -20,   0,   0,   0,   0,   0,   0, -20,
+            -30,   0,   0,   0,   0,   0,   0, -30,
+            -50, -40, -40, -40, -40, -40, -40, -50,
     };
 
     Score mg_king_table[64] = {
@@ -43,8 +54,8 @@ namespace nn {
             -30,-30,-30,-35,-35,-30,-30,-30,
             -20,-20,-20,-30,-30,-20,-20,-20,
             -10,-20,-20,-20,-20,-20,-20,-10,
-             20, 20,  0,  0,  0,  0, 20, 20,
-             50, 50, 10,  0,  0, 10, 50, 50,
+            20, 20,  0,  0,  0,  0, 20, 20,
+            50, 50, 10,  0,  0, 10, 50, 50,
     };
 
     Score eg_king_table[64] = {
@@ -68,41 +79,40 @@ namespace nn {
         score += 900 * (board.pieces<WHITE, QUEEN>().pop_count() - board.pieces<BLACK, QUEEN>().pop_count());
 
         int phase = 0;
+        core::Bitboard occ = board.occupied();
 
         for (Color color : {WHITE, BLACK}) {
-            core::Bitboard occ = board.occupied();
-            Score mobility = 0;
-            for (PieceType pt : {KNIGHT, BISHOP, ROOK, QUEEN}) {
+            Score piece_score = 0;
+            for (PieceType pt : {PAWN, KNIGHT, BISHOP, ROOK, QUEEN}) {
                 core::Bitboard bb = board.pieces(color, pt);
                 while (bb) {
                     phase += PIECE_TO_PHASE_INT[pt];
                     Square sq = bb.pop_lsb();
-                    mobility += attacks_piece(pt, sq, occ).pop_count();
+                    Square pov_sq = color == WHITE ? square_flip(sq) : sq;
+
+                    // PST
+                    if (pt == PAWN) {
+                        piece_score += pawn_table[pov_sq];
+                    } else if (pt == BISHOP) {
+                        piece_score += bishop_table[pov_sq];
+                    }
+
+                    // Mobility
+                    if (pt != PAWN)
+                        piece_score += attacks_piece(pt, sq, occ).pop_count();
                 }
             }
-
-            if (color == WHITE) score += mobility;
-            else score -= mobility;
-
-            core::Bitboard pawns = board.pieces(color, PAWN);
-            phase += pawns.pop_count() * PIECE_TO_PHASE_INT[PAWN];
-            while (pawns) {
-                Square sq = pawns.pop_lsb();
-                if (color == WHITE) sq = square_flip(sq);
-
-                if (color == WHITE)
-                    score += pawn_table[sq];
-                else
-                    score -= pawn_table[sq];
-            }
+            if (color == WHITE) score += piece_score;
+            else score -= piece_score;
         }
+
 
         Square wk = board.pieces<WHITE, KING>().lsb();
         Square wk_flip = square_flip(wk);
         Square bk = board.pieces<BLACK, KING>().lsb();
 
-        Score king_mg = mg_king_table[wk_flip] - mg_king_table[bk];
-        Score king_eg = eg_king_table[wk_flip] - eg_king_table[bk];
+        Score mg_king_score = mg_king_table[wk_flip] - mg_king_table[bk];
+        Score eg_king_score = eg_king_table[wk_flip] - eg_king_table[bk];
 
         core::Bitboard wshield = core::step<NORTH_EAST>(wk) | core::step<NORTH>(wk) | core::step<NORTH_WEST>(wk);
         core::Bitboard bshield = core::step<SOUTH_EAST>(bk) | core::step<SOUTH>(bk) | core::step<SOUTH_WEST>(bk);
@@ -110,10 +120,10 @@ namespace nn {
         wshield &= board.pieces<WHITE, PAWN>();
         bshield &= board.pieces<BLACK, PAWN>();
 
-        king_mg += wshield.pop_count() * 30;
-        king_mg -= bshield.pop_count() * 30;
+        mg_king_score += wshield.pop_count() * 30;
+        mg_king_score -= bshield.pop_count() * 30;
 
-        Score king_score = (king_mg * (phase) + king_eg * (64 - phase)) / 64;
+        Score king_score = (mg_king_score * (phase) + eg_king_score * (64 - phase)) / 64;
 
         score += king_score;
 
