@@ -26,6 +26,17 @@
 #include <thread>
 
 namespace search {
+
+    extern Depth lmr_reductions[200][MAX_PLY + 1];
+
+    inline void init_lmr() {
+        for (int made_moves = 0; made_moves < 200; made_moves++) {
+            for (Depth depth = 0; depth < MAX_PLY + 1; depth++) {
+                lmr_reductions[made_moves][depth] = 1.0 + std::log(made_moves) * std::log(depth) / 2.0;
+            }
+        }
+    }
+
     struct SharedMemory {
         TimeManager tm;
         TT tt;
@@ -112,8 +123,8 @@ namespace search {
         Score search(Depth depth, Score alpha, Score beta, Ply ply) {
             constexpr bool root_node = node_type == ROOT_NODE;
             constexpr bool non_root_node = !root_node;
-            // constexpr bool pv_node = node_type != NON_PV_NODE;
-            // constexpr bool non_pv_node = !pv_node;
+            constexpr bool pv_node = node_type != NON_PV_NODE;
+            constexpr bool non_pv_node = !pv_node;
 
             const Score mate_ply = -MATE_VALUE + ply;
             const bool in_check = board.is_check();
@@ -157,7 +168,7 @@ namespace search {
                 return in_check ? mate_ply : 0;
             }
 
-            bool pv_next = true;
+            int made_moves = 0;
             while (!move_list.empty()) {
                 core::Move move = move_list.next_move();
 
@@ -165,14 +176,20 @@ namespace search {
                 board.make_move(move);
                 Score score;
 
-                if (pv_next) {
-                    score = -search<PV_NODE>(depth - 1, -beta, -alpha, ply + 1);
-                } else {
-                    score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ply + 1);
+                if (!in_check && depth >= 4 && made_moves >= 4 && !move.is_promo() && move.is_quiet()) {
+                    Depth R = lmr_reductions[depth][made_moves];
+                    Depth new_depth = std::clamp(depth - R, 1, depth - 1);
+                    score = -search<NON_PV_NODE>(new_depth, -alpha - 1, -alpha, ply + 1);
 
-                    if (score > alpha) {
-                        score = -search<PV_NODE>(depth - 1, -beta, -alpha, ply + 1);
+                    if (score > alpha && R > 0) {
+                        score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ply + 1);
                     }
+                } else if (non_pv_node || made_moves != 0) {
+                    score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ply + 1);
+                }
+
+                if (pv_node && (made_moves == 0 || (alpha < score && score < beta))) {
+                    score = -search<PV_NODE>(depth - 1, -beta, -alpha, ply + 1);
                 }
 
                 board.undo_move(move);
@@ -207,9 +224,10 @@ namespace search {
 
                     if (score > alpha) {
                         alpha = score;
-                        pv_next = false;
                     }
                 }
+
+                made_moves++;
             }
 
             shared.tt.save(board.get_hash(), depth, best_score, flag, best_move);
