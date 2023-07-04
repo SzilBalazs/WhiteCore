@@ -217,6 +217,9 @@ namespace search {
             if (root_node || in_check)
                 goto search_moves;
 
+            if (!entry && depth >= 5)
+                depth--;
+
             if (non_pv_node && depth <= 6 && static_eval - depth * 100 >= beta && std::abs(beta) < WORST_MATE)
                 return static_eval;
 
