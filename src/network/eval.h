@@ -25,7 +25,7 @@
 
 namespace nn {
 
-    Score pawn_table[64] = {
+    constexpr Score pawn_table[64] = {
             0,   0,   0,   0,   0,   0,   0,   0,
             50,  50,  50,  50,  50,  50,  50,  50,
             15,  20,  20,  25,  25,  20,  20,  15,
@@ -36,37 +36,41 @@ namespace nn {
             0,   0,   0,   0,   0,   0,   0,   0,
     };
 
-    Score bishop_table[64] = {
-            0,   0,   0,   0,   0,   0,   0,   0,
-            0,   0,   0,   0,   0,   0,   0,   0,
-            0,   0,   0,   0,   0,   0,   0,   0,
-            -5,   0,   0,   0,   0,   0,   0,  -5,
+    constexpr Score bishop_table[64] = {
+            0,    0,   0,   0,   0,   0,   0,   0,
+            0,    0,   0,   0,   0,   0,   0,   0,
+            0,    0,   0,   0,   0,   0,   0,   0,
+            -5,    0,   0,   0,   0,   0,   0,  -5,
             -10,   0,   0,   0,   0,   0,   0, -10,
             -20,   0,   0,   0,   0,   0,   0, -20,
             -30,   0,   0,   0,   0,   0,   0, -30,
             -50, -40, -40, -40, -40, -40, -40, -50,
     };
 
-    Score mg_king_table[64] = {
-            -50,-50,-50,-50,-50,-50,-50,-50,
-            -50,-50,-50,-50,-50,-50,-50,-50,
-            -40,-40,-40,-40,-40,-40,-40,-40,
-            -30,-30,-30,-35,-35,-30,-30,-30,
-            -20,-20,-20,-30,-30,-20,-20,-20,
-            -10,-20,-20,-20,-20,-20,-20,-10,
-            20, 20,  0,  0,  0,  0, 20, 20,
-            50, 50, 10,  0,  0, 10, 50, 50,
+    constexpr Score  mg_king_table[64] = {
+            -50, -50, -50, -50, -50, -50, -50, -50,
+            -50, -50, -50, -50, -50, -50, -50, -50,
+            -40, -40, -40, -40, -40, -40, -40, -40,
+            -30, -30, -30, -35, -35, -30, -30, -30,
+            -20, -20, -20, -30, -30, -20, -20, -20,
+            -10, -20, -20, -20, -20, -20, -20, -10,
+            20,  20,   0,   0,   0,   0,  20,  20,
+            50,  50,  10,   0,   0,  10,  50,  50,
     };
 
-    Score eg_king_table[64] = {
-            -50,-30,-30,-30,-30,-30,-30,-50,
-            -30,-20,-10,  0,  0,-10,-20,-30,
-            -30,-10, 20, 30, 30, 20,-10,-30,
-            -30,  0, 30, 40, 40, 30,  0,-30,
-            -30,  0, 30, 40, 40, 30,  0,-30,
-            -30,-10, 20, 30, 30, 20,-10,-30,
-            -30,-20,-10,  0,  0,-10,-20,-30,
-            -50,-30,-30,-30,-30,-30,-30,-50,
+    constexpr Score  eg_king_table[64] = {
+            -50, -30, -30, -30, -30, -30, -30, -50,
+            -30, -20, -10,   0,   0, -10, -20, -30,
+            -30, -10,  20,  30,  30,  20, -10, -30,
+            -30,   0,  30,  40,  40,  30,   0, -30,
+            -30,   0,  30,  40,  40,  30,   0, -30,
+            -30, -10,  20,  30,  30,  20, -10, -30,
+            -30, -20, -10,   0,   0, -10, -20, -30,
+            -50, -30, -30, -30, -30, -30, -30, -50,
+    };
+
+    constexpr Score mobility_weight[6] = {
+            0, 0, 2, 2, 1, 1
     };
 
     inline Score hce(const core::Board &board) {
@@ -74,7 +78,7 @@ namespace nn {
         Score score = 0;
         score += 100 * (board.pieces<WHITE, PAWN>().pop_count() - board.pieces<BLACK, PAWN>().pop_count());
         score += 300 * (board.pieces<WHITE, KNIGHT>().pop_count() - board.pieces<BLACK, KNIGHT>().pop_count());
-        score += 350 * (board.pieces<WHITE, BISHOP>().pop_count() - board.pieces<BLACK, BISHOP>().pop_count());
+        score += 320 * (board.pieces<WHITE, BISHOP>().pop_count() - board.pieces<BLACK, BISHOP>().pop_count());
         score += 500 * (board.pieces<WHITE, ROOK>().pop_count() - board.pieces<BLACK, ROOK>().pop_count());
         score += 900 * (board.pieces<WHITE, QUEEN>().pop_count() - board.pieces<BLACK, QUEEN>().pop_count());
 
@@ -107,7 +111,7 @@ namespace nn {
 
                     // Mobility
                     if (pt != PAWN)
-                        piece_score += attacks_piece(pt, sq, occ).pop_count();
+                        piece_score += mobility_weight[pt] * core::attacks_piece(pt, sq, occ).pop_count();
                 }
             }
             if (color == WHITE) score += piece_score;
