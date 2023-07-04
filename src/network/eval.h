@@ -95,6 +95,14 @@ namespace nn {
                         piece_score += pawn_table[pov_sq];
                     } else if (pt == BISHOP) {
                         piece_score += bishop_table[pov_sq];
+                    } else if (pt == ROOK) {
+                        core::Bitboard pawns = core::masks_file[sq] & board.pieces<PAWN>();
+                        int pawn_count = pawns.pop_count();
+                        if (pawn_count == 0) {
+                            piece_score += 15;
+                        } else if (pawn_count == 1) {
+                            piece_score += 5;
+                        }
                     }
 
                     // Mobility
