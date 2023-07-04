@@ -153,6 +153,10 @@ struct Piece {
     constexpr bool is_ok() const {
         return !is_null();
     }
+
+    constexpr bool operator==(Piece p) {
+        return color == p.color && type == p.type;
+    }
 };
 
 constexpr Piece NULL_PIECE = Piece();

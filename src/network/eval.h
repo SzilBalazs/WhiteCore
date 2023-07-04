@@ -106,10 +106,14 @@ namespace nn {
             else score -= piece_score;
         }
 
-
         Square wk = board.pieces<WHITE, KING>().lsb();
         Square wk_flip = square_flip(wk);
         Square bk = board.pieces<BLACK, KING>().lsb();
+
+        if (((wk == F1 || wk == G1) && board.piece_at(H1) == Piece(ROOK, WHITE)) || ((wk == B1 || wk == C1) && board.piece_at(A1) == Piece(ROOK, WHITE)))
+            score -= 50;
+        if (((bk == F8 || bk == G8) && board.piece_at(H8) == Piece(ROOK, BLACK)) || ((bk == B8 || bk == C8) && board.piece_at(A8) == Piece(ROOK, BLACK)))
+            score += 50;
 
         Score mg_king_score = mg_king_table[wk_flip] - mg_king_table[bk];
         Score eg_king_score = eg_king_table[wk_flip] - eg_king_table[bk];
