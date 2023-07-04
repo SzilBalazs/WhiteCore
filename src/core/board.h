@@ -112,6 +112,27 @@ namespace core {
 
         inline bool is_check() const;
 
+        inline bool has_non_pawn() {
+            const Color stm = get_stm();
+            return bool(pieces<KNIGHT>(stm) | pieces<BISHOP>(stm) | pieces<ROOK>() | pieces<QUEEN>());
+        }
+
+        inline void make_null_move() {
+            const Color xstm = color_enemy(get_stm());
+            const BoardState state_old = state;
+
+            states.emplace_back(state);
+
+            state.stm = xstm;
+            state.hash.xor_stm();
+            state.ep = NULL_SQUARE;
+            if (state_old.ep != NULL_SQUARE) state.hash.xor_ep(state_old.ep);
+        }
+
+        inline void undo_null_move() {
+            states.pop_back();
+        }
+
         inline void make_move(Move move) {
             const Square from = move.get_from();
             const Square to = move.get_to();
