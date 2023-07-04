@@ -30,6 +30,10 @@ namespace search {
             butterfly[move.get_from()][move.get_to()] += 100 * depth;
         }
 
+        void decrease_history(core::Move move, Depth depth) {
+            butterfly[move.get_from()][move.get_to()] -= 100 * depth;
+        }
+
         void clear() {
             for (int i = 0; i < MAX_PLY + 2; i++) {
                 killer_moves[i][0] = killer_moves[i][1] = core::NULL_MOVE;
