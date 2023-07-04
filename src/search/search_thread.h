@@ -242,9 +242,16 @@ namespace search {
                 return in_check ? mate_ply : 0;
             }
 
+            bool skip_quiets = false;
             int made_moves = 0;
             while (!move_list.empty()) {
                 core::Move move = ss->move = move_list.next_move();
+
+                if (skip_quiets && move.is_quiet() && !move.is_promo()) continue;
+
+                if (non_root_node && non_pv_node && !in_check && depth <= 5 && made_moves >= 5 + depth * depth) {
+                    skip_quiets = true;
+                }
 
                 shared.node_count++;
                 board.make_move(move);
