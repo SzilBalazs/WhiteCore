@@ -47,6 +47,12 @@ namespace search {
         int64_t node_count;
     };
 
+    struct SearchStack {
+        Ply ply;
+        core::Move move;
+        Score eval;
+    };
+
     class SearchThread {
     public:
         SearchThread(SharedMemory &shared_memory, unsigned int thread_id) : shared(shared_memory), id(thread_id) {}
@@ -128,6 +134,14 @@ namespace search {
                 beta = prev_score + delta;
             }
 
+            SearchStack stack[MAX_PLY + 10];
+            SearchStack *ss = stack + 7;
+            for (Ply i = -7; i <= MAX_PLY + 2; i++) {
+                (ss + i)->move = core::NULL_MOVE;
+                (ss + i)->eval = UNKNOWN_SCORE;
+                (ss + i)->ply = i;
+            }
+
             while (true) {
                 if (!shared.is_searching) {
                     break;
@@ -136,7 +150,7 @@ namespace search {
                 if (alpha <= -BOUND) alpha = -INF_SCORE;
                 if (beta >= BOUND) beta = INF_SCORE;
 
-                Score score = search<ROOT_NODE>(depth, alpha, beta, 0);
+                Score score = search<ROOT_NODE>(depth, alpha, beta, ss);
 
                 if (score <= alpha) {
                     beta = (alpha + beta) / 2;
@@ -160,20 +174,20 @@ namespace search {
         }
 
         template<NodeType node_type>
-        Score search(Depth depth, Score alpha, Score beta, Ply ply) {
+        Score search(Depth depth, Score alpha, Score beta, SearchStack *ss) {
             constexpr bool root_node = node_type == ROOT_NODE;
             constexpr bool non_root_node = !root_node;
             constexpr bool pv_node = node_type != NON_PV_NODE;
             constexpr bool non_pv_node = !pv_node;
 
-            const Score mate_ply = -MATE_VALUE + ply;
+            const Score mate_ply = -MATE_VALUE + ss->ply;
             const bool in_check = board.is_check();
 
             core::Move best_move = core::NULL_MOVE;
             Score best_score = -INF_SCORE;
 
             if (id == 0)
-                pv_length[ply] = ply;
+                pv_length[ss->ply] = ss->ply;
 
             if ((shared.node_count & 1023) == 0) {
                 manage_resources();
@@ -198,7 +212,7 @@ namespace search {
             if (depth <= 0)
                 return qsearch<node_type>(alpha, beta);
 
-            Score static_eval = nn::eval(board);
+            Score static_eval = ss->eval = nn::eval(board);
 
             if (root_node || in_check)
                 goto search_moves;
@@ -208,8 +222,10 @@ namespace search {
 
             if (non_pv_node && depth >= 3 && static_eval >= beta && board.has_non_pawn()) {
                 Depth R = 3 + std::min(3, depth / 4);
+                ss->move = core::NULL_MOVE;
+
                 board.make_null_move();
-                Score score = -search<NON_PV_NODE>(depth - R, -beta, -beta + 1, ply + 1);
+                Score score = -search<NON_PV_NODE>(depth - R, -beta, -beta + 1, ss + 1);
                 board.undo_null_move();
 
                 if (score >= beta) {
@@ -220,7 +236,7 @@ namespace search {
             }
 
         search_moves:
-            MoveList<false> move_list(board, hash_move, history, ply);
+            MoveList<false> move_list(board, hash_move, history, ss->ply);
 
             if (move_list.empty()) {
                 return in_check ? mate_ply : 0;
@@ -228,7 +244,7 @@ namespace search {
 
             int made_moves = 0;
             while (!move_list.empty()) {
-                core::Move move = move_list.next_move();
+                core::Move move = ss->move = move_list.next_move();
 
                 shared.node_count++;
                 board.make_move(move);
@@ -237,17 +253,17 @@ namespace search {
                 if (!in_check && depth >= 4 && made_moves >= 4 && !move.is_promo() && move.is_quiet()) {
                     Depth R = lmr_reductions[depth][made_moves];
                     Depth new_depth = std::clamp(depth - R, 1, depth - 1);
-                    score = -search<NON_PV_NODE>(new_depth, -alpha - 1, -alpha, ply + 1);
+                    score = -search<NON_PV_NODE>(new_depth, -alpha - 1, -alpha, ss + 1);
 
                     if (score > alpha && R > 0) {
-                        score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ply + 1);
+                        score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ss + 1);
                     }
                 } else if (non_pv_node || made_moves != 0) {
-                    score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ply + 1);
+                    score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ss + 1);
                 }
 
                 if (pv_node && (made_moves == 0 || (alpha < score && score < beta))) {
-                    score = -search<PV_NODE>(depth - 1, -beta, -alpha, ply + 1);
+                    score = -search<PV_NODE>(depth - 1, -beta, -alpha, ss + 1);
                 }
 
                 board.undo_move(move);
@@ -259,7 +275,7 @@ namespace search {
                 if (score >= beta) {
 
                     if (move.is_quiet()) {
-                        history.add_cutoff(move, depth, ply);
+                        history.add_cutoff(move, depth, ss->ply);
                     }
 
                     shared.tt.save(board.get_hash(), depth, beta, TT_BETA, move);
@@ -272,11 +288,11 @@ namespace search {
                     flag = TT_EXACT;
 
                     if (id == 0) {
-                        pv_array[ply][ply] = move;
-                        for (Ply i = ply + 1; i < pv_length[ply + 1]; i++) {
-                            pv_array[ply][i] = pv_array[ply + 1][i];
+                        pv_array[ss->ply][ss->ply] = move;
+                        for (Ply i = ss->ply + 1; i < pv_length[ss->ply + 1]; i++) {
+                            pv_array[ss->ply][i] = pv_array[ss->ply + 1][i];
                         }
-                        pv_length[ply] = pv_length[ply + 1];
+                        pv_length[ss->ply] = pv_length[ss->ply + 1];
                     }
 
 

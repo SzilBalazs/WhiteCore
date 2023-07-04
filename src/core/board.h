@@ -114,8 +114,7 @@ namespace core {
 
         inline bool has_non_pawn() {
             const Color stm = get_stm();
-            core::Bitboard own_pieces = sides(stm);
-            return bool(own_pieces & ~(pieces<KING>(stm) | pieces<PAWN>(stm)));
+            return bool(pieces<KNIGHT>(stm) | pieces<BISHOP>(stm) | pieces<ROOK>() | pieces<QUEEN>());
         }
 
         inline void make_null_move() {
@@ -123,6 +122,7 @@ namespace core {
             const BoardState state_old = state;
 
             states.emplace_back(state);
+
             state.stm = xstm;
             state.hash.xor_stm();
             state.ep = NULL_SQUARE;
