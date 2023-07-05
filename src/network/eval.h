@@ -89,6 +89,9 @@ namespace nn {
             Score piece_score = 0;
             for (PieceType pt : {PAWN, KNIGHT, BISHOP, ROOK, QUEEN}) {
                 core::Bitboard bb = board.pieces(color, pt);
+
+                if (pt == BISHOP && bb.pop_count() == 2) piece_score += 50;
+
                 while (bb) {
                     phase += PIECE_TO_PHASE_INT[pt];
                     Square sq = bb.pop_lsb();
