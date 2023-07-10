@@ -87,6 +87,7 @@ namespace nn {
 
         for (Color color : {WHITE, BLACK}) {
             Score piece_score = 0;
+            core::Bitboard enemy_pawns = board.pieces<PAWN>(color_enemy(color));
             for (PieceType pt : {PAWN, KNIGHT, BISHOP, ROOK, QUEEN}) {
                 core::Bitboard bb = board.pieces(color, pt);
 
@@ -100,6 +101,10 @@ namespace nn {
                     // PST
                     if (pt == PAWN) {
                         piece_score += pawn_table[pov_sq];
+
+                        core::Bitboard passed = core::masks_passed_pawn[sq][color];
+                        if (!(passed & enemy_pawns))
+                            piece_score += 50;
                     } else if (pt == BISHOP) {
                         piece_score += bishop_table[pov_sq];
                     } else if (pt == ROOK) {
