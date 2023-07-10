@@ -220,6 +220,12 @@ namespace search {
             if (!entry && depth >= 5)
                 depth--;
 
+            if (depth <= 3 && static_eval + 150 * depth <= alpha) {
+                Score score = qsearch<NON_PV_NODE>(alpha, beta);
+                if (score <= alpha)
+                    return score;
+            }
+
             if (non_pv_node && depth <= 6 && static_eval - depth * 100 >= beta && std::abs(beta) < WORST_MATE)
                 return static_eval;
 
