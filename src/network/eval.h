@@ -104,7 +104,7 @@ namespace nn {
 
                         core::Bitboard passed = core::masks_passed_pawn[sq][color];
                         if (!(passed & enemy_pawns))
-                            piece_score += 50;
+                            piece_score += 20;
                     } else if (pt == BISHOP) {
                         piece_score += bishop_table[pov_sq];
                     } else if (pt == ROOK) {
