@@ -27,7 +27,7 @@ namespace nn {
 
 namespace core {
     // Declarations
-    Bitboard masks_bit[64], masks_adjacent_file[64], masks_adjacent_north[64], masks_adjacent_south[64], masks_pawn[64][2],
+    Bitboard masks_bit[64], masks_adjacent_file[64], masks_adjacent_north[64], masks_adjacent_south[64], masks_pawn[64][2], masks_passed_pawn[64][2],
             masks_knight[64], masks_king[64], masks_file[64], masks_rank[64], masks_rook[64], masks_diagonal[64],
             masks_anti_diagonal[64], masks_bishop[64], masks_common_ray[64][64];
     LineType line_type[64][64];

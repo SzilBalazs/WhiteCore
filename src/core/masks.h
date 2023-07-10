@@ -24,6 +24,7 @@ namespace core {
     extern Bitboard masks_adjacent_north[64];
     extern Bitboard masks_adjacent_south[64];
     extern Bitboard masks_pawn[64][2];
+    extern Bitboard masks_passed_pawn[64][2];
     extern Bitboard masks_knight[64];
     extern Bitboard masks_king[64];
     extern Bitboard masks_file[64];
@@ -81,6 +82,18 @@ namespace core {
                                        (file != 7 ? slide<SOUTH>(sq + EAST) : 0);
             masks_adjacent_file[sq] =
                     ~masks_file[sq] & (masks_adjacent_north[sq] | masks_adjacent_south[sq] | step<WEST>(sq) | step<EAST>(sq));
+
+            masks_passed_pawn[sq][WHITE] = slide<NORTH>(sq);
+            masks_passed_pawn[sq][BLACK] = slide<SOUTH>(sq);
+
+            if (!FILE_A.get(sq)) {
+                masks_passed_pawn[sq][WHITE] |= slide<NORTH>(sq + WEST);
+                masks_passed_pawn[sq][BLACK] |= slide<SOUTH>(sq + WEST);
+            }
+            if (!FILE_H.get(sq)) {
+                masks_passed_pawn[sq][WHITE] |= slide<NORTH>(sq + EAST);
+                masks_passed_pawn[sq][BLACK] |= slide<SOUTH>(sq + EAST);
+            }
 
             // Calculates the common ray and the line type of the shortest path between sq and sq2.
             for (Square sq2 = A1; sq2 < 64; sq2 += 1) {
