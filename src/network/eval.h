@@ -101,6 +101,7 @@ namespace nn {
 
         Score king_safety = 0;
         king_safety += 15 * pawn_shield_1.pop_count();
+        king_safety += 5 * pawn_shield_2.pop_count();
 
         attacked -= 2 * pawn_shield_1.pop_count();
         attacked -= 1 * pawn_shield_2.pop_count();
