@@ -310,7 +310,6 @@ namespace search {
                 if (score > best_score) {
                     best_score = score;
                     best_move = move;
-                    flag = TT_EXACT;
 
                     if (id == 0) {
                         pv_array[ss->ply][ss->ply] = move;
@@ -322,6 +321,7 @@ namespace search {
 
 
                     if (score > alpha) {
+                        flag = TT_EXACT;
                         alpha = score;
                     }
                 }
