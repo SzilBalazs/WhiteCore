@@ -47,7 +47,7 @@ namespace nn {
             -50, -40, -40, -40, -40, -40, -40, -50,
     };
 
-    constexpr Score  mg_king_table[64] = {
+    constexpr Score mg_king_table[64] = {
             -50, -50, -50, -50, -50, -50, -50, -50,
             -50, -50, -50, -50, -50, -50, -50, -50,
             -40, -40, -40, -40, -40, -40, -40, -40,
@@ -58,7 +58,7 @@ namespace nn {
             50,  50,  10,   0,   0,  10,  50,  50,
     };
 
-    constexpr Score  eg_king_table[64] = {
+    constexpr Score eg_king_table[64] = {
             -50, -30, -30, -30, -30, -30, -30, -50,
             -30, -20, -10,   0,   0, -10, -20, -30,
             -30, -10,  20,  30,  30,  20, -10, -30,
@@ -69,9 +69,48 @@ namespace nn {
             -50, -30, -30, -30, -30, -30, -30, -50,
     };
 
+    constexpr Score king_safety_table[50] = {
+            1, 2, 3, 5, 7, 9, 12, 15, 18, 22,
+            26, 30, 35, 40, 45, 51, 57, 63, 70, 77,
+            84, 92, 100, 108, 117, 126, 135, 145, 155, 165,
+            176, 187, 198, 210, 222, 234, 247, 260, 273, 287,
+            301, 315, 330, 345, 360, 376, 392, 408, 425, 442
+    };
+
     constexpr Score mobility_weight[6] = {
             0, 0, 2, 2, 1, 1
     };
+
+    constexpr int attack_weight[6] = {
+            0, 1, 2, 3, 4, 5
+    };
+
+    template<Color color>
+    inline Score evaluate_king_safety(const core::Board &board, Square king, int attacked) {
+        core::Bitboard pawn_shield_1, pawn_shield_2;
+        if constexpr (color == WHITE) {
+            pawn_shield_1 = core::step<NORTH_EAST>(king) | core::step<NORTH>(king) | core::step<NORTH_WEST>(king);
+            pawn_shield_2 = core::step<NORTH>(pawn_shield_1);
+        } else {
+            pawn_shield_1 = core::step<SOUTH_EAST>(king) | core::step<SOUTH>(king) | core::step<SOUTH_WEST>(king);
+            pawn_shield_2 = core::step<SOUTH>(pawn_shield_1);
+        }
+
+        pawn_shield_1 &= board.pieces<color, PAWN>();
+        pawn_shield_2 &= board.pieces<color, PAWN>();
+
+        Score king_safety = 0;
+        king_safety += 15 * pawn_shield_1.pop_count();
+
+        attacked -= 2 * pawn_shield_1.pop_count();
+        attacked -= 1 * pawn_shield_2.pop_count();
+
+        attacked = std::clamp(attacked, 0, 49);
+
+        king_safety -= king_safety_table[attacked];
+
+        return king_safety;
+    }
 
     inline Score hce(const core::Board &board) {
 
@@ -83,11 +122,27 @@ namespace nn {
         score += 900 * (board.pieces<WHITE, QUEEN>().pop_count() - board.pieces<BLACK, QUEEN>().pop_count());
 
         int phase = 0;
+        int king_attack_score[2] = {0, 0};
         core::Bitboard occ = board.occupied();
+
+        Square wk = board.pieces<WHITE, KING>().lsb();
+        Square wk_flip = square_flip(wk);
+        Square bk = board.pieces<BLACK, KING>().lsb();
 
         for (Color color : {WHITE, BLACK}) {
             Score piece_score = 0;
+
             core::Bitboard enemy_pawns = board.pieces<PAWN>(color_enemy(color));
+            Square enemy_king_sq = (color == WHITE ? bk : wk);
+
+            core::Bitboard temp = core::step<EAST>(enemy_king_sq) | core::Bitboard(enemy_king_sq) | core::step<WEST>(enemy_king_sq);
+            core::Bitboard enemy_king_zone = temp;
+            Direction forward = (color == WHITE ? SOUTH : NORTH);
+            for (int i = 0; i < 2; i++) {
+                temp = core::step(forward, temp);
+                enemy_king_zone |= temp;
+            }
+
             for (PieceType pt : {PAWN, KNIGHT, BISHOP, ROOK, QUEEN}) {
                 core::Bitboard bb = board.pieces(color, pt);
 
@@ -118,17 +173,16 @@ namespace nn {
                     }
 
                     // Mobility
-                    if (pt != PAWN)
-                        piece_score += mobility_weight[pt] * core::attacks_piece(pt, sq, occ).pop_count();
+                    if (pt != PAWN) {
+                        core::Bitboard attacks = core::attacks_piece(pt, sq, occ);
+                        piece_score += mobility_weight[pt] * attacks.pop_count();
+                        king_attack_score[color] += attack_weight[pt] * (enemy_king_zone & attacks).pop_count();
+                    }
                 }
             }
             if (color == WHITE) score += piece_score;
             else score -= piece_score;
         }
-
-        Square wk = board.pieces<WHITE, KING>().lsb();
-        Square wk_flip = square_flip(wk);
-        Square bk = board.pieces<BLACK, KING>().lsb();
 
         if (((wk == F1 || wk == G1) && board.piece_at(H1) == Piece(ROOK, WHITE)) || ((wk == B1 || wk == C1) && board.piece_at(A1) == Piece(ROOK, WHITE)))
             score -= 50;
@@ -138,14 +192,8 @@ namespace nn {
         Score mg_king_score = mg_king_table[wk_flip] - mg_king_table[bk];
         Score eg_king_score = eg_king_table[wk_flip] - eg_king_table[bk];
 
-        core::Bitboard wshield = core::step<NORTH_EAST>(wk) | core::step<NORTH>(wk) | core::step<NORTH_WEST>(wk);
-        core::Bitboard bshield = core::step<SOUTH_EAST>(bk) | core::step<SOUTH>(bk) | core::step<SOUTH_WEST>(bk);
-
-        wshield &= board.pieces<WHITE, PAWN>();
-        bshield &= board.pieces<BLACK, PAWN>();
-
-        mg_king_score += wshield.pop_count() * 30;
-        mg_king_score -= bshield.pop_count() * 30;
+        mg_king_score += evaluate_king_safety<WHITE>(board, wk, king_attack_score[BLACK]);
+        mg_king_score -= evaluate_king_safety<BLACK>(board, bk, king_attack_score[WHITE]);
 
         Score king_score = (mg_king_score * (phase) + eg_king_score * (64 - phase)) / 64;
 
