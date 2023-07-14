@@ -209,6 +209,11 @@ namespace search {
             TTFlag flag = TT_ALPHA;
             core::Move hash_move = entry ? entry->hash_move : core::NULL_MOVE;
 
+            if (entry && non_pv_node && entry->depth >= depth && board.get_move50() < 90 &&
+                (entry->flag == TT_EXACT || (entry->flag == TT_ALPHA && entry->eval <= alpha) || (entry->flag == TT_BETA && entry->eval >= beta))) {
+                return entry->eval;
+            }
+
             if (depth <= 0)
                 return qsearch<node_type>(alpha, beta);
 
@@ -305,7 +310,6 @@ namespace search {
                 if (score > best_score) {
                     best_score = score;
                     best_move = move;
-                    flag = TT_EXACT;
 
                     if (id == 0) {
                         pv_array[ss->ply][ss->ply] = move;
@@ -317,6 +321,7 @@ namespace search {
 
 
                     if (score > alpha) {
+                        flag = TT_EXACT;
                         alpha = score;
                     }
                 }
