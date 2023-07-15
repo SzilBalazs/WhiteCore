@@ -27,8 +27,7 @@ wandb.init(
     config={
         "learning_rate": 0.001,
         "architecture": 3,
-        "dataset": "data.plain",
-        "epochs": 10,
+        "epochs": 30,
         "batch_size": 16384,
         "thread_count": 4
     }
@@ -38,7 +37,7 @@ commit_hash = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).d
 current_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 wandb.run.name = f"exp-{commit_hash}-{current_time}"
 
-command_string = f"train in {wandb.run.config['dataset']} lr {wandb.run.config['learning_rate']} " \
+command_string = f"train lr {wandb.run.config['learning_rate']} " \
                  f"epochs {wandb.run.config['epochs']} batch {wandb.run.config['batch_size']} " \
                  f"threads {wandb.run.config['thread_count']}\n"
 
@@ -64,6 +63,8 @@ while is_running:
                 wandb.run.summary["iterations"] = iteration
                 wandb.log({"training loss": float(data[1]),
                            "training accuracy": float(data[3]),
+                           "validation loss": float(data[4]),
+                           "validation accuracy": float(data[5]),
                            "positions per second": int(data[2])})
         f.close()
     except Exception as e:

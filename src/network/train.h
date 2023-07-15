@@ -33,7 +33,8 @@ namespace nn {
     class Trainer {
     public:
 
-        Trainer(const std::string &training_data, const std::optional<std::string> &network_path, float learning_rate, int epochs, int batch_size, int thread_count) : adam(learning_rate), parser(training_data), batch_size(batch_size), thread_count(thread_count) {
+        Trainer(const std::string &training_data, const std::string &validation_data, const std::optional<std::string> &network_path, float learning_rate, int epochs, int batch_size, int thread_count) :
+        adam(learning_rate), training_parser(training_data), validation_parser(validation_data), batch_size(batch_size), thread_count(thread_count) {
 
             if (!std::filesystem::exists("networks")) {
                 std::filesystem::create_directory("networks");
@@ -53,7 +54,7 @@ namespace nn {
             entries_next = new TrainingEntry[batch_size];
 
             bool _;
-            parser.read_batch(batch_size, entries_next, _);
+            training_parser.read_batch(batch_size, entries_next, _);
 
             int64_t iter = 0;
             for (int epoch = 1; epoch <= epochs; epoch++) {
@@ -76,11 +77,11 @@ namespace nn {
                     errors.assign(thread_count, 0.0f);
                     accuracy.assign(thread_count, 0);
 
-                    std::thread th_loading = std::thread(&DataParser::read_batch, &parser, batch_size, entries_next, std::ref(is_new_epoch));
+                    std::thread th_loading = std::thread(&DataParser::read_batch, &training_parser, batch_size, entries_next, std::ref(is_new_epoch));
 
                     std::vector<std::thread> ths;
                     for (int id = 0; id < thread_count; id++) {
-                        ths.emplace_back(&Trainer::process_batch, this, id);
+                        ths.emplace_back(&Trainer::process_batch<true>, this, id);
                     }
 
                     for (std::thread &th : ths) {
@@ -99,6 +100,7 @@ namespace nn {
                     if (iter % 20 == 0) {
                         float average_error = checkpoint_error / float(batch_size * checkpoint_iter);
                         float average_accuracy = float(checkpoint_accuracy) / float(batch_size * checkpoint_iter);
+                        auto [val_loss, val_acc] = test_validation();
 
                         int64_t current_time = now();
                         int64_t elapsed_time = current_time - start_time;
@@ -124,7 +126,7 @@ namespace nn {
                         std::cout << "] - Epoch " << epoch << " - Iteration " << iter << " - Error " << average_error << " - ETA " << (eta / 1000) << "s - " << pos_per_s << " pos/s \r" << std::flush;
 
 
-                        log_file << iter << " " << average_error << " " << pos_per_s << " " << average_accuracy << "\n";
+                        log_file << iter << " " << average_error << " " << pos_per_s << " " << average_accuracy << " " << val_loss << " " << val_acc << "\n";
                         log_file.flush();
                         checkpoint_error = 0.0f;
                         checkpoint_accuracy = 0;
@@ -142,7 +144,8 @@ namespace nn {
     private:
         Network network;
         Adam adam;
-        DataParser parser;
+        DataParser training_parser;
+        DataParser validation_parser;
         unsigned int entry_count;
         int batch_size, thread_count;
         std::vector<Gradient> gradients;
@@ -150,6 +153,39 @@ namespace nn {
         std::vector<int> accuracy;
         TrainingEntry *entries, *entries_next;
 
+        std::pair<float, float> test_validation() {
+            bool _;
+            delete[] entries;
+            entries = new TrainingEntry[batch_size];
+            validation_parser.read_batch(batch_size, entries, _);
+
+            errors.assign(thread_count, 0.0f);
+            accuracy.assign(thread_count, 0);
+
+            std::vector<std::thread> ths;
+            for (int id = 0; id < thread_count; id++) {
+                ths.emplace_back(&Trainer::process_batch<false>, this, id);
+            }
+
+            for (std::thread &th : ths) {
+                if (th.joinable()) th.join();
+            }
+
+            float val_loss = 0.0f;
+            int correct = 0.0f;
+
+            for (int id = 0; id < thread_count; id++) {
+                val_loss += errors[id];
+                correct += accuracy[id];
+            }
+
+            val_loss /= batch_size;
+
+            float val_acc = float(correct) / float(batch_size);
+            return {val_loss, val_acc};
+        }
+
+        template<bool train>
         void process_batch(int id) {
             Gradient &g = gradients[id];
 
@@ -168,10 +204,12 @@ namespace nn {
                 errors[id] += error;
                 accuracy[id] += ((entry.wdl - 0.5f) * (prediction - 0.5f) > 0.0f) || std::abs(entry.wdl - prediction) < 0.05f;
 
-                std::array<float, 1> l1_loss = {(1 - EVAL_INFLUENCE) * 2.0f * (prediction - entry.wdl) + EVAL_INFLUENCE * 2.0f * (prediction - entry.eval)};
+                if constexpr (train) {
+                    std::array<float, 1> l1_loss = {(1 - EVAL_INFLUENCE) * 2.0f * (prediction - entry.wdl) + EVAL_INFLUENCE * 2.0f * (prediction - entry.eval)};
 
-                network.l1.backward(l1_loss, l0_output, l1_output, l0_loss, g.l1);
-                network.l0.backward(l0_loss, entry.features, l0_output, g.l0);
+                    network.l1.backward(l1_loss, l0_output, l1_output, l0_loss, g.l1);
+                    network.l0.backward(l0_loss, entry.features, l0_output, g.l0);
+                }
             }
         }
 

@@ -22,6 +22,7 @@
 #include "../selfplay/selfplay.h"
 #include "../network/train.h"
 #include "../tests/perft.h"
+#include "../utils/split.h"
 #include "../utils/logger.h"
 #include "../utils/utilities.h"
 #include "command.h"
@@ -99,17 +100,25 @@ namespace uci {
             std::optional<int> dropout = find_element<int>(tokens, "dropout");
             selfplay::start_generation(limits, book.value_or("book.epd"), output.value_or("data.plain"), thread_count.value_or(1), dropout.value_or(1));
         });
+        commands.emplace_back("split", [&](context tokens){
+            std::optional<std::string> input_data = find_element<std::string>(tokens, "input");
+            std::optional<std::string> output_data1 = find_element<std::string>(tokens, "output1");
+            std::optional<std::string> output_data2 = find_element<std::string>(tokens, "output2");
+            std::optional<int> rate = find_element<int>(tokens, "rate");
+            split_data(input_data.value_or("data.plain"), output_data1.value_or("train.plain"), output_data2.value_or("validation.plain"), rate.value_or(10));
+        });
         commands.emplace_back("train", [&](context tokens){
             std::optional<std::string> network_path = find_element<std::string>(tokens, "network");
-            std::optional<std::string> training_data = find_element<std::string>(tokens, "in");
+            std::optional<std::string> training_data = find_element<std::string>(tokens, "training_data");
+            std::optional<std::string> validation_data = find_element<std::string>(tokens, "validation_data");
             std::optional<float> learning_rate = find_element<float>(tokens, "lr");
             std::optional<int> epochs = find_element<int>(tokens, "epochs");
             std::optional<int> batch_size = find_element<int>(tokens, "batch");
             std::optional<int> threads = find_element<int>(tokens, "threads");
-            nn::Trainer trainer(training_data.value_or("data.plain"), network_path, learning_rate.value_or(0.001f),
+            nn::Trainer trainer(training_data.value_or("train.plain"), validation_data.value_or("validation.plain"), network_path, learning_rate.value_or(0.001f),
                                 epochs.value_or(10), batch_size.value_or(16384), threads.value_or(4));
         });
-        commands.emplace_back("learn", [&](context tokens){
+        /*commands.emplace_back("learn", [&](context tokens){
             std::optional<int> thread_count = find_element<int>(tokens, "threads");
             std::optional<int> iterations = find_element<int>(tokens, "iter");
             std::optional<int> nodes = find_element<int>(tokens, "nodes");
@@ -130,7 +139,7 @@ namespace uci {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
                 nn::net = nn::QNetwork("corenet.bin");
             }
-        });
+        });*/
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);
             U64 node_count = test::perft<true, false>(board, depth);
