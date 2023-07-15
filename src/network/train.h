@@ -28,7 +28,7 @@
 namespace nn {
 
     constexpr unsigned int PROGRESS_BAR_WIDTH = 25;
-    constexpr float EVAL_INFLUENCE = 0.5;
+    constexpr float EVAL_INFLUENCE = 0.9;
 
     class Trainer {
     public:

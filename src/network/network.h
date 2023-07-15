@@ -25,7 +25,7 @@
 
 namespace nn {
 
-    constexpr int L1_SIZE = 256;
+    constexpr int L1_SIZE = 32;
 
     struct Gradient {
         layers::DenseLayerGradient<768, L1_SIZE> l0;
@@ -41,7 +41,7 @@ namespace nn {
 
     struct Network {
 
-        static constexpr int MAGIC = 3;
+        static constexpr int MAGIC = 4;
 
         static constexpr unsigned int get_feature_index(Piece piece, unsigned int sq) {
             return (piece.color == WHITE) * 384 + piece.type * 64 + sq;
