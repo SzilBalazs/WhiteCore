@@ -115,31 +115,34 @@ namespace nn::layers {
             activate(output);
         }
 
-        void backward(const std::array<float, OUT> &loss, const std::array<float, IN> &input, std::array<float, IN> &input_loss, std::array<float, OUT> &bias_gradiant, std::array<float, IN * OUT> &weight_gradient) const {
+        void backward(const std::array<float, OUT> &loss, const std::array<float, IN> &input, const std::array<float, OUT> &output, std::array<float, IN> &input_loss, DenseLayerGradient<IN, OUT> &gradient) const {
             std::array<float, OUT> loss_before_activation;
+            std::fill(input_loss.begin(), input_loss.end(), 0);
+
             for (unsigned int i = 0; i < OUT; i++) {
-                loss_before_activation[i] = loss[i] * ACTIVATION::backward(loss[i]);
-                bias_gradiant[i] += loss_before_activation[i];
+                loss_before_activation[i] = loss[i] * ACTIVATION::backward(output[i]);
+                gradient.biases[i] += loss_before_activation[i];
             }
 
             for (unsigned int i = 0; i < IN; i++) {
                 for (unsigned int j = 0; j < OUT; j++) {
-                    weight_gradient[i * OUT + j] += input[i] * loss_before_activation[j];
+                    gradient.weights[i * OUT + j] += input[i] * loss_before_activation[j];
                     input_loss[i] += weights[i * OUT + j] * loss_before_activation[j];
                 }
             }
         }
 
-        void backward(const std::array<float, OUT> &loss, const std::vector<unsigned int> &input_features, std::array<float, OUT> &bias_gradiant, std::array<float, IN * OUT> &weight_gradient) const {
+        void backward(const std::array<float, OUT> &loss, const std::vector<unsigned int> &input_features, const std::array<float, OUT> &output, DenseLayerGradient<IN, OUT> &gradient) const {
             std::array<float, OUT> loss_before_activation;
+
             for (unsigned int i = 0; i < OUT; i++) {
-                loss_before_activation[i] = loss[i] * ACTIVATION::backward(loss[i]);
-                bias_gradiant[i] += loss_before_activation[i];
+                loss_before_activation[i] = loss[i] * ACTIVATION::backward(output[i]);
+                gradient.biases[i] += loss_before_activation[i];
             }
 
             for (unsigned int i : input_features) {
                 for (unsigned int j = 0; j < OUT; j++) {
-                    weight_gradient[i * OUT + j] += loss_before_activation[j];
+                    gradient.weights[i * OUT + j] += loss_before_activation[j];
                 }
             }
         }

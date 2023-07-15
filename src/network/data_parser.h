@@ -104,7 +104,7 @@ namespace nn {
 
             int eval_int = std::stoi(eval);
             if (stm == BLACK) eval_int *= -1;
-            res.eval = activations::sigmoid::forward(float(eval_int)/400.0f);
+            res.eval = activations::sigmoid::forward(float(eval_int) / 400.0f);
 
             return res;
         }

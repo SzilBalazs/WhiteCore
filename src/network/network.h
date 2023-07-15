@@ -18,30 +18,37 @@
 #pragma once
 
 #include "activations/relu.h"
+#include "activations/crelu.h"
 #include "activations/sigmoid.h"
 #include "layers/tapered_eval.h"
 #include "layers/dense_layer.h"
 
 namespace nn {
 
+    constexpr int L1_SIZE = 256;
+
     struct Gradient {
-        layers::DenseLayerGradient<768, 2> pst;
+        layers::DenseLayerGradient<768, L1_SIZE> l0;
+        layers::DenseLayerGradient<L1_SIZE, 1> l1;
+
+        Gradient() = default;
 
         void operator+=(const Gradient &g) {
-            pst += g.pst;
+            l0 += g.l0;
+            l1 += g.l1;
         }
     };
 
     struct Network {
 
-        static constexpr int MAGIC = 2;
+        static constexpr int MAGIC = 3;
 
         static constexpr unsigned int get_feature_index(Piece piece, unsigned int sq) {
             return (piece.color == WHITE) * 384 + piece.type * 64 + sq;
         }
 
-        layers::DenseLayer<768, 2, activations::none> pst;
-        layers::TaperedEval<activations::sigmoid> tapered_eval;
+        layers::DenseLayer<768, L1_SIZE, activations::crelu> l0;
+        layers::DenseLayer<L1_SIZE, 1, activations::sigmoid> l1;
 
         Network(const std::string &network_path) {
             std::ifstream file(network_path, std::ios::in | std::ios::binary);
@@ -49,7 +56,8 @@ namespace nn {
                 logger.print("Unable to open:", network_path);
                 std::random_device rd;
                 std::mt19937 mt(rd());
-                pst.randomize(mt);
+                l0.randomize(mt);
+                l1.randomize(mt);
             } else {
                 int magic;
                 file.read(reinterpret_cast<char *>(&magic), sizeof(magic));
@@ -59,7 +67,8 @@ namespace nn {
                     throw std::invalid_argument("Invalid network file with magic " + std::to_string(magic));
                 }
 
-                pst.load_from_file(file);
+                l0.load_from_file(file);
+                l1.load_from_file(file);
 
                 file.close();
 
@@ -70,15 +79,13 @@ namespace nn {
         Network() {
             std::random_device rd;
             std::mt19937 mt(rd());
-            pst.randomize(mt);
+            l0.randomize(mt);
+            l1.randomize(mt);
         }
 
-        float forward(const std::vector<unsigned int> &features, float phase) const {
-            std::array<float, 2> l1_output;
-            float l2_output;
-            pst.forward(features, l1_output);
-            tapered_eval.forward(l1_output, l2_output, phase);
-            return l2_output;
+        void forward(const std::vector<unsigned int> &features, std::array<float, L1_SIZE> &l0_output, std::array<float, 1> &l1_output, float phase) const {
+            l0.forward(features, l0_output);
+            l1.forward(l0_output, l1_output);
         }
 
         void write_to_file(const std::string &output_path) {
@@ -91,7 +98,8 @@ namespace nn {
             int magic = MAGIC;
             file.write(reinterpret_cast<char *>(&magic), sizeof(magic));
 
-            pst.write_to_file(file);
+            l0.write_to_file(file);
+            l1.write_to_file(file);
 
             file.close();
         }

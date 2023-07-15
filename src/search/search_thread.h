@@ -32,7 +32,9 @@ namespace search {
     inline void init_lmr() {
         for (int made_moves = 0; made_moves < 200; made_moves++) {
             for (Depth depth = 0; depth < MAX_PLY + 1; depth++) {
-                lmr_reductions[made_moves][depth] = 1.0 + std::log(made_moves) * std::log(depth) / 2.0;
+                double moves_log = made_moves == 0 ? 0 : std::log(made_moves);
+                double depth_log = depth == 0 ? 0 : std::log(depth);
+                lmr_reductions[made_moves][depth] = 1.0 + moves_log * depth_log / 2.0;
             }
         }
     }

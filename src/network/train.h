@@ -28,7 +28,7 @@
 namespace nn {
 
     constexpr unsigned int PROGRESS_BAR_WIDTH = 25;
-    constexpr float EVAL_INFLUENCE = 0.2;
+    constexpr float EVAL_INFLUENCE = 0.5;
 
     class Trainer {
     public:
@@ -139,15 +139,21 @@ namespace nn {
             for (int i = id; i < batch_size; i += thread_count) {
                 TrainingEntry &entry = entries[i];
 
-                float prediction = network.forward(entry.features, entry.phase);
+                std::array<float, L1_SIZE> l0_output;
+                std::array<float, L1_SIZE> l0_loss;
+                std::array<float, 1> l1_output;
+
+                network.forward(entry.features, l0_output, l1_output, entry.phase);
+                float prediction = l1_output[0];
+
                 float error = (1.0f - EVAL_INFLUENCE) * (prediction - entry.wdl) * (prediction - entry.wdl)
                               + EVAL_INFLUENCE * (prediction - entry.eval) * (prediction - entry.eval);
                 errors[id] += error;
 
-                float loss = {(1 - EVAL_INFLUENCE) * 2.0f * (prediction - entry.wdl) + EVAL_INFLUENCE * 2.0f * (prediction - entry.eval)};
-                std::array<float, 2> l1_loss;
-                network.tapered_eval.backward(loss, l1_loss, entry.phase);
-                network.pst.backward(l1_loss, entry.features, g.pst.biases, g.pst.weights);
+                std::array<float, 1> l1_loss = {(1 - EVAL_INFLUENCE) * 2.0f * (prediction - entry.wdl) + EVAL_INFLUENCE * 2.0f * (prediction - entry.eval)};
+
+                network.l1.backward(l1_loss, l0_output, l1_output, l0_loss, g.l1);
+                network.l0.backward(l0_loss, entry.features, l0_output, g.l0);
             }
         }
 

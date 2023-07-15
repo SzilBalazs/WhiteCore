@@ -32,8 +32,11 @@ namespace nn {
                 total += g;
             }
 
-            update(network.pst.weights, m_gradient.pst.weights, v_gradient.pst.weights, total.pst.weights);
-            update(network.pst.biases, m_gradient.pst.biases, v_gradient.pst.biases, total.pst.biases);
+            update(network.l0.weights, m_gradient.l0.weights, v_gradient.l0.weights, total.l0.weights);
+            update(network.l0.biases, m_gradient.l0.biases, v_gradient.l0.biases, total.l0.biases);
+
+            update(network.l1.weights, m_gradient.l1.weights, v_gradient.l1.weights, total.l1.weights);
+            update(network.l1.biases, m_gradient.l1.biases, v_gradient.l1.biases, total.l1.biases);
         }
 
     private:
@@ -56,6 +59,7 @@ namespace nn {
             v = BETA2 * v + (1.0f - BETA2) * grad * grad;
 
             target -= LR * m / (std::sqrt(v) + EPSILON);
+            target = std::clamp(target, -1.98f, 1.98f);
         }
     };
 

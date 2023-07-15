@@ -20,13 +20,16 @@
 #include <algorithm>
 
 namespace nn::activations {
-    struct relu {
+    struct crelu {
+
+        static constexpr float UPPER_BOUND = 1.0f;
+
         static float forward(float value) {
-            return std::max(0.0f, value);
+            return std::clamp(value, 0.0f, UPPER_BOUND);
         }
 
         static constexpr float backward(float value) {
-            return 0.0f < value;
+            return 0.0f < value && value < UPPER_BOUND;
         }
     };
 } // namespace nn::activations
