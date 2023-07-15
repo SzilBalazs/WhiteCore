@@ -41,6 +41,8 @@ namespace nn {
 
             index_training_data(training_data);
 
+            std::ofstream log_file("log.txt", std::ios::out);
+
             if (network_path) {
                 network = Network(network_path.value());
             } else {
@@ -57,12 +59,14 @@ namespace nn {
             for (int epoch = 1; epoch <= epochs; epoch++) {
                 int64_t start_time = now();
                 bool is_new_epoch = false;
-                float total_error = 0.0f;
+                float checkpoint_error = 0.0f;
+                int checkpoint_accuracy = 0;
                 int64_t epoch_iter = 0;
+                int64_t checkpoint_iter = 0;
 
                 while (!is_new_epoch) {
                     iter++;
-                    epoch_iter++;
+                    epoch_iter++; checkpoint_iter++;
 
                     delete[] entries;
                     entries = entries_next;
@@ -70,6 +74,7 @@ namespace nn {
 
                     gradients.assign(thread_count, Gradient());
                     errors.assign(thread_count, 0.0f);
+                    accuracy.assign(thread_count, 0);
 
                     std::thread th_loading = std::thread(&DataParser::read_batch, &parser, batch_size, entries_next, std::ref(is_new_epoch));
 
@@ -85,13 +90,15 @@ namespace nn {
                     adam.update(gradients, network);
 
                     for (int id = 0; id < thread_count; id++) {
-                        total_error += errors[id];
+                        checkpoint_error += errors[id];
+                        checkpoint_accuracy += accuracy[id];
                     }
 
                     if (th_loading.joinable()) th_loading.join();
 
-                    if (iter % 10 == 0) {
-                        float average_error = total_error / float(batch_size * epoch_iter);
+                    if (iter % 20 == 0) {
+                        float average_error = checkpoint_error / float(batch_size * checkpoint_iter);
+                        float average_accuracy = float(checkpoint_accuracy) / float(batch_size * checkpoint_iter);
 
                         int64_t current_time = now();
                         int64_t elapsed_time = current_time - start_time;
@@ -116,11 +123,20 @@ namespace nn {
                         }
                         std::cout << "] - Epoch " << epoch << " - Iteration " << iter << " - Error " << average_error << " - ETA " << (eta / 1000) << "s - " << pos_per_s << " pos/s \r" << std::flush;
 
+
+                        log_file << iter << " " << average_error << " " << pos_per_s << " " << average_accuracy << "\n";
+                        log_file.flush();
+                        checkpoint_error = 0.0f;
+                        checkpoint_accuracy = 0;
+                        checkpoint_iter = 0;
                     }
                 }
                 std::cout << std::endl;
                 network.write_to_file("networks/" + std::to_string(epoch) + ".bin");
             }
+
+            log_file << "END\n";
+            log_file.close();
         }
 
     private:
@@ -131,6 +147,7 @@ namespace nn {
         int batch_size, thread_count;
         std::vector<Gradient> gradients;
         std::vector<float> errors;
+        std::vector<int> accuracy;
         TrainingEntry *entries, *entries_next;
 
         void process_batch(int id) {
@@ -149,6 +166,7 @@ namespace nn {
                 float error = (1.0f - EVAL_INFLUENCE) * (prediction - entry.wdl) * (prediction - entry.wdl)
                               + EVAL_INFLUENCE * (prediction - entry.eval) * (prediction - entry.eval);
                 errors[id] += error;
+                accuracy[id] += ((entry.wdl - 0.5f) * (prediction - 0.5f) > 0.0f) || std::abs(entry.wdl - prediction) < 0.05f;
 
                 std::array<float, 1> l1_loss = {(1 - EVAL_INFLUENCE) * 2.0f * (prediction - entry.wdl) + EVAL_INFLUENCE * 2.0f * (prediction - entry.eval)};
 

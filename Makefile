@@ -66,6 +66,10 @@ clean:
 bench: $(OUTPUT_BINARY)
 	@echo Bench: $(shell ./$(OUTPUT_BINARY) bench | grep -Eo '^[0-9]+ nodes' | grep -o '[0-9]*')
 
+train: $(OUTPUT_BINARY)
+	cp $(OUTPUT_BINARY) train/WhiteCore
+	cd train && source py/bin/activate && python trainer.py && deactivate
+
 $(INCBIN_TOOL):
 ifeq ($(uname_S), Windows)
 	@echo Compiling $(INCBIN_TOOL)
