@@ -201,7 +201,7 @@ namespace selfplay {
             int64_t eta = (1.0f - progress) * total_time;
 
             unsigned int percentage = progress * 100;
-            unsigned int pos_per_s = position_count * 1000 / elapsed_time;
+            unsigned int pos_per_s = position_count / elapsed_time * 1000;
 
             unsigned int progress_position = PROGRESS_BAR_WIDTH * progress;
 
