@@ -210,6 +210,8 @@ namespace nn {
 
     inline Score eval(const core::Board &board) {
 
+        // return hce(board);
+
         core::Bitboard bb = board.occupied();
         std::vector<unsigned int> features;
         float phase = 0.0;

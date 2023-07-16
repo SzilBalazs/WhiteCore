@@ -39,6 +39,10 @@ namespace nn {
             update(network.l1.biases, m_gradient.l1.biases, v_gradient.l1.biases, total.l1.biases);
         }
 
+        void reduce_learning_rate(float rate) {
+            LR *= rate;
+        }
+
     private:
         static constexpr float BETA1 = 0.9f;
         static constexpr float BETA2 = 0.999f;

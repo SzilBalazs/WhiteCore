@@ -34,8 +34,8 @@ namespace nn {
             return (piece.color == WHITE) * 384 + piece.type * 64 + sq;
         }
 
-        layers::DenseLayer<768, 32, activations::crelu> l0;
-        layers::DenseLayer<32, 1, activations::none> l1;
+        layers::DenseLayer<768, L1_SIZE, activations::crelu> l0;
+        layers::DenseLayer<L1_SIZE, 1, activations::none> l1;
 
         QNetwork() = default;
 
@@ -82,7 +82,7 @@ namespace nn {
         }
 
         Score forward(const std::vector<unsigned int> &features, float phase) const {
-            std::array<float, 32> l0_output;
+            std::array<float, L1_SIZE> l0_output;
             std::array<float, 1> l1_output;
             l0.forward(features, l0_output);
             l1.forward(l0_output, l1_output);

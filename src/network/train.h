@@ -65,6 +65,10 @@ namespace nn {
                 int64_t epoch_iter = 0;
                 int64_t checkpoint_iter = 0;
 
+                if (epoch == 15) {
+                    adam.reduce_learning_rate(0.1);
+                }
+
                 while (!is_new_epoch) {
                     iter++;
                     epoch_iter++; checkpoint_iter++;

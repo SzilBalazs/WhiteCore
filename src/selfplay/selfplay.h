@@ -31,7 +31,7 @@ namespace selfplay {
     const unsigned int DEFAULT_THREAD_COUNT = 1;
     const unsigned int BLOCK_SIZE = 100000;
 
-    std::atomic<unsigned int> game_count, position_count;
+    std::atomic<uint64_t> game_count, position_count;
 
     const unsigned int PROGRESS_BAR_WIDTH = 25;
 
@@ -201,7 +201,7 @@ namespace selfplay {
             int64_t eta = (1.0f - progress) * total_time;
 
             unsigned int percentage = progress * 100;
-            unsigned int pos_per_s = position_count / elapsed_time * 1000;
+            uint64_t pos_per_s = position_count * 1000ULL / elapsed_time;
 
             unsigned int progress_position = PROGRESS_BAR_WIDTH * progress;
 
