@@ -19,10 +19,10 @@ endif
 
 ifeq ($(uname_S), Windows)
 	SUFFIX = .exe
-	CP = cp
+	CP = powershell cp
 else
-	SUFFIX =
 	CP = cp
+	SUFFIX =
 	SOURCES := $(shell find $(SOURCEDIR) -name '*.cpp')
     HEADERS := $(shell find $(SOURCEDIR) -name '*.h')
 endif
