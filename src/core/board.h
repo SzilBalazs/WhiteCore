@@ -22,9 +22,10 @@
 #include "bitboard.h"
 #include "board_state.h"
 #include "move.h"
+#include "../network/nnue.h"
 
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 #include <vector>
 
 #define state states.back()
@@ -133,7 +134,7 @@ namespace core {
             states.pop_back();
         }
 
-        inline void make_move(Move move) {
+        inline void make_move(Move move, nn::NNUE *nnue = nullptr) {
             const Square from = move.get_from();
             const Square to = move.get_to();
             Piece piece_moved = piece_at(from);
@@ -163,7 +164,7 @@ namespace core {
 
             if (move.eq_flag(EP_CAPTURE)) {
                 state.piece_captured = Piece(PAWN, xstm);
-                square_clear(to + DOWN);
+                square_clear(to + DOWN, nnue);
             } else {
                 state.piece_captured = piece_at(to);
             }
@@ -191,19 +192,19 @@ namespace core {
                 }
             }
 
-            move_piece(piece_moved, from, to);
+            move_piece(piece_moved, from, to, nnue);
 
             if (move.eq_flag(KING_CASTLE)) {
                 if (stm == WHITE) {
-                    move_piece(Piece(ROOK, WHITE), H1, F1);
+                    move_piece(Piece(ROOK, WHITE), H1, F1, nnue);
                 } else {
-                    move_piece(Piece(ROOK, BLACK), H8, F8);
+                    move_piece(Piece(ROOK, BLACK), H8, F8, nnue);
                 }
             } else if (move.eq_flag(QUEEN_CASTLE)) {
                 if (stm == WHITE) {
-                    move_piece(Piece(ROOK, WHITE), A1, D1);
+                    move_piece(Piece(ROOK, WHITE), A1, D1, nnue);
                 } else {
-                    move_piece(Piece(ROOK, BLACK), A8, D8);
+                    move_piece(Piece(ROOK, BLACK), A8, D8, nnue);
                 }
             }
 
@@ -223,7 +224,7 @@ namespace core {
             state.hash.xor_castle(state.rights);
         }
 
-        inline void undo_move(Move move) {
+        inline void undo_move(Move move, nn::NNUE *nnue = nullptr) {
             const Square from = move.get_from();
             const Square to = move.get_to();
             Piece piece_moved = piece_at(to);
@@ -240,24 +241,24 @@ namespace core {
 
             if (move.eq_flag(KING_CASTLE)) {
                 if (stm == WHITE) {
-                    move_piece(Piece(ROOK, WHITE), F1, H1);
+                    move_piece(Piece(ROOK, WHITE), F1, H1, nnue);
                 } else {
-                    move_piece(Piece(ROOK, BLACK), F8, H8);
+                    move_piece(Piece(ROOK, BLACK), F8, H8, nnue);
                 }
             } else if (move.eq_flag(QUEEN_CASTLE)) {
                 if (stm == WHITE) {
-                    move_piece(Piece(ROOK, WHITE), D1, A1);
+                    move_piece(Piece(ROOK, WHITE), D1, A1, nnue);
                 } else {
-                    move_piece(Piece(ROOK, BLACK), D8, A8);
+                    move_piece(Piece(ROOK, BLACK), D8, A8, nnue);
                 }
             }
 
-            move_piece(piece_moved, to, from);
+            move_piece(piece_moved, to, from, nnue);
 
             if (move.eq_flag(EP_CAPTURE)) {
-                square_set(to + DOWN, state.piece_captured);
+                square_set(to + DOWN, state.piece_captured, nnue);
             } else if (move.is_capture()) {
-                square_set(to, state.piece_captured);
+                square_set(to, state.piece_captured, nnue);
             }
 
             states.pop_back();
@@ -378,13 +379,24 @@ namespace core {
                       << std::endl;
         }
 
+        inline std::vector<unsigned int> to_features() const {
+            std::vector<unsigned int> result;
+            Bitboard bb = occupied();
+            while (bb) {
+                Square sq = bb.pop_lsb();
+                Piece piece = piece_at(sq);
+                result.emplace_back(nn::NNUE::get_feature_index(piece, sq));
+            }
+            return result;
+        }
+
     private:
         Piece mailbox[64];
         Bitboard bb_pieces[6], bb_colors[2];
 
         std::vector<BoardState> states;
 
-        inline void square_clear(Square square) {
+        inline void square_clear(Square square, nn::NNUE *nnue = nullptr) {
             const Piece piece = piece_at(square);
             if (piece.is_null()) return;
 
@@ -393,24 +405,28 @@ namespace core {
             mailbox[square] = NULL_PIECE;
 
             state.hash.xor_piece(square, piece);
+
+            if (nnue) nnue->deactivate(piece, square);
         }
 
-        inline void square_set(Square square, Piece piece) {
+        inline void square_set(Square square, Piece piece, nn::NNUE *nnue = nullptr) {
             assert(piece.is_ok());
-            square_clear(square);
+            square_clear(square, nnue);
 
             bb_colors[piece.color].set(square);
             bb_pieces[piece.type].set(square);
             mailbox[square] = piece;
 
             state.hash.xor_piece(square, piece);
+
+            if (nnue) nnue->activate(piece, square);
         }
 
-        inline void move_piece(Piece piece, Square from, Square to) {
+        inline void move_piece(Piece piece, Square from, Square to, nn::NNUE *nnue = nullptr) {
             assert(piece.is_ok());
 
-            square_clear(from);
-            square_set(to, piece);
+            square_clear(from, nnue);
+            square_set(to, piece, nnue);
         }
 
         inline void board_clear() {

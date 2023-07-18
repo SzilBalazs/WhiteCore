@@ -153,6 +153,7 @@ namespace search {
                 if (alpha <= -BOUND) alpha = -INF_SCORE;
                 if (beta >= BOUND) beta = INF_SCORE;
 
+                nnue.refresh(board.to_features());
                 Score score = search<ROOT_NODE>(depth, alpha, beta, ss);
 
                 if (score <= alpha) {
@@ -220,7 +221,7 @@ namespace search {
             if (depth <= 0)
                 return qsearch<node_type>(alpha, beta);
 
-            Score static_eval = ss->eval = nnue.evaluate(board);
+            Score static_eval = ss->eval = nnue.evaluate(board.get_stm());
 
             if (root_node || in_check)
                 goto search_moves;
@@ -272,7 +273,7 @@ namespace search {
                 }
 
                 shared.node_count++;
-                board.make_move(move);
+                board.make_move(move, &nnue);
                 Score score;
 
                 if (!in_check && depth >= 4 && made_moves >= 4 && !move.is_promo() && move.is_quiet()) {
@@ -291,7 +292,7 @@ namespace search {
                     score = -search<PV_NODE>(depth - 1, -beta, -alpha, ss + 1);
                 }
 
-                board.undo_move(move);
+                board.undo_move(move, &nnue);
 
                 if (!shared.is_searching) {
                     return UNKNOWN_SCORE;
@@ -346,7 +347,7 @@ namespace search {
 
             MoveList<true> move_list(board, core::NULL_MOVE, history, 0);
 
-            Score static_eval = nnue.evaluate(board);
+            Score static_eval = nnue.evaluate(board.get_stm());
 
             if (static_eval >= beta)
                 return beta;
@@ -357,9 +358,9 @@ namespace search {
                 core::Move move = move_list.next_move();
 
                 shared.node_count++;
-                board.make_move(move);
+                board.make_move(move, &nnue);
                 Score score = -qsearch<node_type>(-beta, -alpha);
-                board.undo_move(move);
+                board.undo_move(move, &nnue);
 
                 if (score == UNKNOWN_SCORE) {
                     return UNKNOWN_SCORE;

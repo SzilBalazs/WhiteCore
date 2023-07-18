@@ -89,7 +89,8 @@ namespace uci {
         });
         commands.emplace_back("eval", [&](context tokens){
             nn::NNUE network{};
-            logger.print(network.evaluate(board));
+            network.refresh(board.to_features());
+            logger.print("Eval:", network.evaluate(board.get_stm()));
         });
         commands.emplace_back("gen", [&](context tokens) {
             search::Limits limits;
