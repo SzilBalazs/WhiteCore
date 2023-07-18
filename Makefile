@@ -19,8 +19,10 @@ endif
 
 ifeq ($(uname_S), Windows)
 	SUFFIX = .exe
+	CP = copy
 else
 	SUFFIX =
+	CP = cp
 	SOURCES := $(shell find $(SOURCEDIR) -name '*.cpp')
     HEADERS := $(shell find $(SOURCEDIR) -name '*.h')
 endif
@@ -52,7 +54,8 @@ ifeq ($(build), debug)
 endif
 
 EVALFILE = corenet.bin
-DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG -D_CRT_SECURE_NO_WARNINGS -DEVALFILE=\"$(EVALFILE)\"
+TMP_EVALFILE = tmp.bin
+DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG -D_CRT_SECURE_NO_WARNINGS
 CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall
 EXE = $(NAME)-v$(VERSION_MAJOR)-$(VERSION_MINOR)
 OUTPUT_BINARY = $(EXE)$(SUFFIX)
@@ -62,16 +65,19 @@ build: $(OUTPUT_BINARY)
 	@echo > /dev/null
 
 clean:
-	@rm $(OUTPUT_BINARY) $(INCBIN_TOOL) src/corenet.cpp || true
+	@rm $(OUTPUT_BINARY) $(INCBIN_TOOL) $(TMP_EVALFILE) src/corenet.cpp || true
 
 bench: $(OUTPUT_BINARY)
 	@echo Bench: $(shell ./$(OUTPUT_BINARY) bench | grep -Eo '^[0-9]+ nodes' | grep -o '[0-9]*')
 
 train: $(OUTPUT_BINARY)
-	cp $(OUTPUT_BINARY) train/WhiteCore
-	cd train && source py/bin/activate && python trainer.py && deactivate
+	@$(CP) $(OUTPUT_BINARY) train/WhiteCore
+	@cd train && source py/bin/activate && python trainer.py && deactivate
 
-$(INCBIN_TOOL):
+$(TMP_EVALFILE):
+	@$(CP) $(EVALFILE) $(TMP_EVALFILE)
+
+$(INCBIN_TOOL): $(TMP_EVALFILE)
 ifeq ($(uname_S), Windows)
 	@echo Compiling $(INCBIN_TOOL)
 	@clang -o $@ src/external/incbin/incbin.c
