@@ -360,6 +360,8 @@ namespace search {
             while (!move_list.empty()) {
                 core::Move move = move_list.next_move();
 
+                if (alpha > -WORST_MATE && !see(board, move, 0)) continue;
+
                 shared.node_count++;
                 board.make_move(move, &nnue);
                 Score score = -qsearch<node_type>(-beta, -alpha);
