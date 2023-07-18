@@ -66,9 +66,8 @@ namespace nn::layers {
         }
 
         void copy_accumulator(std::array<T, OUT> &result) {
-            std::copy(accumulator.begin(), accumulator.end(), result.begin());
-            for (T &i : result) {
-                i = ACTIVATION::forward(i);
+            for (unsigned int i = 0; i < OUT; i++) {
+                result[i] = ACTIVATION::forward(accumulator[i]);
             }
         }
 
