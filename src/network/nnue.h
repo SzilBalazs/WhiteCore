@@ -22,9 +22,13 @@
 #include "layers/dense_layer.h"
 #include "../external/incbin/incbin.h"
 
+#ifndef EVALFILE
+#define EVALFILE "corenet.bin"
+#endif
+
 namespace nn {
 
-    INCBIN(DefaultNetwork, "corenet.bin");
+    INCBIN(DefaultNetwork, EVALFILE);
 
     class NNUE {
 
