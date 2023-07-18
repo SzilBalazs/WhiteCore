@@ -88,7 +88,8 @@ namespace uci {
             board.display();
         });
         commands.emplace_back("eval", [&](context tokens){
-            logger.print("Eval:", nn::eval(board));
+            nn::NNUE network{};
+            logger.print(network.evaluate(board));
         });
         commands.emplace_back("gen", [&](context tokens) {
             search::Limits limits;
@@ -106,6 +107,12 @@ namespace uci {
             std::optional<std::string> output_data2 = find_element<std::string>(tokens, "output2");
             std::optional<int> rate = find_element<int>(tokens, "rate");
             split_data(input_data.value_or("data.plain"), output_data1.value_or("train.plain"), output_data2.value_or("validation.plain"), rate.value_or(10));
+        });
+        commands.emplace_back("quantize", [&](context tokens){
+            std::optional<std::string> input = find_element<std::string>(tokens, "input");
+            std::optional<std::string> output = find_element<std::string>(tokens, "output");
+            nn::Network network_file(input.value_or("input.bin"));
+            network_file.quantize<int16_t, nn::NNUE::QSCALE>(output.value_or("output.bin"));
         });
         commands.emplace_back("train", [&](context tokens){
             std::optional<std::string> network_path = find_element<std::string>(tokens, "network");
@@ -187,10 +194,6 @@ namespace uci {
                 },
                 1, 4);
         sm.allocate_threads(1);
-
-        options.emplace_back("EvalFile", "default", "string", [&]() {
-            nn::net = nn::QNetwork(get_option<std::string>("EvalFile"));
-        });
     }
 
     void UCI::start() {

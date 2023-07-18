@@ -20,7 +20,6 @@
 #include "activations/relu.h"
 #include "activations/crelu.h"
 #include "activations/sigmoid.h"
-#include "layers/tapered_eval.h"
 #include "layers/dense_layer.h"
 
 namespace nn {
@@ -47,8 +46,8 @@ namespace nn {
             return (piece.color == WHITE) * 384 + piece.type * 64 + sq;
         }
 
-        layers::DenseLayer<768, L1_SIZE, activations::crelu> l0;
-        layers::DenseLayer<L1_SIZE, 1, activations::sigmoid> l1;
+        layers::DenseLayer<768, L1_SIZE, float, float, activations::crelu<float, 1>> l0;
+        layers::DenseLayer<L1_SIZE, 1, float, float, activations::sigmoid> l1;
 
         Network(const std::string &network_path) {
             std::ifstream file(network_path, std::ios::in | std::ios::binary);
@@ -100,6 +99,23 @@ namespace nn {
 
             l0.write_to_file(file);
             l1.write_to_file(file);
+
+            file.close();
+        }
+
+        template<typename QTYPE, int QSCALE>
+        void quantize(const std::string &output_path) {
+            std::ofstream file(output_path, std::ios::out | std::ios::binary);
+            if (!file.is_open()) {
+                logger.print("Unable to open:", output_path);
+                throw std::invalid_argument("Unable to open: " + output_path);
+            }
+
+            int magic = -MAGIC;
+            file.write(reinterpret_cast<char *>(&magic), sizeof(magic));
+
+            l0.quantize<QTYPE, QSCALE, QSCALE>(file);
+            l1.quantize<QTYPE, QSCALE * QSCALE, QSCALE>(file);
 
             file.close();
         }

@@ -18,12 +18,6 @@
 #include "tests/tests.h"
 #include "uci/uci.h"
 #include "utils/bench.h"
-#include "external/incbin/incbin.h"
-
-namespace nn {
-    QNetwork net;
-    INCBIN(DefaultNetwork, "corenet.bin");
-}
 
 namespace core {
     // Declarations
@@ -61,7 +55,6 @@ int main(int argc, char *argv[]) {
         mode = std::string(argv[1]);
     }
 
-    nn::net = nn::QNetwork(nn::gDefaultNetworkData);
     init_all();
 
     if (mode == "test") {

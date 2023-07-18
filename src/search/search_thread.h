@@ -16,7 +16,7 @@
 //
 
 #include "../core/board.h"
-#include "../network/eval.h"
+#include "../network/nnue.h"
 #include "history.h"
 #include "move_list.h"
 #include "time_manager.h"
@@ -57,7 +57,7 @@ namespace search {
 
     class SearchThread {
     public:
-        SearchThread(SharedMemory &shared_memory, unsigned int thread_id) : shared(shared_memory), id(thread_id) {}
+        SearchThread(SharedMemory &shared_memory, unsigned int thread_id) : nnue(), shared(shared_memory), id(thread_id) {}
 
         void load_board(const core::Board &position) {
             board = position;
@@ -74,6 +74,7 @@ namespace search {
 
     private:
         core::Board board;
+        nn::NNUE nnue;
         SharedMemory &shared;
         std::thread th;
         unsigned int id;
@@ -219,7 +220,7 @@ namespace search {
             if (depth <= 0)
                 return qsearch<node_type>(alpha, beta);
 
-            Score static_eval = ss->eval = nn::eval(board);
+            Score static_eval = ss->eval = nnue.evaluate(board);
 
             if (root_node || in_check)
                 goto search_moves;
@@ -345,7 +346,7 @@ namespace search {
 
             MoveList<true> move_list(board, core::NULL_MOVE, history, 0);
 
-            Score static_eval = nn::eval(board);
+            Score static_eval = nnue.evaluate(board);
 
             if (static_eval >= beta)
                 return beta;
