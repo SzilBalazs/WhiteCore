@@ -19,7 +19,7 @@ endif
 
 ifeq ($(uname_S), Windows)
 	SUFFIX = .exe
-	CP = copy
+	CP = cp
 else
 	SUFFIX =
 	CP = cp
