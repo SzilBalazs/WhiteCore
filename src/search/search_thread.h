@@ -276,8 +276,11 @@ namespace search {
                 board.make_move(move, &nnue);
                 Score score;
 
-                if (!in_check && depth >= 4 && made_moves >= 4 && !move.is_promo() && move.is_quiet()) {
+                if (!in_check && depth >= 3 && made_moves >= 4 && !move.is_promo() && move.is_quiet()) {
                     Depth R = lmr_reductions[depth][made_moves];
+
+                    R -= pv_node;
+
                     Depth new_depth = std::clamp(depth - R, 1, depth - 1);
                     score = -search<NON_PV_NODE>(new_depth, -alpha - 1, -alpha, ss + 1);
 
