@@ -3,6 +3,8 @@ name: Build & Run Tests
 on:
   push:
     branches: [ "master", "dev" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   BlackCore:
