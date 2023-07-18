@@ -20,6 +20,7 @@
 #include "../activations/none.h"
 
 #include <type_traits>
+#include <vector>
 #include <cstring>
 #include <array>
 
