@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#pragma once
+
 #include "../core/constants.h"
 #include "../utils/utilities.h"
 #include "activations/sigmoid.h"

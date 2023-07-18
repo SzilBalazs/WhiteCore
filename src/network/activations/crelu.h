@@ -20,16 +20,17 @@
 #include <algorithm>
 
 namespace nn::activations {
+    template<typename T, int INT_UPPER_BOUND>
     struct crelu {
 
-        static constexpr float UPPER_BOUND = 1.0f;
+        static constexpr T UPPER_BOUND = static_cast<T>(INT_UPPER_BOUND);
 
-        static float forward(float value) {
-            return std::clamp(value, 0.0f, UPPER_BOUND);
+        static T forward(T value) {
+            return std::clamp(value, static_cast<T>(0), UPPER_BOUND);
         }
 
-        static constexpr float backward(float value) {
-            return 0.0f < value && value < UPPER_BOUND;
+        static constexpr T backward(T value) {
+            return static_cast<T>(0) < value && value < UPPER_BOUND;
         }
     };
 } // namespace nn::activations

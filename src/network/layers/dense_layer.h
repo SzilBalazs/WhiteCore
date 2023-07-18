@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#pragma once
+
 #include <array>
 #include <functional>
 #include <thread>
@@ -46,14 +48,14 @@ namespace nn::layers {
         }
     };
 
-    template<unsigned int IN, unsigned int OUT, typename ACTIVATION = activations::none>
+    template<unsigned int IN, unsigned int OUT, typename T, typename T2, typename ACTIVATION = activations::none<T>>
     class DenseLayer {
     private:
 
-        static_assert(std::is_invocable_r_v<float, decltype(ACTIVATION::forward), float>, "Invalid ACTIVATION::forward");
-        static_assert(std::is_invocable_r_v<float, decltype(ACTIVATION::backward), float>, "Invalid ACTIVATION::backward");
+        static_assert(std::is_invocable_r_v<T2, decltype(ACTIVATION::forward), T2>, "Invalid ACTIVATION::forward");
+        static_assert(std::is_invocable_r_v<T2, decltype(ACTIVATION::backward), T2>, "Invalid ACTIVATION::backward");
 
-        void activate(std::array<float, OUT> &output) const {
+        void activate(std::array<T2, OUT> &output) const {
             for (unsigned int i = 0; i < OUT; i++) {
                 output[i] = ACTIVATION::forward(output[i]);
             }
@@ -61,8 +63,8 @@ namespace nn::layers {
 
     public:
 
-        std::array<float, OUT> biases;
-        std::array<float, IN * OUT> weights;
+        std::array<T, OUT> biases;
+        std::array<T, IN * OUT> weights;
 
         void load_from_file(std::ifstream &file) {
             file.read(reinterpret_cast<char *>(biases.data()), sizeof(biases));
@@ -70,16 +72,16 @@ namespace nn::layers {
         }
 
         int load_from_pointer(const unsigned char *ptr, int offset) {
-            std::memcpy(biases.data(), ptr + offset, sizeof(float) * OUT);
-            offset += sizeof(float) * OUT;
-            std::memcpy(weights.data(), ptr + offset, sizeof(float) * IN * OUT);
-            offset += sizeof(float) * IN * OUT;
+            std::memcpy(biases.data(), ptr + offset, sizeof(T) * OUT);
+            offset += sizeof(T) * OUT;
+            std::memcpy(weights.data(), ptr + offset, sizeof(T) * IN * OUT);
+            offset += sizeof(T) * IN * OUT;
 
             return offset;
         }
 
         void randomize(std::mt19937 &mt) {
-            std::uniform_real_distribution<float> dist(-0.1, 0.1);
+            std::uniform_real_distribution<T> dist(-0.1, 0.1);
 
             for (unsigned int i = 0; i < IN * OUT; i++) {
                 weights[i] = dist(mt);
@@ -95,8 +97,26 @@ namespace nn::layers {
             file.write(reinterpret_cast<char *>(weights.data()), sizeof(weights));
         }
 
-        void forward(const std::vector<unsigned int> &input_features, std::array<float, OUT> &output) const {
-            std::copy(biases.begin(), biases.end(), output.begin());
+        template<typename QTYPE, int QBIAS_SCALE, int QWEIGHT_SCALE>
+        void quantize(std::ofstream &file) {
+            std::array<QTYPE, OUT> qbiases;
+            std::array<QTYPE, IN * OUT> qweights;
+            for (unsigned int i = 0; i < OUT; i++) {
+                qbiases[i] = round(biases[i] * QBIAS_SCALE);
+            }
+            for (unsigned int i = 0; i < IN * OUT; i++) {
+                qweights[i] = round(weights[i] * QWEIGHT_SCALE);
+            }
+
+            file.write(reinterpret_cast<char *>(qbiases.data()), sizeof(qbiases));
+            file.write(reinterpret_cast<char *>(qweights.data()), sizeof(qweights));
+        }
+
+        void forward(const std::vector<unsigned int> &input_features, std::array<T2, OUT> &output) const {
+            for (unsigned int i = 0; i < OUT; i++) {
+                output[i] = biases[i];
+            }
+
             for (unsigned int i : input_features) {
                 for (unsigned int j = 0; j < OUT; j++) {
                     output[j] += weights[i * OUT + j];
@@ -105,8 +125,11 @@ namespace nn::layers {
             activate(output);
         }
 
-        void forward(const std::array<float, IN> &input, std::array<float, OUT> &output) const {
-            std::copy(biases.begin(), biases.end(), output.begin());
+        void forward(const std::array<T, IN> &input, std::array<T2, OUT> &output) const {
+            for (unsigned int i = 0; i < OUT; i++) {
+                output[i] = biases[i];
+            }
+
             for (unsigned int i = 0; i < IN; i++) {
                 for (unsigned int j = 0; j < OUT; j++) {
                     output[j] += input[i] * weights[i * OUT + j];
@@ -115,8 +138,10 @@ namespace nn::layers {
             activate(output);
         }
 
-        void backward(const std::array<float, OUT> &loss, const std::array<float, IN> &input, const std::array<float, OUT> &output, std::array<float, IN> &input_loss, DenseLayerGradient<IN, OUT> &gradient) const {
-            std::array<float, OUT> loss_before_activation;
+        void backward(const std::array<T, OUT> &loss, const std::array<T, IN> &input, const std::array<T, OUT> &output, std::array<T, IN> &input_loss, DenseLayerGradient<IN, OUT> &gradient) const {
+            static_assert(std::is_same<T, T2>(), "T and T2 are not equal");
+
+            std::array<T, OUT> loss_before_activation;
             std::fill(input_loss.begin(), input_loss.end(), 0);
 
             for (unsigned int i = 0; i < OUT; i++) {
@@ -132,8 +157,10 @@ namespace nn::layers {
             }
         }
 
-        void backward(const std::array<float, OUT> &loss, const std::vector<unsigned int> &input_features, const std::array<float, OUT> &output, DenseLayerGradient<IN, OUT> &gradient) const {
-            std::array<float, OUT> loss_before_activation;
+        void backward(const std::array<T, OUT> &loss, const std::vector<unsigned int> &input_features, const std::array<T, OUT> &output, DenseLayerGradient<IN, OUT> &gradient) const {
+            static_assert(std::is_same<T, T2>(), "T and T2 are not equal");
+
+            std::array<T, OUT> loss_before_activation;
 
             for (unsigned int i = 0; i < OUT; i++) {
                 loss_before_activation[i] = loss[i] * ACTIVATION::backward(output[i]);

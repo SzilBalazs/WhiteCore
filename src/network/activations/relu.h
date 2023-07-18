@@ -20,13 +20,14 @@
 #include <algorithm>
 
 namespace nn::activations {
+    template<typename T>
     struct relu {
-        static float forward(float value) {
-            return std::max(0.0f, value);
+        static T forward(T value) {
+            return std::max(static_cast<T>(0), value);
         }
 
-        static constexpr float backward(float value) {
-            return 0.0f < value;
+        static constexpr T backward(T value) {
+            return static_cast<T>(0) < value;
         }
     };
 } // namespace nn::activations

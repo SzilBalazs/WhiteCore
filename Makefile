@@ -78,7 +78,7 @@ endif
 
 $(OUTPUT_BINARY): $(HEADERS) $(SOURCES) $(INCBIN_TOOL)
 ifeq ($(uname_S), Windows)
-	@./$(INCBIN_TOOL) src/main.cpp -o src/corenet.cpp
+	@./$(INCBIN_TOOL) src/network/nnue.h -o src/corenet.cpp
 endif
 	@echo Compiling $(NAME)
 	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ src/*.cpp

@@ -18,13 +18,14 @@
 #pragma once
 
 namespace nn::activations {
+    template<typename T>
     struct none {
-        static constexpr float forward(float value) {
+        static constexpr T forward(T value) {
             return value;
         }
 
-        static constexpr float backward(float value) {
-            return 1.0f;
+        static constexpr T backward(T value) {
+            return static_cast<T>(1);
         }
     };
 } // namespace nn::activations
