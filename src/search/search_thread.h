@@ -348,14 +348,14 @@ namespace search {
                 return UNKNOWN_SCORE;
             }
 
-            MoveList<true> move_list(board, core::NULL_MOVE, history, 0);
-
             Score static_eval = nnue.evaluate(board.get_stm());
 
             if (static_eval >= beta)
                 return beta;
             if (static_eval > alpha)
                 alpha = static_eval;
+
+            MoveList<true> move_list(board, core::NULL_MOVE, history, 0);
 
             while (!move_list.empty()) {
                 core::Move move = move_list.next_move();
