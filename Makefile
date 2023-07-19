@@ -53,10 +53,10 @@ ifeq ($(build), debug)
 	DEFINE_FLAGS = -DNATIVE
 endif
 
-EVALFILE = corenet.bin
+EVALFILE = weights/master.bin
 TMP_EVALFILE = tmp.bin
 DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG -D_CRT_SECURE_NO_WARNINGS
-CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -flto -std=c++20 -O3 -pthread -Wall
+CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -std=c++20 -O3 -flto -pthread -Wall
 EXE = $(NAME)-v$(VERSION_MAJOR)-$(VERSION_MINOR)
 OUTPUT_BINARY = $(EXE)$(SUFFIX)
 INCBIN_TOOL = incbin_tool$(SUFFIX)
@@ -90,5 +90,6 @@ endif
 	@echo Compiling $(NAME)
 	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ src/*.cpp
 	@echo Build has finished.
+	@rm tmp.bin
 
 .PHONY: all

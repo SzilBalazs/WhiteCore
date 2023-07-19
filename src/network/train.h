@@ -138,7 +138,7 @@ namespace nn {
                     }
                 }
                 std::cout << std::endl;
-                network.write_to_file("networks/" + std::to_string(epoch) + ".bin");
+                network.write_to_file("networks/epoch-" + std::to_string(epoch) + ".bin");
             }
 
             log_file << "END\n";

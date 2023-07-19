@@ -14,12 +14,15 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import os
 import sys
 import time
 import wandb
 import subprocess
 from datetime import datetime
+
+os.system("rm -rf networks")
+os.system("mkdir networks")
 
 wandb.init(
     project="white-core",
@@ -69,5 +72,9 @@ while is_running:
         f.close()
     except Exception as e:
         print("Failed to sync data with child process", e)
+
+networks = wandb.Artifact('networks', type='models')
+networks.add_dir('networks')
+wandb.run.log_artifact(networks)
 
 wandb.finish()
