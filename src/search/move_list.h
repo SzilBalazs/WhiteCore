@@ -19,6 +19,7 @@
 
 #include "../core/movegen.h"
 #include "history.h"
+#include "see.h"
 
 namespace search {
     template<bool captures_only>

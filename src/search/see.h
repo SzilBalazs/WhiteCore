@@ -61,7 +61,7 @@ namespace search {
             stm = color_enemy(stm);
 
             if (value >= 0) {
-                if (type == KING && (attackers & board.pieces(stm))) {
+                if (type == KING && (attackers & board.sides(stm))) {
                     stm = color_enemy(stm);
                 }
                 break;
