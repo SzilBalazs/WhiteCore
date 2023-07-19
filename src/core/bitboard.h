@@ -19,9 +19,9 @@
 
 #include "constants.h"
 
+#include <bit>
 #include <cassert>
 #include <immintrin.h>
-#include <bit>
 
 #ifdef _MSC_VER
 #include <intrin.h>

@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "activations/relu.h"
 #include "activations/crelu.h"
+#include "activations/relu.h"
 #include "activations/sigmoid.h"
 #include "layers/dense_layer.h"
 
@@ -119,6 +119,5 @@ namespace nn {
 
             file.close();
         }
-
     };
 } // namespace nn

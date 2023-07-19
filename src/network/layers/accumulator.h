@@ -19,10 +19,11 @@
 
 #include "../activations/none.h"
 
+#include <array>
+#include <cstring>
+#include <fstream>
 #include <type_traits>
 #include <vector>
-#include <cstring>
-#include <array>
 
 namespace nn::layers {
 
@@ -32,7 +33,6 @@ namespace nn::layers {
         static_assert(std::is_invocable_r_v<T, decltype(ACTIVATION::forward), T>, "Invalid ACTIVATION::forward");
 
     public:
-
         void load_from_file(std::ifstream &file) {
             file.read(reinterpret_cast<char *>(biases.data()), sizeof(biases));
             file.read(reinterpret_cast<char *>(weights.data()), sizeof(weights));
@@ -73,7 +73,6 @@ namespace nn::layers {
         }
 
     private:
-
         std::array<T, OUT> accumulator;
         std::array<T, OUT> biases;
         std::array<T, IN * OUT> weights;
@@ -82,4 +81,4 @@ namespace nn::layers {
             std::copy(biases.begin(), biases.end(), accumulator.begin());
         }
     };
-}
+} // namespace nn::layers

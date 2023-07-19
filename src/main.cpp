@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
         test::run();
     } else if (mode == "bench") {
         run_bench();
-    }  else {
+    } else {
         uci::UCI protocol;
         protocol.start();
     }

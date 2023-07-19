@@ -18,12 +18,12 @@
 #pragma once
 
 #include "../core/board.h"
+#include "../network/train.h"
 #include "../search/search_manager.h"
 #include "../selfplay/selfplay.h"
-#include "../network/train.h"
 #include "../tests/perft.h"
-#include "../utils/split.h"
 #include "../utils/logger.h"
+#include "../utils/split.h"
 #include "../utils/utilities.h"
 #include "command.h"
 #include "option.h"
@@ -87,7 +87,7 @@ namespace uci {
         commands.emplace_back("display", [&](context tokens) {
             board.display();
         });
-        commands.emplace_back("eval", [&](context tokens){
+        commands.emplace_back("eval", [&](context tokens) {
             nn::NNUE network{};
             network.refresh(board.to_features());
             logger.print("Eval:", network.evaluate(board.get_stm()));
@@ -102,20 +102,20 @@ namespace uci {
             std::optional<int> dropout = find_element<int>(tokens, "dropout");
             selfplay::start_generation(limits, book.value_or("book.epd"), output.value_or("data.plain"), thread_count.value_or(1), dropout.value_or(1));
         });
-        commands.emplace_back("split", [&](context tokens){
+        commands.emplace_back("split", [&](context tokens) {
             std::optional<std::string> input_data = find_element<std::string>(tokens, "input");
             std::optional<std::string> output_data1 = find_element<std::string>(tokens, "output1");
             std::optional<std::string> output_data2 = find_element<std::string>(tokens, "output2");
             std::optional<int> rate = find_element<int>(tokens, "rate");
             split_data(input_data.value_or("data.plain"), output_data1.value_or("train.plain"), output_data2.value_or("validation.plain"), rate.value_or(10));
         });
-        commands.emplace_back("quantize", [&](context tokens){
+        commands.emplace_back("quantize", [&](context tokens) {
             std::optional<std::string> input = find_element<std::string>(tokens, "input");
             std::optional<std::string> output = find_element<std::string>(tokens, "output");
             nn::Network network_file(input.value_or("input.bin"));
             network_file.quantize<int16_t, nn::NNUE::QSCALE>(output.value_or("output.bin"));
         });
-        commands.emplace_back("train", [&](context tokens){
+        commands.emplace_back("train", [&](context tokens) {
             std::optional<std::string> network_path = find_element<std::string>(tokens, "network");
             std::optional<std::string> training_data = find_element<std::string>(tokens, "training_data");
             std::optional<std::string> validation_data = find_element<std::string>(tokens, "validation_data");

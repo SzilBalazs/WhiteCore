@@ -17,10 +17,14 @@
 
 #pragma once
 
+#include "../external/incbin/incbin.h"
+#include "../core/constants.h"
+#include "../utils/logger.h"
 #include "activations/crelu.h"
 #include "layers/accumulator.h"
 #include "layers/dense_layer.h"
-#include "../external/incbin/incbin.h"
+
+#include <cassert>
 
 namespace nn {
 
@@ -29,11 +33,10 @@ namespace nn {
     class NNUE {
 
     public:
-
         static constexpr int QSCALE = 64;
 
         NNUE() {
-            const unsigned char* data = gDefaultNetworkData;
+            const unsigned char *data = gDefaultNetworkData;
 
             int magic;
             std::memcpy(&magic, data, sizeof(int));
@@ -110,4 +113,4 @@ namespace nn {
         layers::DenseLayer<L1_SIZE, 1, int16_t, int32_t, activations::none<int16_t>> l1;
     };
 
-}
+} // namespace nn

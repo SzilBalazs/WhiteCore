@@ -30,8 +30,10 @@ inline void split_data(const std::string &input, const std::string &output1, con
 
     std::string line;
     while (std::getline(in, line)) {
-        if (dist(g) == 0) out2 << line << "\n";
-        else out1 << line << "\n";
+        if (dist(g) == 0)
+            out2 << line << "\n";
+        else
+            out1 << line << "\n";
     }
 
     in.close();

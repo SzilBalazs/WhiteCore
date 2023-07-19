@@ -18,8 +18,8 @@
 #pragma once
 
 #include "../utils/logger.h"
-#include "data_parser.h"
 #include "adam.h"
+#include "data_parser.h"
 
 #include <filesystem>
 #include <optional>
@@ -32,7 +32,6 @@ namespace nn {
 
     class Trainer {
     public:
-
         Trainer(const std::string &training_data, const std::string &validation_data, const std::optional<std::string> &network_path, float learning_rate, int epochs, int batch_size, int thread_count) :
         adam(learning_rate), training_parser(training_data), validation_parser(validation_data), batch_size(batch_size), thread_count(thread_count) {
 
@@ -71,7 +70,8 @@ namespace nn {
 
                 while (!is_new_epoch) {
                     iter++;
-                    epoch_iter++; checkpoint_iter++;
+                    epoch_iter++;
+                    checkpoint_iter++;
 
                     delete[] entries;
                     entries = entries_next;
@@ -203,8 +203,8 @@ namespace nn {
                 network.forward(entry.features, l0_output, l1_output, entry.phase);
                 float prediction = l1_output[0];
 
-                float error = (1.0f - EVAL_INFLUENCE) * (prediction - entry.wdl) * (prediction - entry.wdl)
-                              + EVAL_INFLUENCE * (prediction - entry.eval) * (prediction - entry.eval);
+                float error = (1.0f - EVAL_INFLUENCE) * (prediction - entry.wdl) * (prediction - entry.wdl) +
+                              EVAL_INFLUENCE * (prediction - entry.eval) * (prediction - entry.eval);
                 errors[id] += error;
                 accuracy[id] += ((entry.wdl - 0.5f) * (prediction - 0.5f) > 0.0f) || std::abs(entry.wdl - prediction) < 0.05f;
 
@@ -232,4 +232,4 @@ namespace nn {
             logger.print("Found", entry_count, "positions");
         }
     };
-}
+} // namespace nn

@@ -20,9 +20,9 @@
 #include "engine.h"
 
 #include <ctime>
-#include <random>
 #include <filesystem>
 #include <iomanip>
+#include <random>
 #include <sstream>
 
 namespace selfplay {
@@ -126,7 +126,7 @@ namespace selfplay {
         logger.print("Combining files...");
 
         std::ofstream file(output_file, std::ios::app | std::ios::out);
-        for (const auto& entry : std::filesystem::directory_iterator(path)) {
+        for (const auto &entry : std::filesystem::directory_iterator(path)) {
             std::ifstream in(entry.path());
             std::string tmp;
             while (std::getline(in, tmp)) {
@@ -165,7 +165,7 @@ namespace selfplay {
 
         std::random_device rd;
         std::mt19937 g(rd());
-        std::uniform_int_distribution<int> dist(0, dropout-1);
+        std::uniform_int_distribution<int> dist(0, dropout - 1);
 
         while (std::getline(book, tmp)) {
             if (dist(g) == 0)

@@ -17,12 +17,12 @@
 
 #pragma once
 
+#include "../network/nnue.h"
 #include "../utils/utilities.h"
 #include "attacks.h"
 #include "bitboard.h"
 #include "board_state.h"
 #include "move.h"
-#include "../network/nnue.h"
 
 #include <algorithm>
 #include <sstream>

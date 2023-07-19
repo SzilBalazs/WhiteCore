@@ -18,11 +18,11 @@
 #pragma once
 
 #include <array>
+#include <cstring>
 #include <functional>
+#include <random>
 #include <thread>
 #include <vector>
-#include <random>
-#include <cstring>
 
 #include "../activations/none.h"
 
@@ -51,7 +51,6 @@ namespace nn::layers {
     template<unsigned int IN, unsigned int OUT, typename T, typename T2, typename ACTIVATION = activations::none<T>>
     class DenseLayer {
     private:
-
         static_assert(std::is_invocable_r_v<T2, decltype(ACTIVATION::forward), T2>, "Invalid ACTIVATION::forward");
         static_assert(std::is_invocable_r_v<T2, decltype(ACTIVATION::backward), T2>, "Invalid ACTIVATION::backward");
 
@@ -62,7 +61,6 @@ namespace nn::layers {
         }
 
     public:
-
         std::array<T, OUT> biases;
         std::array<T, IN * OUT> weights;
 

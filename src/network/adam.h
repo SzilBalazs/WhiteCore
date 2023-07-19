@@ -23,7 +23,6 @@ namespace nn {
 
     class Adam {
     public:
-
         Adam(float learning_rate) : LR(learning_rate), m_gradient(), v_gradient() {}
 
         void update(const std::vector<Gradient> &gradients, Network &network) {
@@ -67,4 +66,4 @@ namespace nn {
         }
     };
 
-}
+} // namespace nn

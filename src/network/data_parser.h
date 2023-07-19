@@ -38,7 +38,6 @@ namespace nn {
 
     class DataParser {
     public:
-
         DataParser(const std::string &path) {
             file.open(path, std::ios::in);
         }
@@ -58,7 +57,6 @@ namespace nn {
         }
 
     private:
-
         std::ifstream file;
 
         TrainingEntry parse_entry(const std::string &entry) {
@@ -85,7 +83,7 @@ namespace nn {
             for (; idx < fen.size() && fen[idx] != ' '; idx++) {
                 char c = fen[idx];
                 if ('1' <= c && c <= '8') {
-                    sq += c-'0';
+                    sq += c - '0';
                 } else if (c == '/') {
                     sq -= 16;
                 } else {
@@ -98,8 +96,10 @@ namespace nn {
 
             Color stm = COLOR_EMPTY;
             idx++;
-            if (fen[idx] == 'w') stm = WHITE;
-            else if (fen[idx] == 'b') stm = BLACK;
+            if (fen[idx] == 'w')
+                stm = WHITE;
+            else if (fen[idx] == 'b')
+                stm = BLACK;
             else {
                 throw 1;
             }
@@ -111,4 +111,4 @@ namespace nn {
             return res;
         }
     };
-}
+} // namespace nn
