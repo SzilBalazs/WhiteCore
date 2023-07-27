@@ -125,7 +125,7 @@ namespace search {
 
         Score aspiration_window(Depth depth, Score prev_score) {
 
-            static constexpr Score DELTA = 30;
+            static constexpr Score DELTA = 20;
             static constexpr Score BOUND = 1500;
 
             Score delta = DELTA;
