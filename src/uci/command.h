@@ -23,14 +23,14 @@
 
 namespace uci {
 
-    struct Command {
+    struct [[nodiscard]] Command {
 
         std::string cmd;
         std::function<void(std::vector<std::string>)> func;
 
         Command(std::string c, std::function<void(std::vector<std::string>)> f) : cmd(std::move(c)), func(std::move(f)) {}
 
-        bool is_match(const std::vector<std::string> &tokens) const {
+        [[nodiscard]] bool is_match(const std::vector<std::string> &tokens) const {
             return tokens[0] == cmd;
         }
     };

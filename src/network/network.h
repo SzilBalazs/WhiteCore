@@ -91,7 +91,7 @@ namespace nn {
             std::ofstream file(output_path, std::ios::out | std::ios::binary);
             if (!file.is_open()) {
                 logger.print("Unable to open:", output_path);
-                throw std::invalid_argument("Unable to open: " + output_path);
+                throw std::runtime_error("Unable to open: " + output_path);
             }
 
             int magic = MAGIC;
@@ -108,7 +108,7 @@ namespace nn {
             std::ofstream file(output_path, std::ios::out | std::ios::binary);
             if (!file.is_open()) {
                 logger.print("Unable to open:", output_path);
-                throw std::invalid_argument("Unable to open: " + output_path);
+                throw std::runtime_error("Unable to open: " + output_path);
             }
 
             int magic = -MAGIC;

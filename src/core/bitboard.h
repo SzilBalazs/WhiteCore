@@ -44,7 +44,7 @@ namespace core {
         constexpr Bitboard() = default;
 
         // Returns the square's value.
-        constexpr bool get(Square square) const {
+        [[nodiscard]] constexpr bool get(Square square) const {
             return (bb >> square) & 1;
         }
 
@@ -59,12 +59,12 @@ namespace core {
         }
 
         // Returns the number of bits set to 1.
-        constexpr int pop_count() const {
+        [[nodiscard]] constexpr int pop_count() const {
             return std::popcount(bb);
         }
 
         // Returns the square with the lowest index, that is set to 1.
-        inline Square lsb() const {
+        [[nodiscard]] inline Square lsb() const {
 
 #ifdef __GNUC__
             return Square(__builtin_ctzll(bb));
@@ -78,53 +78,53 @@ namespace core {
         }
 
         // Clears the square with the lowest index, that is set to 1.
-        constexpr Square pop_lsb() {
+        [[nodiscard]] constexpr Square pop_lsb() {
             Square square = lsb();
             bb &= bb - 1;
             return square;
         }
 
-        constexpr Bitboard operator*(Bitboard a) const {
+        [[nodiscard]] constexpr Bitboard operator*(Bitboard a) const {
             return bb * a.bb;
         }
 
-        constexpr bool operator==(Bitboard a) const {
+        [[nodiscard]] constexpr bool operator==(Bitboard a) const {
             return bb == a.bb;
         }
 
-        constexpr bool operator!=(Bitboard a) const {
+        [[nodiscard]] constexpr bool operator!=(Bitboard a) const {
             return bb != a.bb;
         }
 
-        constexpr Bitboard operator+(Bitboard a) const {
+        [[nodiscard]] constexpr Bitboard operator+(Bitboard a) const {
             return bb + a.bb;
         }
 
-        constexpr Bitboard operator-(Bitboard a) const {
+        [[nodiscard]] constexpr Bitboard operator-(Bitboard a) const {
             return bb - a.bb;
         }
 
-        constexpr Bitboard operator&(Bitboard a) const {
+        [[nodiscard]] constexpr Bitboard operator&(Bitboard a) const {
             return bb & a.bb;
         }
 
-        constexpr Bitboard operator|(Bitboard a) const {
+        [[nodiscard]] constexpr Bitboard operator|(Bitboard a) const {
             return bb | a.bb;
         }
 
-        constexpr Bitboard operator^(Bitboard a) const {
+        [[nodiscard]] constexpr Bitboard operator^(Bitboard a) const {
             return bb ^ a.bb;
         }
 
-        constexpr Bitboard operator~() const {
+        [[nodiscard]] constexpr Bitboard operator~() const {
             return ~bb;
         }
 
-        constexpr Bitboard operator<<(const unsigned int a) const {
+        [[nodiscard]] constexpr Bitboard operator<<(const unsigned int a) const {
             return bb << a;
         }
 
-        constexpr Bitboard operator>>(const unsigned int a) const {
+        [[nodiscard]] constexpr Bitboard operator>>(const unsigned int a) const {
             return bb >> a;
         }
 
@@ -148,11 +148,11 @@ namespace core {
             bb >>= a;
         }
 
-        constexpr explicit operator bool() const {
+        [[nodiscard]] constexpr explicit operator bool() const {
             return bb;
         }
 
-        constexpr explicit operator U64() const {
+        [[nodiscard]] constexpr explicit operator U64() const {
             return bb;
         }
     };
@@ -198,7 +198,7 @@ namespace core {
     }
 
     template<Direction direction>
-    constexpr Bitboard step(Bitboard b) {
+    [[nodiscard]] constexpr Bitboard step(Bitboard b) {
         switch (direction) {
             case NORTH:
                 return b << 8;
@@ -219,7 +219,7 @@ namespace core {
         }
     }
 
-    constexpr Bitboard step(Direction direction, Bitboard b) {
+    [[nodiscard]] constexpr Bitboard step(Direction direction, Bitboard b) {
         switch (direction) {
             case NORTH:
                 return b << 8;
@@ -242,7 +242,7 @@ namespace core {
     }
 
     template<Direction direction>
-    constexpr Bitboard slide(Square square) {
+    [[nodiscard]] constexpr Bitboard slide(Square square) {
         Bitboard result;
         Bitboard temp = {square};
         while (temp) {
@@ -252,7 +252,7 @@ namespace core {
         return result;
     }
 
-    inline Bitboard slide(Direction direction, Square square) {
+    [[nodiscard]] inline Bitboard slide(Direction direction, Square square) {
         Bitboard result;
         Bitboard temp = {square};
         while (temp) {
@@ -263,7 +263,7 @@ namespace core {
     }
 
     template<Direction direction>
-    constexpr Bitboard slide(Square square, Bitboard occupied) {
+    [[nodiscard]] constexpr Bitboard slide(Square square, Bitboard occupied) {
         Bitboard result;
         Bitboard temp = {square};
         while (temp && !occupied.get(temp.lsb())) {

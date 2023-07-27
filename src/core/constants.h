@@ -32,10 +32,10 @@
 #define AVX2
 #endif
 
-typedef uint64_t U64;
-typedef int32_t Score;
-typedef int8_t Depth;
-typedef int8_t Ply;
+using U64 = uint64_t;
+using Score = int32_t;
+using Depth = int8_t;
+using Ply = int8_t;
 
 constexpr int64_t INF_TIME = 1'000'000'000'000'000;
 constexpr int64_t INF_NODES = 1'000'000'000'000'000;
@@ -146,15 +146,15 @@ struct Piece {
         color = c;
     }
 
-    constexpr bool is_null() const {
+    [[nodiscard]] constexpr bool is_null() const {
         return type == PIECE_EMPTY || color == COLOR_EMPTY;
     }
 
-    constexpr bool is_ok() const {
+    [[nodiscard]] constexpr bool is_ok() const {
         return !is_null();
     }
 
-    constexpr bool operator==(Piece p) {
+    constexpr bool operator==(Piece p) const {
         return color == p.color && type == p.type;
     }
 };
@@ -163,10 +163,10 @@ constexpr Piece NULL_PIECE = Piece();
 constexpr PieceType index_to_type[7] = {KING, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, PIECE_EMPTY};
 constexpr Color index_to_color[3] = {WHITE, BLACK, COLOR_EMPTY};
 
-constexpr unsigned int PROMO_FLAG = 0x8;    // 0b1000
-constexpr unsigned int CAPTURE_FLAG = 0x4;  // 0b0100
-constexpr unsigned int SPECIAL1_FLAG = 0x2; // 0b0010
-constexpr unsigned int SPECIAL2_FLAG = 0x1; // 0b0001
+constexpr unsigned int PROMO_FLAG = 1 << 3;
+constexpr unsigned int CAPTURE_FLAG = 1 << 2;
+constexpr unsigned int SPECIAL1_FLAG = 1 << 1;
+constexpr unsigned int SPECIAL2_FLAG = 1 << 0;
 
 constexpr unsigned int QUIET_MOVE = 0;
 constexpr unsigned int CAPTURE = CAPTURE_FLAG;

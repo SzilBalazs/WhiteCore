@@ -43,11 +43,11 @@ namespace core {
             data &= ~right;
         }
 
-        bool get(unsigned int right) const {
+        [[nodiscard]] bool get(unsigned int right) const {
             return data & right;
         }
 
-        std::string to_string() const {
+        [[nodiscard]] std::string to_string() const {
             std::string res;
             if (get(WK_MASK))
                 res += 'K';

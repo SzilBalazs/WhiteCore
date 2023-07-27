@@ -34,11 +34,11 @@ namespace search {
             }
         }
 
-        bool empty() {
+        [[nodiscard]] bool empty() const {
             return current == size;
         }
 
-        core::Move next_move() {
+        [[nodiscard]] core::Move next_move() {
             for (unsigned int i = current; i < size; i++) {
                 if (scores[i] > scores[current]) {
                     std::swap(scores[i], scores[current]);
@@ -57,14 +57,14 @@ namespace search {
         const History &history;
         const Ply &ply;
 
-        Score get_mvv_lva(const core::Move &move) {
+        [[nodiscard]] Score get_mvv_lva(const core::Move &move) const {
             if (move.eq_flag(EP_CAPTURE))
                 return MVVLVA[PAWN][PAWN];
             else
                 return MVVLVA[board.piece_at(move.get_to()).type][board.piece_at(move.get_from()).type];
         }
 
-        Score score_move(const core::Move &move) {
+        [[nodiscard]] Score score_move(const core::Move &move) const {
             if (move == hash_move) {
                 return 10'000'000;
             } else if (move.is_promo()) {

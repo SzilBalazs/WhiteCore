@@ -90,6 +90,6 @@ endif
 	@echo Compiling $(NAME)
 	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ src/*.cpp
 	@echo Build has finished.
-	@rm tmp.bin
+	@rm $(TMP_EVALFILE)
 
 .PHONY: all

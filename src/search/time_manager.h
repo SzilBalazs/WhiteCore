@@ -40,19 +40,19 @@ namespace search {
             end_time = start_time + allocated_time - MOVE_OVERHEAD;
         }
 
-        inline bool time_left() {
+        [[nodiscard]] inline bool time_left() const {
             return now() < end_time;
         }
 
-        inline int64_t get_elapsed_time() {
+        [[nodiscard]] inline int64_t get_elapsed_time() const {
             return now() - start_time;
         }
 
-        inline Depth get_max_depth() const {
+        [[nodiscard]] inline Depth get_max_depth() const {
             return max_depth;
         }
 
-        inline int64_t get_max_nodes() const {
+        [[nodiscard]] inline int64_t get_max_nodes() const {
             return max_nodes;
         }
 

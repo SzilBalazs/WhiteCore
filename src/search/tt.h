@@ -42,6 +42,8 @@ namespace search {
         TTFlag flag;          // 1 byte
     };
 
+        static_assert(sizeof(TTEntry) == 16);
+
     class TT {
     public:
         void resize(unsigned int MB) {

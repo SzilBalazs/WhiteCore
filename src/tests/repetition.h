@@ -40,7 +40,7 @@ namespace test {
 
         for (const Test &test : tests) {
             board.load(test.fen);
-            for (std::string str : test.moves) {
+            for (const std::string& str : test.moves) {
                 core::Move move = uci::move_from_string(board, str);
                 board.make_move(move);
             }

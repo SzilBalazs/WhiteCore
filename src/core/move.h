@@ -39,52 +39,52 @@ namespace core {
         constexpr Move() = default;
 
         // Returns the to square of the move
-        constexpr Square get_to() const {
+        [[nodiscard]]  constexpr Square get_to() const {
             return Square(data & 0x3f);
         }
 
         // Returns the from square of the move
-        constexpr Square get_from() const {
+        [[nodiscard]] constexpr Square get_from() const {
             return Square((data >> 6) & 0x3f);
         }
 
         // Returns true if the flag is set in the move
-        constexpr bool is_flag(unsigned int flag) const {
+        [[nodiscard]] constexpr bool is_flag(unsigned int flag) const {
             return (data >> 12) & flag;
         }
 
         // Returns true if the move type is equal to flag
-        constexpr bool eq_flag(unsigned int flag) const {
+        [[nodiscard]] constexpr bool eq_flag(unsigned int flag) const {
             return (data >> 12) == flag;
         }
 
         // Returns true if the move is not null
-        constexpr bool is_ok() const {
+        [[nodiscard]] constexpr bool is_ok() const {
             return data != 0;
         }
 
         // Returns true if the move is a capture
-        constexpr bool is_capture() const {
+        [[nodiscard]] constexpr bool is_capture() const {
             return is_flag(CAPTURE_FLAG);
         }
 
         // Returns true if the move is a promotion
-        constexpr bool is_promo() const {
+        [[nodiscard]] constexpr bool is_promo() const {
             return is_flag(PROMO_FLAG);
         }
 
         // Returns true if the move has the SPECIAL1_FLAG set
-        constexpr bool is_special_1() const {
+        [[nodiscard]] constexpr bool is_special_1() const {
             return is_flag(SPECIAL1_FLAG);
         }
 
         // Returns true if the move has the SPECIAL2_FLAG set
-        constexpr bool is_special_2() const {
+        [[nodiscard]] constexpr bool is_special_2() const {
             return is_flag(SPECIAL2_FLAG);
         }
 
         // Returns true if the move is quiet - not a capture.
-        constexpr bool is_quiet() const {
+        [[nodiscard]] constexpr bool is_quiet() const {
             return !is_capture();
         }
 
@@ -104,7 +104,7 @@ namespace core {
         }
 
         // Returns the move in UCI format as a string
-        inline std::string to_uci() const {
+        [[nodiscard]] inline std::string to_uci() const {
             std::string res;
             if (is_promo()) {
                 if (!is_special_1() && !is_special_2())

@@ -38,8 +38,13 @@ namespace nn {
 
     class DataParser {
     public:
-        DataParser(const std::string &path) {
+        explicit DataParser(const std::string &path) {
             file.open(path, std::ios::in);
+
+            if (!file.is_open()) {
+                logger.print("Unable to open:", path);
+                throw std::runtime_error("Unable to open: " + path);
+            }
         }
 
         void read_batch(unsigned int batch_size, TrainingEntry *entries, bool &is_new_epoch) {
@@ -59,7 +64,7 @@ namespace nn {
     private:
         std::ifstream file;
 
-        TrainingEntry parse_entry(const std::string &entry) {
+        [[nodiscard]] static TrainingEntry parse_entry(const std::string &entry) {
             TrainingEntry res;
             res.phase = 0.0f;
             std::stringstream ss(entry);

@@ -35,72 +35,72 @@ namespace core {
     class Board {
 
     public:
-        constexpr Color get_stm() const {
+        [[nodiscard]] constexpr Color get_stm() const {
             return state.stm;
         }
 
-        constexpr Square get_ep() const {
+        [[nodiscard]] constexpr Square get_ep() const {
             return state.ep;
         }
 
-        constexpr Zobrist get_hash() const {
+        [[nodiscard]] constexpr Zobrist get_hash() const {
             return state.hash;
         }
 
-        constexpr unsigned int get_move50() const {
+        [[nodiscard]] constexpr unsigned int get_move50() const {
             return state.move50;
         }
 
-        constexpr CastlingRights get_rights() const {
+        [[nodiscard]] constexpr CastlingRights get_rights() const {
             return state.rights;
         }
 
-        constexpr Piece piece_at(Square square) const {
+        [[nodiscard]] constexpr Piece piece_at(Square square) const {
             return mailbox[square];
         }
 
         template<Color color, PieceType pt>
-        constexpr Bitboard pieces() const {
+        [[nodiscard]] constexpr Bitboard pieces() const {
             return bb_colors[color] & bb_pieces[pt];
         }
 
         template<Color color>
-        constexpr Bitboard pieces(PieceType pt) const {
+        [[nodiscard]] constexpr Bitboard pieces(PieceType pt) const {
             return bb_colors[color] & bb_pieces[pt];
         }
 
         template<PieceType pt>
-        constexpr Bitboard pieces(Color color) const {
+        [[nodiscard]] constexpr Bitboard pieces(Color color) const {
             return bb_colors[color] & bb_pieces[pt];
         }
 
-        constexpr Bitboard pieces(Color color, PieceType pt) const {
+        [[nodiscard]] constexpr Bitboard pieces(Color color, PieceType pt) const {
             return bb_colors[color] & bb_pieces[pt];
         }
 
         template<PieceType pt>
-        constexpr Bitboard pieces() const {
+        [[nodiscard]] constexpr Bitboard pieces() const {
             return bb_pieces[pt];
         }
 
         template<Color color>
-        constexpr Bitboard sides() const {
+        [[nodiscard]] constexpr Bitboard sides() const {
             return bb_colors[color];
         }
 
-        constexpr Bitboard sides(Color color) const {
+        [[nodiscard]] constexpr Bitboard sides(Color color) const {
             return bb_colors[color];
         }
 
-        constexpr Bitboard occupied() const {
+        [[nodiscard]] constexpr Bitboard occupied() const {
             return bb_colors[WHITE] | bb_colors[BLACK];
         }
 
-        constexpr Bitboard empty() const {
+        [[nodiscard]] constexpr Bitboard empty() const {
             return ~occupied();
         }
 
-        inline bool is_draw() const {
+        [[nodiscard]] inline bool is_draw() const {
             if (get_move50() >= 100) return true;
             int cnt = 0;
             for (const BoardState &st : states) {
@@ -111,9 +111,9 @@ namespace core {
             return cnt >= 2;
         }
 
-        inline bool is_check() const;
+        [[nodiscard]] inline bool is_check() const;
 
-        inline bool has_non_pawn() {
+        [[nodiscard]] inline bool has_non_pawn() const {
             const Color stm = get_stm();
             return bool(pieces<KNIGHT>(stm) | pieces<BISHOP>(stm) | pieces<ROOK>() | pieces<QUEEN>());
         }
@@ -169,9 +169,11 @@ namespace core {
                 state.piece_captured = piece_at(to);
             }
 
-            if (move.is_capture()) assert(state.piece_captured.is_ok());
-            else
+            if (move.is_capture()) {
+                assert(state.piece_captured.is_ok());
+            } else {
                 assert(state.piece_captured.is_null());
+            }
 
             if (move.eq_flag(DOUBLE_PAWN_PUSH)) {
                 state.ep = from + UP;
@@ -233,7 +235,9 @@ namespace core {
             const Direction DOWN = -UP;
 
             assert(states.size() > 1);
-            if (move.is_capture()) assert(state.piece_captured.is_ok());
+            if (move.is_capture()) {
+                assert(state.piece_captured.is_ok());
+            }
 
             if (move.is_promo()) {
                 piece_moved.type = PAWN;
@@ -296,32 +300,37 @@ namespace core {
 
             state.rights = CastlingRights(rights);
             state.ep = square_from_string(ep);
-            if (!move50.empty() && std::all_of(move50.begin(), move50.end(), ::isdigit))
+            if (!move50.empty() && std::all_of(move50.begin(), move50.end(), ::isdigit)) {
                 state.move50 = std::stoi(move50);
-            else
+            } else {
                 state.move50 = 0;
+            }
 
             state.hash.xor_castle(state.rights);
-            if (state.ep != NULL_SQUARE)
+            if (state.ep != NULL_SQUARE) {
                 state.hash.xor_ep(state.ep);
+            }
 
             logger.info("Board::load", "Finished loading fen");
         }
 
-        inline std::string get_fen() const {
+        [[nodiscard]] inline std::string get_fen() const {
             std::string fen;
 
             Square square = A8;
             int empty = 0;
             while (true) {
-                if (mailbox[square].is_null()) empty++;
-                else {
+                if (mailbox[square].is_null()) {
+                    empty++;
+                } else {
                     if (empty) fen += std::to_string(empty);
                     fen += char_from_piece(mailbox[square]);
                     empty = 0;
                 }
 
-                if (square == H1) break;
+                if (square == H1) {
+                    break;
+                }
 
                 if (square_to_file(square) == 7) {
                     square -= 15;
@@ -347,15 +356,15 @@ namespace core {
 
         inline void display() const {
             std::vector<std::string> text;
-            text.emplace_back(std::string("50-move draw counter: ") + std::to_string(state.move50));
-            text.emplace_back(std::string("Hash: ") + std::to_string(get_hash()));
-            text.emplace_back(std::string("Fen: ") + get_fen());
+            text.emplace_back("50-move draw counter: " + std::to_string(state.move50));
+            text.emplace_back("Hash: " + std::to_string(get_hash()));
+            text.emplace_back("Fen: " + get_fen());
+            text.emplace_back("Castling rights: " + get_rights().to_string());
+            text.emplace_back("Side to move: " + std::string(get_stm() == WHITE ? "White" : "Black"));
 
-            if (get_ep() != NULL_SQUARE)
-                text.emplace_back(std::string("En passant square: ") + format_square(get_ep()));
-
-            text.emplace_back(std::string("Castling rights: ") + get_rights().to_string());
-            text.emplace_back(std::string("Side to move: ") + std::string(get_stm() == WHITE ? "White" : "Black"));
+            if (get_ep() != NULL_SQUARE) {
+                text.emplace_back("En passant square: " + format_square(get_ep()));
+            }
 
             std::cout << "\n     A   B   C   D   E   F   G   H  \n";
             for (int i = 8; i >= 1; i--) {
@@ -379,7 +388,7 @@ namespace core {
                       << std::endl;
         }
 
-        inline std::vector<unsigned int> to_features() const {
+        [[nodiscard]] inline std::vector<unsigned int> to_features() const {
             std::vector<unsigned int> result;
             Bitboard bb = occupied();
             while (bb) {
@@ -437,12 +446,13 @@ namespace core {
 
             for (Bitboard &i : bb_colors) i = 0;
 
-            for (Square square = A1; square < 64; square += 1)
+            for (Square square = A1; square < 64; square += 1) {
                 mailbox[square] = NULL_PIECE;
+            }
 
             states.clear();
 
-            states.emplace_back(BoardState());
+            states.emplace_back();
 
             logger.info("Board::board_clear", "Board has been cleared");
         }
