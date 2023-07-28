@@ -99,14 +99,14 @@ namespace nn {
                 }
             }
 
-            Color stm = COLOR_EMPTY;
+            Color stm;
             idx++;
             if (fen[idx] == 'w')
                 stm = WHITE;
             else if (fen[idx] == 'b')
                 stm = BLACK;
             else {
-                throw 1;
+                throw std::runtime_error("Invalid color specified in FEN " + entry + ".");
             }
 
             int eval_int = std::stoi(eval);
