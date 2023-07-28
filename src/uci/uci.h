@@ -30,7 +30,7 @@
 
 namespace uci {
 
-    inline core::Move move_from_string(core::Board &board, const std::string &str) {
+    core::Move move_from_string(core::Board &board, const std::string &str) {
         core::Move moves[200];
         core::Move *moves_end = core::gen_moves(board, moves, false);
         for (core::Move *it = moves; it != moves_end; it++) {
@@ -126,28 +126,6 @@ namespace uci {
             nn::Trainer trainer(training_data.value_or("train.plain"), validation_data.value_or("validation.plain"), network_path, learning_rate.value_or(0.001f),
                                 epochs.value_or(10), batch_size.value_or(16384), threads.value_or(4));
         });
-        /*commands.emplace_back("learn", [&](context tokens){
-            std::optional<int> thread_count = find_element<int>(tokens, "threads");
-            std::optional<int> iterations = find_element<int>(tokens, "iter");
-            std::optional<int> nodes = find_element<int>(tokens, "nodes");
-            std::optional<std::string> book = find_element<std::string>(tokens, "book");
-            std::optional<int> dropout = find_element<int>(tokens, "dropout");
-            std::optional<std::string> data = find_element<std::string>(tokens, "data");
-            search::Limits limits = search::create_node_limit(nodes.value_or(5000));
-
-            const std::string data_path = data.value_or("data.plain");
-            nn::net = nn::QNetwork("corenet.bin");
-
-            for (int it = 1; it <= iterations.value_or(100); it++) {
-                logger.print("Starting iteration", it);
-                selfplay::start_generation(limits, book.value_or("book.epd"), data_path, thread_count.value_or(4), dropout.value_or(200));
-                nn::Trainer trainer(data_path, "corenet.bin", 0.001f, 3, 16384, thread_count.value_or(4));
-                system(("rm " + data_path).c_str());
-                system("cp networks/3.bin corenet.bin");
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-                nn::net = nn::QNetwork("corenet.bin");
-            }
-        });*/
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);
             U64 node_count = test::perft<true, false>(board, depth);
@@ -236,18 +214,20 @@ namespace uci {
     }
 
     search::Limits UCI::parse_limits(UCI::context tokens) {
+
+        const std::string time_token = (board.get_stm() == WHITE) ? "wtime" : "btime";
+        const std::string increment_token = (board.get_stm() == WHITE) ? "winc" : "binc";
+
         search::Limits limits;
-        if (board.get_stm() == WHITE) {
-            limits.time_left = find_element<int64_t>(tokens, "wtime");
-            limits.increment = find_element<int64_t>(tokens, "winc");
-        } else {
-            limits.time_left = find_element<int64_t>(tokens, "btime");
-            limits.increment = find_element<int64_t>(tokens, "binc");
-        }
+
+        limits.time_left = find_element<int64_t>(tokens, time_token);
+        limits.increment = find_element<int64_t>(tokens, increment_token);
+
         limits.moves_to_go = find_element<int64_t>(tokens, "movestogo");
         limits.depth = find_element<int64_t>(tokens, "depth");
         limits.move_time = find_element<int64_t>(tokens, "movetime");
         limits.max_nodes = find_element<int64_t>(tokens, "nodes");
+
         return limits;
     }
 

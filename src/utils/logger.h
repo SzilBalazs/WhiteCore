@@ -39,17 +39,17 @@ struct Logger {
     }
 
     template<typename T, typename... Args>
-    inline void print(T a, Args... args) {
+    void print(T a, Args... args) {
         std::cout << a << " ";
         print(args...);
     }
 
-    inline void print() {
+    void print() {
         std::cout << std::endl;
     }
 
     template<typename T, typename... Args>
-    inline void info(T a, Args... args) {
+    void info(T a, Args... args) {
 #ifdef LOGGING
         file << "[INFO] " << a << "(): ";
         log(args...);
@@ -57,7 +57,7 @@ struct Logger {
     }
 
     template<typename T, typename... Args>
-    inline void error(T a, Args... args) {
+    void error(T a, Args... args) {
 #ifdef LOGGING
         file << "[INFO] " << a << "(): ";
         log(args...);
@@ -65,12 +65,12 @@ struct Logger {
     }
 
     template<typename T, typename... Args>
-    inline void log(T a, Args... args) {
+    void log(T a, Args... args) {
         file << a << " ";
         log(args...);
     }
 
-    inline void log() {
+    void log() {
         file << std::endl;
     }
 };

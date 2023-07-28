@@ -48,7 +48,7 @@ namespace test {
         return nodes;
     }
 
-    inline void test_perft() {
+    void test_perft() {
 
         struct Test {
             std::string fen;

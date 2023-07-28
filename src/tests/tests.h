@@ -23,7 +23,7 @@
 
 namespace test {
 
-    inline void run() {
+    void run() {
         test_hash();
         test_repetition();
         test_perft();

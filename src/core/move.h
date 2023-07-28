@@ -104,7 +104,7 @@ namespace core {
         }
 
         // Returns the move in UCI format as a string
-        [[nodiscard]] inline std::string to_uci() const {
+        [[nodiscard]]  std::string to_uci() const {
             std::string res;
             if (is_promo()) {
                 if (!is_special_1() && !is_special_2())
@@ -125,7 +125,7 @@ namespace core {
 
     constexpr Move NULL_MOVE = Move();
 
-    inline std::ostream &operator<<(std::ostream &os, const Move &move) {
+    std::ostream &operator<<(std::ostream &os, const Move &move) {
         os << move.to_uci();
         return os;
     }

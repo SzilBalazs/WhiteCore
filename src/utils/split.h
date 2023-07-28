@@ -19,7 +19,7 @@
 
 #include <random>
 
-inline void split_data(const std::string &input, const std::string &output1, const std::string &output2, int rate) {
+void split_data(const std::string &input, const std::string &output1, const std::string &output2, int rate) {
     std::ifstream in(input, std::ios::in);
     std::ofstream out1(output1, std::ios::out | std::ios::app);
     std::ofstream out2(output2, std::ios::out | std::ios::app);

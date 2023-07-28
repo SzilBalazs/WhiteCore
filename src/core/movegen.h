@@ -24,7 +24,7 @@ namespace core {
 
     // Returns a bitboard of all the squares attacking a given square for the given color
     template<Color color>
-    [[nodiscard]] inline Bitboard get_attackers(const Board &board, Square square) {
+    [[nodiscard]] Bitboard get_attackers(const Board &board, Square square) {
         constexpr Color enemy_color = color_enemy<color>();
 
         Bitboard occupied = board.occupied();
@@ -38,7 +38,7 @@ namespace core {
     }
 
     // Returns a bitboard of all the squares attacking a given square for the side to move
-    [[nodiscard]] inline Bitboard get_attackers(const Board &board, Square square) {
+    [[nodiscard]] Bitboard get_attackers(const Board &board, Square square) {
         if (board.get_stm() == WHITE)
             return get_attackers<WHITE>(board, square);
         else
@@ -47,7 +47,7 @@ namespace core {
 
     // Generates all promotion moves for a pawn from 'from' to 'to'
     // and adds them to the move list 'moves'
-    [[nodiscard]] inline Move *make_promo(Move *moves, Square from, Square to) {
+    [[nodiscard]] Move *make_promo(Move *moves, Square from, Square to) {
         *moves++ = Move(from, to, PROMO_KNIGHT);
         *moves++ = Move(from, to, PROMO_BISHOP);
         *moves++ = Move(from, to, PROMO_ROOK);
@@ -57,7 +57,7 @@ namespace core {
 
     // Generates all promotion captures for a pawn from 'from' to 'to'
     // and adds them to the move list 'moves'
-    [[nodiscard]] inline Move *make_promo_capture(Move *moves, Square from, Square to) {
+    [[nodiscard]] Move *make_promo_capture(Move *moves, Square from, Square to) {
         *moves++ = Move(from, to, PROMO_CAPTURE_KNIGHT);
         *moves++ = Move(from, to, PROMO_CAPTURE_BISHOP);
         *moves++ = Move(from, to, PROMO_CAPTURE_ROOK);
@@ -68,7 +68,7 @@ namespace core {
     // Returns a bitboard of all the squares attacked by a given color
     // 'board' is the board, 'occupied' is a bitboard of all the occupied squares
     template<Color color>
-    [[nodiscard]] inline Bitboard get_attacked_squares(const Board &board, Bitboard occupied) {
+    [[nodiscard]] Bitboard get_attacked_squares(const Board &board, Bitboard occupied) {
 
         constexpr Direction UP_LEFT = color == WHITE ? NORTH_WEST : -NORTH_WEST;
         constexpr Direction UP_RIGHT = color == WHITE ? NORTH_EAST : -NORTH_EAST;
@@ -99,8 +99,8 @@ namespace core {
     // 'empty' - a bitboard of all empty squares
     // 'enemy' - a bitboard of all enemy pieces
     template<bool captures_only, bool pinHV, bool pinDA>
-    [[nodiscard]] inline Move *gen_moves_from_pieces(const Board &board, Move *moves, Bitboard pieces, Bitboard mask_special,
-                                       Bitboard occupied, Bitboard empty, Bitboard enemy) {
+    [[nodiscard]] Move *gen_moves_from_pieces(const Board &board, Move *moves, Bitboard pieces, Bitboard mask_special,
+                                              Bitboard occupied, Bitboard empty, Bitboard enemy) {
 
         // Iterate through the pieces
         while (pieces) {
@@ -148,8 +148,8 @@ namespace core {
     // 'moveD' - a bitboard indicating pieces which can move diagonally
     // 'moveA' - a bitboard indicating pieces which can move anti-diagonally
     template<Color color, bool captures_only>
-    [[nodiscard]] inline Move *gen_pawn_moves(const Board &board, Move *moves, Square king, Bitboard mask_check,
-                         Bitboard moveH, Bitboard moveV, Bitboard moveD, Bitboard moveA) {
+    [[nodiscard]] Move *gen_pawn_moves(const Board &board, Move *moves, Square king, Bitboard mask_check,
+                                       Bitboard moveH, Bitboard moveV, Bitboard moveD, Bitboard moveA) {
 
         // Define enemy color
         constexpr Color enemy_color = color_enemy<color>();
@@ -334,8 +334,8 @@ namespace core {
 
     // Generates all the legal king moves.
     template<bool captures_only>
-    [[nodiscard]] inline Move *gen_king_moves(const Board &board, Move *moves, Square king,
-                                Bitboard squares_safe, Bitboard empty, Bitboard enemy) {
+    [[nodiscard]] Move *gen_king_moves(const Board &board, Move *moves, Square king,
+                                       Bitboard squares_safe, Bitboard empty, Bitboard enemy) {
 
         // Calculate all safe squares that the king can move to
         Bitboard king_target = masks_king[king] & squares_safe;
@@ -362,7 +362,7 @@ namespace core {
     }
 
     // Returns the "to" squares which evades check.
-    [[nodiscard]] inline Bitboard gen_check_mask(const Board &board, Square king, Bitboard checkers) {
+    [[nodiscard]] Bitboard gen_check_mask(const Board &board, Square king, Bitboard checkers) {
         unsigned int checks = checkers.pop_count();
         if (checks == 0) {
             return 0xffffffffffffffffULL;
@@ -381,9 +381,9 @@ namespace core {
 
     // Generates all the legal slider and knight moves using the gen_moves_from_pieces utility.
     template<bool captures_only>
-    [[nodiscard]] inline Move *gen_slider_and_jumper(const Board &board, Move *moves, Bitboard pieces,
-                                       Bitboard occupied, Bitboard empty, Bitboard enemy, Bitboard checkMask,
-                                       Bitboard pinHV, Bitboard pinDA) {
+    [[nodiscard]] Move *gen_slider_and_jumper(const Board &board, Move *moves, Bitboard pieces,
+                                              Bitboard occupied, Bitboard empty, Bitboard enemy, Bitboard checkMask,
+                                              Bitboard pinHV, Bitboard pinDA) {
         Bitboard pinnedHV = pinHV & pieces;
         Bitboard pinnedDA = pinDA & pieces;
         pieces &= ~(pinnedHV | pinnedDA);
@@ -401,7 +401,7 @@ namespace core {
 
     // Generates all the legal moves in a board.
     template<Color color, bool captures_only>
-    [[nodiscard]] inline Move *gen_moves(const Board &board, Move *moves) {
+    [[nodiscard]] Move *gen_moves(const Board &board, Move *moves) {
         // Define enemy color
         constexpr Color enemyColor = color_enemy<color>();
 
@@ -525,7 +525,7 @@ namespace core {
 
     // Wrapper around the stm template.
     template<bool captures_only>
-    [[nodiscard]] inline Move *gen_moves(const Board &board, Move *moves) {
+    [[nodiscard]] Move *gen_moves(const Board &board, Move *moves) {
         if (board.get_stm() == WHITE) {
             return gen_moves<WHITE, captures_only>(board, moves);
         } else {
@@ -534,7 +534,7 @@ namespace core {
     }
 
     // Wrapper around captures only template.
-    [[nodiscard]] inline Move *gen_moves(const Board &board, Move *moves, bool captures_only) {
+    [[nodiscard]] Move *gen_moves(const Board &board, Move *moves, bool captures_only) {
         if (captures_only) {
             return gen_moves<true>(board, moves);
         } else {

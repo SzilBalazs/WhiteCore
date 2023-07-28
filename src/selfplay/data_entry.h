@@ -23,7 +23,7 @@ namespace selfplay {
         BLACK_WIN
     };
 
-    inline std::string get_wdl(const GameResult &result) {
+    std::string get_wdl(const GameResult &result) {
         switch (result) {
             case WHITE_WIN:
                 return "1";

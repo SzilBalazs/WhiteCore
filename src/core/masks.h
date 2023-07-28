@@ -37,10 +37,10 @@ namespace core {
     extern LineType line_type[64][64];
 
     /*
- * Initializes masks. Must be called
- * before calling the move generator.
- */
-    inline void init_masks() {
+     * Initializes masks. Must be called
+     * before calling the move generator.
+     */
+    void init_masks() {
 
         for (Square sq = A1; sq < 64; sq += 1) {
             masks_bit[sq] = 1ULL << sq;
