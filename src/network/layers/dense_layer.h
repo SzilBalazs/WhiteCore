@@ -61,8 +61,8 @@ namespace nn::layers {
         }
 
     public:
-        std::array<T, OUT> biases;
-        std::array<T, IN * OUT> weights;
+        alignas(64) std::array<T, OUT> biases;
+        alignas(64) std::array<T, IN * OUT> weights;
 
         void load_from_file(std::ifstream &file) {
             file.read(reinterpret_cast<char *>(biases.data()), sizeof(biases));

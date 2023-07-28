@@ -91,7 +91,7 @@ namespace nn {
         }
 
         Score evaluate(Color stm) {
-            accumulator.copy_accumulator(l0_output);
+            accumulator.push(l0_output);
             l1.forward(l0_output, l1_output);
             int32_t score = l1_output[0];
             if (stm == BLACK) score *= -1;
@@ -106,8 +106,8 @@ namespace nn {
         static constexpr int MAGIC = -4;
         static constexpr unsigned int L1_SIZE = 256;
 
-        std::array<int16_t, L1_SIZE> l0_output;
-        std::array<int32_t, 1> l1_output;
+        alignas(64) std::array<int16_t, L1_SIZE> l0_output;
+        alignas(64) std::array<int32_t, 1> l1_output;
 
         layers::Accumulator<768, L1_SIZE, int16_t, activations::crelu<int16_t, QSCALE>> accumulator;
         layers::DenseLayer<L1_SIZE, 1, int16_t, int32_t, activations::none<int16_t>> l1;
