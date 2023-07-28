@@ -281,6 +281,7 @@ namespace search {
                     Depth R = lmr_reductions[depth][made_moves];
 
                     R -= pv_node;
+                    R += !improving;
 
                     Depth new_depth = std::clamp(depth - R, 1, depth - 1);
                     score = -search<NON_PV_NODE>(new_depth, -alpha - 1, -alpha, ss + 1);
