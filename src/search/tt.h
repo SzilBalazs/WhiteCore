@@ -90,6 +90,10 @@ namespace search {
             }
         }
 
+        void prefetch(U64 hash) {
+            __builtin_prefetch(get_entry(hash), 0);
+        }
+
         core::Move get_hash_move(U64 hash) {
             TTEntry *entry = get_entry(hash);
             if (entry->hash == hash)
