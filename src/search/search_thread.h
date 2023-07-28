@@ -226,7 +226,7 @@ namespace search {
             if (root_node || in_check)
                 goto search_moves;
 
-            if (!entry && depth >= 5)
+            if (!entry && non_pv_node && depth >= 4)
                 depth--;
 
             if (depth <= 3 && static_eval + 150 * depth <= alpha) {
