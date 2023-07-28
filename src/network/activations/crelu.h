@@ -18,6 +18,7 @@
 #pragma once
 
 #include <algorithm>
+#include <immintrin.h>
 
 namespace nn::activations {
     template<typename T, int INT_UPPER_BOUND>
@@ -28,6 +29,15 @@ namespace nn::activations {
         static T forward(T value) {
             return std::clamp(value, static_cast<T>(0), UPPER_BOUND);
         }
+
+#ifdef AVX2
+        static __m256i _mm256_forward_epi16(__m256i value) {
+            static_assert(std::is_same_v<T, int16_t>, "Only int16 is supported with AVX2");
+            const __m256i lower_bound = _mm256_setzero_si256();
+            const __m256i upper_bound = _mm256_set1_epi16(UPPER_BOUND);
+            return _mm256_min_epi16(_mm256_max_epi16(value, lower_bound), upper_bound);
+        }
+#endif
 
         static constexpr T backward(T value) {
             return static_cast<T>(0) < value && value < UPPER_BOUND;
