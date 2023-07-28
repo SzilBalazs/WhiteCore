@@ -23,6 +23,36 @@ namespace search {
     class TimeManager {
     public:
         void init(const Limits &limits) {
+
+            calculate_allocated_time(limits);
+
+            max_nodes = limits.max_nodes.value_or(INF_NODES);
+            max_depth = limits.depth.value_or(MAX_PLY);
+
+            start_time = now();
+            end_time = start_time + allocated_time - MOVE_OVERHEAD;
+        }
+
+        [[nodiscard]] bool time_left() const {
+            return now() < end_time;
+        }
+
+        [[nodiscard]] int64_t get_elapsed_time() const {
+            return now() - start_time;
+        }
+
+        [[nodiscard]] Depth get_max_depth() const {
+            return max_depth;
+        }
+
+        [[nodiscard]] int64_t get_max_nodes() const {
+            return max_nodes;
+        }
+
+    private:
+        int64_t start_time, allocated_time, end_time, max_nodes, max_depth;
+
+        void calculate_allocated_time(const Limits &limits) {
             int64_t moves_to_go = limits.moves_to_go.value_or(30);
             int64_t increment = limits.increment.value_or(0);
             if (limits.time_left) {
@@ -32,31 +62,6 @@ namespace search {
             } else {
                 allocated_time = limits.move_time.value_or(INF_TIME);
             }
-
-            max_nodes = limits.max_nodes.value_or(INF_NODES);
-            max_depth = limits.depth.value_or(MAX_PLY);
-
-            start_time = now();
-            end_time = start_time + allocated_time - MOVE_OVERHEAD;
         }
-
-        [[nodiscard]] inline bool time_left() const {
-            return now() < end_time;
-        }
-
-        [[nodiscard]] inline int64_t get_elapsed_time() const {
-            return now() - start_time;
-        }
-
-        [[nodiscard]] inline Depth get_max_depth() const {
-            return max_depth;
-        }
-
-        [[nodiscard]] inline int64_t get_max_nodes() const {
-            return max_nodes;
-        }
-
-    private:
-        int64_t start_time, allocated_time, end_time, max_nodes, max_depth;
     };
 } // namespace search

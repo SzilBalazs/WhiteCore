@@ -30,7 +30,7 @@ namespace core {
 
         explicit Zobrist(U64 hash) : hash(hash) {}
 
-        [[nodiscard]] inline operator U64() const {
+        [[nodiscard]] operator U64() const {
             return hash;
         }
 

@@ -32,7 +32,7 @@ constexpr Color color_enemy() {
         return WHITE;
 }
 
-inline Color color_enemy(Color color) {
+Color color_enemy(Color color) {
     return color == WHITE ? BLACK : WHITE;
 }
 
@@ -44,12 +44,12 @@ constexpr unsigned int square_to_file(Square square) {
     return square & 7;
 }
 
-inline std::string format_square(Square square) {
+std::string format_square(Square square) {
     return std::string() + (char) ('a' + (char) square % 8) + (char) ('1' + (char) (square / 8));
 }
 
 // Function that converts an uci format square string into an actual square.
-inline Square square_from_string(const std::string &s) {
+Square square_from_string(const std::string &s) {
     if (s[0] == '-') {
         return NULL_SQUARE;
     } else if ('a' <= s[0] && s[0] <= 'z') {
@@ -71,7 +71,7 @@ constexpr Square square_flip(Square sq) {
     return Square(int(sq) ^ 56);
 }
 
-inline Piece piece_from_char(char c) {
+Piece piece_from_char(char c) {
     Piece piece;
 
     if ('a' <= c && c <= 'z') {
@@ -108,7 +108,7 @@ inline Piece piece_from_char(char c) {
     return piece;
 }
 
-inline char char_from_piece(Piece piece) {
+char char_from_piece(Piece piece) {
     char base;
     switch (piece.type) {
         case PAWN:
@@ -149,22 +149,22 @@ constexpr int64_t calculate_nps(int64_t time, int64_t nodes) {
     return nodes * 1000 / (time + 1);
 }
 
-inline Square operator+(Square a, int b) {
+Square operator+(Square a, int b) {
     return Square(int(a) + b);
 }
 
-inline Square operator-(Square a, int b) {
+Square operator-(Square a, int b) {
     return Square(int(a) - b);
 }
 
-inline Square operator+=(Square &a, int b) {
+Square operator+=(Square &a, int b) {
     return a = a + b;
 }
 
-inline Square operator-=(Square &a, int b) {
+Square operator-=(Square &a, int b) {
     return a = a - b;
 }
 
-inline int64_t now() {
+int64_t now() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 };

@@ -52,30 +52,30 @@ namespace nn {
         Network(const std::string &network_path) {
             std::ifstream file(network_path, std::ios::in | std::ios::binary);
             if (!file.is_open()) {
-                logger.print("Unable to open:", network_path);
-                std::random_device rd;
-                std::mt19937 mt(rd());
-                l0.randomize(mt);
-                l1.randomize(mt);
-            } else {
-                int magic;
-                file.read(reinterpret_cast<char *>(&magic), sizeof(magic));
-
-                if (magic != MAGIC) {
-                    logger.print("Invalid network file", network_path, "with magic", magic);
-                    throw std::invalid_argument("Invalid network file with magic " + std::to_string(magic));
-                }
-
-                l0.load_from_file(file);
-                l1.load_from_file(file);
-
-                file.close();
-
-                logger.print("Loaded network file", network_path, "for training");
+                logger.print("Unable to open: ", network_path);
+                randomize();
+                return;
             }
+
+            int magic;
+            file.read(reinterpret_cast<char *>(&magic), sizeof(magic));
+
+            if (magic != MAGIC) {
+                logger.print("Invalid network file: ", network_path, " with magic: ", magic);
+                throw std::invalid_argument("Invalid network file with magic: " + std::to_string(magic));
+            }
+
+            l0.load_from_file(file);
+            l1.load_from_file(file);
+
+            logger.print("Loaded network file: ", network_path);
         }
 
         Network() {
+            randomize();
+        }
+
+        void randomize() {
             std::random_device rd;
             std::mt19937 mt(rd());
             l0.randomize(mt);

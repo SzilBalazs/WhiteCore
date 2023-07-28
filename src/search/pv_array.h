@@ -15,18 +15,32 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#pragma once
+#include "../core/move.h"
 
-#include "hash.h"
-#include "perft.h"
-#include "repetition.h"
+namespace search {
+    struct PVArray {
 
-namespace test {
+        core::Move array[500][500];
+        Ply length[500];
 
-    void run() {
-        test_hash();
-        test_repetition();
-        test_perft();
-    }
+        std::string get_line() {
+            std::string line;
+            for (int i = 0; i < length[0]; i++) {
+                line += array[0][i].to_uci() + " ";
+            }
+            return line;
+        }
 
-} // namespace test
+        core::Move get_best_move() {
+            return array[0][0];
+        }
+
+        void update(Ply ply, core::Move move) {
+            array[ply][ply] = move;
+            for (Ply i = ply + 1; i < length[ply + 1]; i++) {
+                array[ply][i] = array[ply + 1][i];
+            }
+            length[ply] = length[ply + 1];
+        }
+    };
+}

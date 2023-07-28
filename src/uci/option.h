@@ -43,17 +43,16 @@ namespace uci {
         }
 
         std::string to_string() const {
-            std::string res = "option";
-
-            res += " name " + name;
-            res += " type " + type;
-            res += " default " + default_value;
+            std::stringstream res;
+            res << "option"
+                << " name " << name
+                << " type " << type
+                << " default " << default_value;
             if (min_value && max_value) {
-                res += " min " + std::to_string(min_value.value());
-                res += " max " + std::to_string(max_value.value());
+                res << " min " << min_value.value()
+                    << " max " << max_value.value();
             }
-
-            return res;
+            return res.str();
         }
 
         void set_value(const std::optional<std::string> &new_value) {

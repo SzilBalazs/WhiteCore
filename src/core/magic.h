@@ -33,7 +33,7 @@ namespace core {
     extern Bitboard attack_table_bishop[5248];
 
     // Slow naive function of getting the attacked squares of a sliding piece.
-    [[nodiscard]] inline Bitboard attacks_sliding_slow(Square square, Bitboard occupied, PieceType pt) {
+    [[nodiscard]] Bitboard attacks_sliding_slow(Square square, Bitboard occupied, PieceType pt) {
         assert((pt == ROOK) || (pt == BISHOP));
         switch (pt) {
             case ROOK:
@@ -48,7 +48,7 @@ namespace core {
     }
 
     // Converts the magic and the occupancy bitboard into an index in the lookup table.
-    [[nodiscard]] inline unsigned int get_magic_index(const Magic &m, Bitboard occ) {
+    [[nodiscard]] unsigned int get_magic_index(const Magic &m, Bitboard occ) {
 #ifdef BMI2
         return _pext_u64(occ.bb, m.mask.bb);
 #else
@@ -57,7 +57,7 @@ namespace core {
     }
 
     // Initializes magic bitboards by pt.
-    inline void init_magic(const Magic *magics, PieceType pt) {
+    void init_magic(const Magic *magics, PieceType pt) {
         assert((pt == ROOK) || (pt == BISHOP));
         Bitboard occupied[4096], attacked[4096];
 
@@ -221,7 +221,7 @@ namespace core {
             {attack_table_bishop + 5184, 0x40201008040200ULL, 0x208600082060020ULL, 6},
     };
 
-    inline void init_magic() {
+    void init_magic() {
         init_magic(magic_rook, ROOK);
         init_magic(magic_bishop, BISHOP);
     }

@@ -35,7 +35,7 @@ namespace selfplay {
 
     const unsigned int PROGRESS_BAR_WIDTH = 25;
 
-    inline std::string get_date() {
+    std::string get_date() {
         auto t = std::time(nullptr);
         auto tm = *std::localtime(&t);
         std::stringstream ss;
@@ -43,7 +43,7 @@ namespace selfplay {
         return ss.str();
     }
 
-    inline std::optional<GameResult> get_game_result(const core::Board &board) {
+    std::optional<GameResult> get_game_result(const core::Board &board) {
 
         if (board.is_draw()) return DRAW;
 
@@ -61,7 +61,7 @@ namespace selfplay {
         return std::nullopt;
     }
 
-    inline void run_game(Engine &engine, const search::Limits &limits, const std::string &starting_fen, std::vector<DataEntry> &entries, unsigned int hash_size = DEFAULT_HASH_SIZE, const unsigned int thread_count = DEFAULT_THREAD_COUNT) {
+    void run_game(Engine &engine, const search::Limits &limits, const std::string &starting_fen, std::vector<DataEntry> &entries, unsigned int hash_size = DEFAULT_HASH_SIZE, const unsigned int thread_count = DEFAULT_THREAD_COUNT) {
         engine.init(hash_size, thread_count);
         core::Board board;
         board.load(starting_fen);
@@ -89,7 +89,7 @@ namespace selfplay {
         }
     }
 
-    inline void gen_games(const search::Limits &limits, const std::vector<std::string> &starting_fens, const std::string &output_path) {
+    void gen_games(const search::Limits &limits, const std::vector<std::string> &starting_fens, const std::string &output_path) {
 
         Engine engine;
 
@@ -121,7 +121,7 @@ namespace selfplay {
         file.close();
     }
 
-    inline void combine_data(const std::string &path, const std::string &output_file) {
+    void combine_data(const std::string &path, const std::string &output_file) {
 
         logger.print("Combining files...");
 
@@ -139,7 +139,7 @@ namespace selfplay {
         logger.print("Finished combining");
     }
 
-    inline void start_generation(const search::Limits &limits, const std::string &book_path, const std::string &output_path, unsigned int thread_count, int dropout) {
+    void start_generation(const search::Limits &limits, const std::string &book_path, const std::string &output_path, unsigned int thread_count, int dropout) {
         game_count = 0;
         position_count = 0;
 

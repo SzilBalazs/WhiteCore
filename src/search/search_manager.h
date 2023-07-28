@@ -25,32 +25,32 @@
 namespace search {
     class SearchManager {
     public:
-        inline void allocate_threads(unsigned int thread_count) {
+        void allocate_threads(unsigned int thread_count) {
             allocated_threads = thread_count;
         }
 
-        inline void allocate_hash(unsigned int MB) {
+        void allocate_hash(unsigned int MB) {
             shared.tt.resize(MB);
         }
 
-        inline void set_limits(const Limits &limits) {
+        void set_limits(const Limits &limits) {
             shared.tm.init(limits);
         }
 
-        inline int64_t get_elapsed_time() {
+        int64_t get_elapsed_time() {
             return shared.tm.get_elapsed_time();
         }
 
-        inline int64_t get_node_count() {
+        int64_t get_node_count() {
             return shared.node_count;
         }
 
-        inline void set_uci_mode(bool uci_mode) {
+        void set_uci_mode(bool uci_mode) {
             shared.uci_mode = uci_mode;
         }
 
         template<bool wait_to_finish>
-        inline void join() {
+        void join() {
             if (!wait_to_finish) {
                 shared.is_searching = false;
             }
@@ -63,7 +63,7 @@ namespace search {
         }
 
         template<bool block>
-        inline void search(const core::Board &board) {
+        void search(const core::Board &board) {
             join<false>();
             for (unsigned int thread_id = 0; thread_id < allocated_threads; thread_id++) {
                 threads.emplace_back(shared, thread_id);
@@ -78,16 +78,16 @@ namespace search {
             if (block) join<true>();
         }
 
-        inline void stop() {
+        void stop() {
             join<false>();
         }
 
-        inline std::pair<core::Move, Score> get_result() {
+        std::pair<core::Move, Score> get_result() {
             join<true>();
             return {shared.best_move, shared.eval};
         }
 
-        inline void tt_clear() {
+        void tt_clear() {
             shared.tt.clear();
         }
 

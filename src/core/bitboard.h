@@ -39,7 +39,7 @@ namespace core {
             bb = value;
         }
 
-        inline Bitboard(Square square);
+        Bitboard(Square square);
 
         constexpr Bitboard() = default;
 
@@ -64,17 +64,8 @@ namespace core {
         }
 
         // Returns the square with the lowest index, that is set to 1.
-        [[nodiscard]] inline Square lsb() const {
-
-#ifdef __GNUC__
-            return Square(__builtin_ctzll(bb));
-#elif defined(_MSC_VER)
-            unsigned long a;
-            _BitScanForward64(&a, bb);
-            return Square(a);
-#else
-#error "Unsupported compiler!"
-#endif
+        [[nodiscard]] Square lsb() const {
+            return Square(std::countr_zero(bb));
         }
 
         // Clears the square with the lowest index, that is set to 1.
@@ -193,7 +184,7 @@ namespace core {
 
     extern Bitboard masks_bit[64];
 
-    inline Bitboard::Bitboard(Square square) {
+    Bitboard::Bitboard(Square square) {
         bb = masks_bit[square].bb;
     }
 
@@ -252,7 +243,7 @@ namespace core {
         return result;
     }
 
-    [[nodiscard]] inline Bitboard slide(Direction direction, Square square) {
+    [[nodiscard]] Bitboard slide(Direction direction, Square square) {
         Bitboard result;
         Bitboard temp = {square};
         while (temp) {

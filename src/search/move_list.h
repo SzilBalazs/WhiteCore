@@ -25,13 +25,19 @@ namespace search {
     template<bool captures_only>
     class MoveList {
 
+        static constexpr unsigned int MOVE_SCORE_HASH = 10'000'000;
+        static constexpr unsigned int MOVE_SCORE_PROMO = 9'000'000;
+        static constexpr unsigned int MOVE_SCORE_CAPTURE = 8'000'000;
+        static constexpr unsigned int MOVE_SCORE_FIRST_KILLER = 7'000'000;
+        static constexpr unsigned int MOVE_SCORE_SECOND_KILLER = 6'000'000;
+
     public:
         MoveList(const core::Board &board, const core::Move &hash_move, const History &history, const Ply &ply) : current(0), board(board),
                                                                                                                   hash_move(hash_move), history(history), ply(ply) {
             size = core::gen_moves(board, moves, captures_only) - moves;
-            for (unsigned int i = 0; i < size; i++) {
-                scores[i] = score_move(moves[i]);
-            }
+            std::transform(moves, moves+size, scores, [this](const core::Move& move) {
+                return score_move(move);
+            });
         }
 
         [[nodiscard]] bool empty() const {
@@ -58,23 +64,22 @@ namespace search {
         const Ply &ply;
 
         [[nodiscard]] Score get_mvv_lva(const core::Move &move) const {
-            if (move.eq_flag(EP_CAPTURE))
-                return MVVLVA[PAWN][PAWN];
-            else
-                return MVVLVA[board.piece_at(move.get_to()).type][board.piece_at(move.get_from()).type];
+            return move.eq_flag(EP_CAPTURE)
+                           ? MVVLVA[PAWN][PAWN]
+                           : MVVLVA[board.piece_at(move.get_to()).type][board.piece_at(move.get_from()).type];
         }
 
         [[nodiscard]] Score score_move(const core::Move &move) const {
             if (move == hash_move) {
-                return 10'000'000;
+                return MOVE_SCORE_HASH;
             } else if (move.is_promo()) {
-                return 9'000'000;
+                return MOVE_SCORE_PROMO;
             } else if (move.is_capture()) {
-                return 8'000'000 + get_mvv_lva(move);
+                return MOVE_SCORE_CAPTURE + get_mvv_lva(move);
             } else if (move == history.killer_moves[ply][0]) {
-                return 7'000'000;
+                return MOVE_SCORE_FIRST_KILLER;
             } else if (move == history.killer_moves[ply][1]) {
-                return 6'000'000;
+                return MOVE_SCORE_SECOND_KILLER;
             } else {
                 return history.butterfly[move.get_from()][move.get_to()];
             }

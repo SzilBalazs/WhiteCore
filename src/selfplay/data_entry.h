@@ -23,7 +23,7 @@ namespace selfplay {
         BLACK_WIN
     };
 
-    inline std::string get_wdl(const GameResult &result) {
+    std::string get_wdl(const GameResult &result) {
         switch (result) {
             case WHITE_WIN:
                 return "1";
@@ -32,7 +32,7 @@ namespace selfplay {
             case BLACK_WIN:
                 return "-1";
         }
-        return "HMMMM";
+        return "";
     }
 
     struct DataEntry {
@@ -47,17 +47,10 @@ namespace selfplay {
                                                                                                                            result(result) {}
 
         std::string to_string() const {
-            std::string res = fen;
-            res += ";";
-            res += std::to_string(ply);
-            res += ";";
-            res += best_move.to_uci();
-            res += ";";
-            res += std::to_string(int(eval));
-            res += ";";
-            res += get_wdl(result.value_or(DRAW));
-            res += ";";
-            return res;
+            std::stringstream ss;
+            ss << fen << ";" << ply << ";" << best_move.to_uci() << ";"
+               << int(eval) << ";" << get_wdl(result.value_or(DRAW)) << ";";
+            return ss.str();
         }
     };
 

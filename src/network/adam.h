@@ -23,7 +23,7 @@ namespace nn {
 
     class Adam {
     public:
-        Adam(float learning_rate) : LR(learning_rate), m_gradient(), v_gradient() {}
+        explicit Adam(float learning_rate) : LR(learning_rate), m_gradient(), v_gradient() {}
 
         void update(const std::vector<Gradient> &gradients, Network &network) {
             Gradient total;
@@ -57,7 +57,7 @@ namespace nn {
             }
         }
 
-        void apply_gradient(float &target, float &m, float &v, float grad) {
+        void apply_gradient(float &target, float &m, float &v, float grad) const {
             m = BETA1 * m + (1.0f - BETA1) * grad;
             v = BETA2 * v + (1.0f - BETA2) * grad * grad;
 

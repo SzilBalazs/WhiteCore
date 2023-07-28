@@ -17,6 +17,7 @@
 
 #include "../core/board.h"
 #include "../network/nnue.h"
+#include "pv_array.h"
 #include "history.h"
 #include "move_list.h"
 #include "time_manager.h"
@@ -29,7 +30,7 @@ namespace search {
 
     extern Depth lmr_reductions[200][MAX_PLY + 1];
 
-    inline void init_lmr() {
+    void init_lmr() {
         for (int made_moves = 0; made_moves < 200; made_moves++) {
             for (Depth depth = 0; depth < MAX_PLY + 1; depth++) {
                 double moves_log = made_moves == 0 ? 0 : std::log(made_moves);
@@ -78,43 +79,64 @@ namespace search {
         SharedMemory &shared;
         std::thread th;
         unsigned int id;
-        core::Move pv_array[500][500];
-        Ply pv_length[500];
+        Ply max_ply;
+        PVArray pv;
+
         History history;
 
-        std::string get_pv_line() {
-            std::string pv;
-            for (int i = 0; i < pv_length[0]; i++) {
-                pv += pv_array[0][i].to_uci() + " ";
-            }
-            return pv;
+        void search() {
+            init_search();
+            iterative_deepening();
+            finish_search();
         }
 
-        void search() {
-            history.clear(); // TODO remove this?
+        void init_search() {
+            history.clear();
             shared.best_move = core::NULL_MOVE;
+            max_ply = 0;
+        }
+
+        void iterative_deepening() {
             Score prev_score = 0;
-            for (Depth depth = 1; depth <= shared.tm.get_max_depth(); depth++) {
+            for (Depth depth = 1; depth <= shared.tm.get_max_depth() && shared.is_searching; depth++) {
                 Score score = prev_score = aspiration_window(depth, prev_score);
 
-                if (shared.is_searching && id == 0) {
-                    int64_t elapsed_time = shared.tm.get_elapsed_time();
-
-                    if (shared.uci_mode) {
-                        logger.print("info", "depth", int(depth), "nodes", shared.node_count,
-                                     "score", "cp", score, "time", elapsed_time,
-                                     "nps", calculate_nps(elapsed_time, shared.node_count),
-                                     "pv", get_pv_line());
-                    }
-
-                    shared.best_move = pv_array[0][0];
-                    shared.eval = score;
-                }
-
-                if (!shared.is_searching) {
-                    break;
-                }
+                handle_iteration(score, depth);
             }
+        }
+
+        void handle_iteration(Score score, Depth depth) {
+            if (shared.is_searching && id == 0) {
+                handle_uci(score, depth);
+                shared.best_move = pv.get_best_move();
+                shared.eval = score;
+            }
+        }
+
+        static std::string score_to_string(Score score) {
+            Score abs_score = std::abs(score);
+            int mate_depth = MATE_VALUE - abs_score;
+            if (mate_depth <= MAX_PLY) {
+                int mate_ply = score > 0 ? mate_depth / 2 + 1 : -(mate_depth / 2);
+                return "mate " + std::to_string(mate_ply);
+            } else {
+                return "cp " + std::to_string(score);
+            }
+        }
+
+        void handle_uci(Score score, Depth depth) {
+            if (shared.uci_mode) {
+                int64_t elapsed_time = shared.tm.get_elapsed_time();
+
+                logger.print("info", "depth", int(depth), "seldepth", int(max_ply),
+                             "nodes", shared.node_count,
+                             "score", score_to_string(score), "time", elapsed_time,
+                             "nps", calculate_nps(elapsed_time, shared.node_count),
+                             "pv", pv.get_line());
+            }
+        }
+
+        void finish_search() {
             if (id == 0) {
                 shared.is_searching = false;
                 if (shared.uci_mode) {
@@ -190,8 +212,10 @@ namespace search {
             core::Move best_move = core::NULL_MOVE;
             Score best_score = -INF_SCORE;
 
-            if (id == 0)
-                pv_length[ss->ply] = ss->ply;
+            if (id == 0) {
+                pv.length[ss->ply] = ss->ply;
+                max_ply = std::max(max_ply, ss->ply);
+            }
 
             if ((shared.node_count & 1023) == 0) {
                 manage_resources();
@@ -201,13 +225,13 @@ namespace search {
                 return UNKNOWN_SCORE;
             }
 
-            if (non_root_node) {
-                if (board.is_draw()) {
-                    return 0;
-                }
+            if (non_root_node && board.is_draw()) {
+                return 0;
             }
 
-            if (in_check) depth++;
+            if (in_check) {
+                depth++;
+            }
 
             std::optional<TTEntry> entry = shared.tt.probe(board.get_hash());
             TTFlag flag = TT_ALPHA;
@@ -321,13 +345,8 @@ namespace search {
                     best_move = move;
 
                     if (id == 0) {
-                        pv_array[ss->ply][ss->ply] = move;
-                        for (Ply i = ss->ply + 1; i < pv_length[ss->ply + 1]; i++) {
-                            pv_array[ss->ply][i] = pv_array[ss->ply + 1][i];
-                        }
-                        pv_length[ss->ply] = pv_length[ss->ply + 1];
+                        pv.update(ss->ply, move);
                     }
-
 
                     if (score > alpha) {
                         flag = TT_EXACT;

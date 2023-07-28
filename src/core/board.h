@@ -100,7 +100,7 @@ namespace core {
             return ~occupied();
         }
 
-        [[nodiscard]] inline bool is_draw() const {
+        [[nodiscard]] bool is_draw() const {
             if (get_move50() >= 100) return true;
             int cnt = 0;
             for (const BoardState &st : states) {
@@ -111,14 +111,14 @@ namespace core {
             return cnt >= 2;
         }
 
-        [[nodiscard]] inline bool is_check() const;
+        [[nodiscard]] bool is_check() const;
 
-        [[nodiscard]] inline bool has_non_pawn() const {
+        [[nodiscard]] bool has_non_pawn() const {
             const Color stm = get_stm();
             return bool(pieces<KNIGHT>(stm) | pieces<BISHOP>(stm) | pieces<ROOK>() | pieces<QUEEN>());
         }
 
-        inline void make_null_move() {
+        void make_null_move() {
             const Color xstm = color_enemy(get_stm());
             const BoardState state_old = state;
 
@@ -130,11 +130,11 @@ namespace core {
             if (state_old.ep != NULL_SQUARE) state.hash.xor_ep(state_old.ep);
         }
 
-        inline void undo_null_move() {
+        void undo_null_move() {
             states.pop_back();
         }
 
-        inline void make_move(Move move, nn::NNUE *nnue = nullptr) {
+        void make_move(Move move, nn::NNUE *nnue = nullptr) {
             const Square from = move.get_from();
             const Square to = move.get_to();
             Piece piece_moved = piece_at(from);
@@ -226,7 +226,7 @@ namespace core {
             state.hash.xor_castle(state.rights);
         }
 
-        inline void undo_move(Move move, nn::NNUE *nnue = nullptr) {
+        void undo_move(Move move, nn::NNUE *nnue = nullptr) {
             const Square from = move.get_from();
             const Square to = move.get_to();
             Piece piece_moved = piece_at(to);
@@ -268,7 +268,7 @@ namespace core {
             states.pop_back();
         }
 
-        inline void load(const std::string &fen) {
+        void load(const std::string &fen) {
             board_clear();
 
             logger.info("Board::load", "Loading fen", fen);
@@ -314,7 +314,7 @@ namespace core {
             logger.info("Board::load", "Finished loading fen");
         }
 
-        [[nodiscard]] inline std::string get_fen() const {
+        [[nodiscard]] std::string get_fen() const {
             std::string fen;
 
             Square square = A8;
@@ -354,7 +354,7 @@ namespace core {
             return fen;
         }
 
-        inline void display() const {
+        void display() const {
             std::vector<std::string> text;
             text.emplace_back("50-move draw counter: " + std::to_string(state.move50));
             text.emplace_back("Hash: " + std::to_string(get_hash()));
@@ -388,7 +388,7 @@ namespace core {
                       << std::endl;
         }
 
-        [[nodiscard]] inline std::vector<unsigned int> to_features() const {
+        [[nodiscard]] std::vector<unsigned int> to_features() const {
             std::vector<unsigned int> result;
             Bitboard bb = occupied();
             while (bb) {
@@ -405,7 +405,7 @@ namespace core {
 
         std::vector<BoardState> states;
 
-        inline void square_clear(Square square, nn::NNUE *nnue = nullptr) {
+        void square_clear(Square square, nn::NNUE *nnue = nullptr) {
             const Piece piece = piece_at(square);
             if (piece.is_null()) return;
 
@@ -418,7 +418,7 @@ namespace core {
             if (nnue) nnue->deactivate(piece, square);
         }
 
-        inline void square_set(Square square, Piece piece, nn::NNUE *nnue = nullptr) {
+        void square_set(Square square, Piece piece, nn::NNUE *nnue = nullptr) {
             assert(piece.is_ok());
             square_clear(square, nnue);
 
@@ -431,19 +431,18 @@ namespace core {
             if (nnue) nnue->activate(piece, square);
         }
 
-        inline void move_piece(Piece piece, Square from, Square to, nn::NNUE *nnue = nullptr) {
+        void move_piece(Piece piece, Square from, Square to, nn::NNUE *nnue = nullptr) {
             assert(piece.is_ok());
 
             square_clear(from, nnue);
             square_set(to, piece, nnue);
         }
 
-        inline void board_clear() {
+        void board_clear() {
 
             logger.info("Board::board_clear", "Clearing board...");
 
             for (Bitboard &i : bb_pieces) i = 0;
-
             for (Bitboard &i : bb_colors) i = 0;
 
             for (Square square = A1; square < 64; square += 1) {
@@ -451,7 +450,6 @@ namespace core {
             }
 
             states.clear();
-
             states.emplace_back();
 
             logger.info("Board::board_clear", "Board has been cleared");

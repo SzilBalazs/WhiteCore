@@ -22,17 +22,17 @@
 
 namespace core {
 
-    [[nodiscard]] inline Bitboard attacks_rook(Square square, Bitboard occ) {
+    [[nodiscard]] Bitboard attacks_rook(Square square, Bitboard occ) {
         const Magic &m = magic_rook[square];
         return m.ptr[get_magic_index(m, occ)];
     }
 
-    [[nodiscard]] inline Bitboard attacks_bishop(Square square, Bitboard occ) {
+    [[nodiscard]] Bitboard attacks_bishop(Square square, Bitboard occ) {
         const Magic &m = magic_bishop[square];
         return m.ptr[get_magic_index(m, occ)];
     }
 
-    [[nodiscard]] inline Bitboard attacks_queen(Square square, Bitboard occ) {
+    [[nodiscard]] Bitboard attacks_queen(Square square, Bitboard occ) {
         return attacks_rook(square, occ) | attacks_bishop(square, occ);
     }
 
@@ -55,7 +55,7 @@ namespace core {
         }
     }
 
-    [[nodiscard]] inline Bitboard attacks_piece(PieceType pt, Square square, Bitboard occupied) {
+    [[nodiscard]] Bitboard attacks_piece(PieceType pt, Square square, Bitboard occupied) {
         assert((pt != PAWN) && (pt != PIECE_EMPTY));
         switch (pt) {
             case KNIGHT:
@@ -74,7 +74,7 @@ namespace core {
     }
 
     template<Color color>
-    [[nodiscard]] inline Bitboard attacks_piece(PieceType pt, Square square, Bitboard occupied) {
+    [[nodiscard]] Bitboard attacks_piece(PieceType pt, Square square, Bitboard occupied) {
         assert((pt != PAWN) && (pt != PIECE_EMPTY));
         switch (pt) {
             case PAWN:
