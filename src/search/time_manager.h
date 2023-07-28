@@ -23,15 +23,8 @@ namespace search {
     class TimeManager {
     public:
         void init(const Limits &limits) {
-            int64_t moves_to_go = limits.moves_to_go.value_or(30);
-            int64_t increment = limits.increment.value_or(0);
-            if (limits.time_left) {
-                int64_t time_left = limits.time_left.value();
-                allocated_time = (time_left + moves_to_go * increment) / moves_to_go;
-                allocated_time = std::min(allocated_time, time_left);
-            } else {
-                allocated_time = limits.move_time.value_or(INF_TIME);
-            }
+
+            calculate_allocated_time(limits);
 
             max_nodes = limits.max_nodes.value_or(INF_NODES);
             max_depth = limits.depth.value_or(MAX_PLY);
@@ -58,5 +51,17 @@ namespace search {
 
     private:
         int64_t start_time, allocated_time, end_time, max_nodes, max_depth;
+
+        void calculate_allocated_time(const Limits &limits) {
+            int64_t moves_to_go = limits.moves_to_go.value_or(30);
+            int64_t increment = limits.increment.value_or(0);
+            if (limits.time_left) {
+                int64_t time_left = limits.time_left.value();
+                allocated_time = (time_left + moves_to_go * increment) / moves_to_go;
+                allocated_time = std::min(allocated_time, time_left);
+            } else {
+                allocated_time = limits.move_time.value_or(INF_TIME);
+            }
+        }
     };
 } // namespace search

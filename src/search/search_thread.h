@@ -79,6 +79,7 @@ namespace search {
         SharedMemory &shared;
         std::thread th;
         unsigned int id;
+        Ply max_ply;
         PVArray pv;
 
         History history;
@@ -92,6 +93,7 @@ namespace search {
         void init_search() {
             history.clear();
             shared.best_move = core::NULL_MOVE;
+            max_ply = 0;
         }
 
         void iterative_deepening() {
@@ -111,12 +113,24 @@ namespace search {
             }
         }
 
-        void handle_uci(Score score, Depth depth) {
-            int64_t elapsed_time = shared.tm.get_elapsed_time();
+        static std::string score_to_string(Score score) {
+            Score abs_score = std::abs(score);
+            int mate_depth = MATE_VALUE - abs_score;
+            if (mate_depth <= MAX_PLY) {
+                int mate_ply = score > 0 ? mate_depth / 2 + 1 : -(mate_depth / 2);
+                return "mate " + std::to_string(mate_ply);
+            } else {
+                return "cp " + std::to_string(score);
+            }
+        }
 
+        void handle_uci(Score score, Depth depth) {
             if (shared.uci_mode) {
-                logger.print("info", "depth", int(depth), "nodes", shared.node_count,
-                             "score", "cp", score, "time", elapsed_time,
+                int64_t elapsed_time = shared.tm.get_elapsed_time();
+
+                logger.print("info", "depth", int(depth), "seldepth", int(max_ply),
+                             "nodes", shared.node_count,
+                             "score", score_to_string(score), "time", elapsed_time,
                              "nps", calculate_nps(elapsed_time, shared.node_count),
                              "pv", pv.get_line());
             }
@@ -200,6 +214,7 @@ namespace search {
 
             if (id == 0) {
                 pv.length[ss->ply] = ss->ply;
+                max_ply = std::max(max_ply, ss->ply);
             }
 
             if ((shared.node_count & 1023) == 0) {
