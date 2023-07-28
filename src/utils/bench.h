@@ -62,8 +62,7 @@ void run_bench() {
     sm.allocate_threads(1);
     sm.allocate_hash(32);
 
-    search::Limits limits;
-    limits.depth = 9;
+    search::Limits limits = search::create_depth_limit(11);
 
     int64_t nodes = 0;
     int64_t start_time = now();
