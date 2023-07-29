@@ -11,7 +11,7 @@ else
 	HASH := unknown
 endif
 
-ifeq ($(CXX), clang++)
+ifneq ($(CXX), g++)
 	TARGET_FLAGS += -fuse-ld=lld
 endif
 
