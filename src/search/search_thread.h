@@ -285,7 +285,9 @@ namespace search {
                 return in_check ? mate_ply : 0;
             }
 
-            std::vector<core::Move> quiet_moves;
+            core::Move quiet_moves[200];
+            core::Move *next_quiet_move = quiet_moves;
+
             bool skip_quiets = false;
             int made_moves = 0;
             while (!move_list.empty()) {
@@ -333,8 +335,8 @@ namespace search {
 
                     if (move.is_quiet()) {
                         history.add_cutoff(move, depth, ss->ply);
-                        for (const core::Move &m : quiet_moves) {
-                            history.decrease_history(m, depth);
+                        for (core::Move *current_move = quiet_moves; current_move != next_quiet_move; current_move++) {
+                            history.decrease_history(*current_move, depth);
                         }
                     }
 
@@ -357,7 +359,7 @@ namespace search {
                 }
 
                 made_moves++;
-                if (move.is_quiet()) quiet_moves.emplace_back(move);
+                if (move.is_quiet()) *next_quiet_move++ = move;
             }
 
             shared.tt.save(board.get_hash(), depth, best_score, flag, best_move);
