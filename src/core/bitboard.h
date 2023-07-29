@@ -64,7 +64,7 @@ namespace core {
         }
 
         // Returns the square with the lowest index, that is set to 1.
-        [[nodiscard]] Square lsb() const {
+        [[nodiscard]] constexpr Square lsb() const {
             return Square(std::countr_zero(bb));
         }
 

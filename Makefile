@@ -1,5 +1,5 @@
 CXX = clang++
-TARGET_FLAGS = -static -fuse-ld=lld
+TARGET_FLAGS = -static
 ARCH = native
 NAME = WhiteCore
 VERSION_MAJOR = 0
@@ -9,6 +9,10 @@ ifneq ($(wildcard .git/*),)
 	HASH := $(shell git rev-parse --short HEAD)
 else
 	HASH := unknown
+endif
+
+ifeq ($(CXX), clang++)
+	TARGET_FLAGS += -fuse-ld=lld
 endif
 
 ifeq ($(OS),Windows_NT)
@@ -88,7 +92,7 @@ ifeq ($(uname_S), Windows)
 	@./$(INCBIN_TOOL) src/network/nnue.h -o src/corenet.cpp
 endif
 	@echo Compiling $(NAME)
-	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ src/*.cpp
+	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ src/main.cpp
 	@echo Build has finished.
 	@rm $(TMP_EVALFILE)
 
