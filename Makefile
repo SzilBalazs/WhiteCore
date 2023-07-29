@@ -4,6 +4,7 @@ ARCH = native
 NAME = WhiteCore
 VERSION_MAJOR = 0
 VERSION_MINOR = 2
+CPP_FILES = src/main.cpp
 
 ifneq ($(wildcard .git/*),)
 	HASH := $(shell git rev-parse --short HEAD)
@@ -23,6 +24,7 @@ endif
 
 ifeq ($(uname_S), Windows)
 	SUFFIX = .exe
+	CPP_FILES += src/corenet.cpp
 	CP = powershell cp
 else
 	CP = cp
@@ -92,7 +94,7 @@ ifeq ($(uname_S), Windows)
 	@./$(INCBIN_TOOL) src/network/nnue.h -o src/corenet.cpp
 endif
 	@echo Compiling $(NAME)
-	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ src/main.cpp
+	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ $(CPP_FILES)
 	@echo Build has finished.
 	@rm $(TMP_EVALFILE)
 
