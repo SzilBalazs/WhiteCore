@@ -264,7 +264,7 @@ namespace search {
                 return static_eval;
 
             if (non_pv_node && depth >= 3 && static_eval >= beta && board.has_non_pawn()) {
-                Depth R = 3 + std::min(3, depth / 4);
+                Depth R = 3 + depth / 3 + std::min(3, (static_eval - beta) / 256);
                 ss->move = core::NULL_MOVE;
 
                 board.make_null_move();
