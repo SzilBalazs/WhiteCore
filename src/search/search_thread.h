@@ -24,7 +24,6 @@
 #include "tt.h"
 
 #include <atomic>
-#include <thread>
 
 namespace search {
 
@@ -64,31 +63,20 @@ namespace search {
             board = position;
         }
 
-        void join() {
-            if (th.joinable())
-                th.join();
-        }
-
-        void start() {
-            th = std::thread([this]() { search(); });
+        void search() {
+            init_search();
+            iterative_deepening();
+            finish_search();
         }
 
     private:
         core::Board board;
         nn::NNUE nnue;
         SharedMemory &shared;
-        std::thread th;
         unsigned int id;
         Ply max_ply;
         PVArray pv;
-
         History history;
-
-        void search() {
-            init_search();
-            iterative_deepening();
-            finish_search();
-        }
 
         void init_search() {
             history.clear();

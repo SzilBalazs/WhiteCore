@@ -19,6 +19,7 @@
 
 #include "../core/board.h"
 #include "search_thread.h"
+#include "threadpool.h"
 #include "time_manager.h"
 #include "tt.h"
 
@@ -26,7 +27,14 @@ namespace search {
     class SearchManager {
     public:
         void allocate_threads(unsigned int thread_count) {
-            allocated_threads = thread_count;
+
+            thread_pool.stop_workers();
+            thread_pool.allocate_threads(thread_count);
+            threads.clear();
+
+            for (unsigned int thread_id = 0; thread_id < thread_count; thread_id++) {
+                threads.emplace_back(shared, thread_id);
+            }
         }
 
         void allocate_hash(unsigned int MB) {
@@ -55,26 +63,24 @@ namespace search {
                 shared.is_searching = false;
             }
 
-            for (SearchThread &thread : threads) {
-                thread.join();
-            }
-
-            threads.clear();
+            thread_pool.wait();
         }
 
         template<bool block>
         void search(const core::Board &board) {
             join<false>();
-            for (unsigned int thread_id = 0; thread_id < allocated_threads; thread_id++) {
-                threads.emplace_back(shared, thread_id);
-                threads.back().load_board(board);
-            }
+
             shared.node_count = 0;
             shared.best_move = core::NULL_MOVE;
             shared.is_searching = true;
-            for (SearchThread &thread : threads) {
-                thread.start();
+
+            for (SearchThread &th : threads) {
+                th.load_board(board);
+                thread_pool.enqueue([&th](){
+                    th.search();
+                });
             }
+
             if (block) join<true>();
         }
 
@@ -92,7 +98,7 @@ namespace search {
         }
 
     private:
-        unsigned int allocated_threads;
+        ThreadPool thread_pool;
         std::vector<SearchThread> threads;
         SharedMemory shared;
     };
