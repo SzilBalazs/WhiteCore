@@ -123,7 +123,7 @@ namespace selfplay {
 
     void combine_data(const std::string &path, const std::string &output_file) {
 
-        logger.print("Combining files...");
+        Logger("Combining files...");
 
         std::ofstream file(output_file, std::ios::app | std::ios::out);
         for (const auto &entry : std::filesystem::directory_iterator(path)) {
@@ -136,7 +136,7 @@ namespace selfplay {
         }
         file.close();
 
-        logger.print("Finished combining");
+        Logger("Finished combining");
     }
 
     void start_generation(const search::Limits &limits, const std::string &book_path, const std::string &output_path, unsigned int thread_count, int dropout) {
@@ -145,7 +145,7 @@ namespace selfplay {
 
         // TODO argument for network file
         if (!std::filesystem::exists(book_path)) {
-            logger.print("Invalid book path: " + book_path);
+            Logger("Invalid book path: " + book_path);
             throw std::invalid_argument("Invalid book path: " + book_path);
         }
 
@@ -176,7 +176,7 @@ namespace selfplay {
 
         std::vector<std::thread> threads;
 
-        logger.print("Starting", thread_count, "threads...");
+        Logger("Starting", thread_count, "threads...");
         for (unsigned int id = 0; id < thread_count; id++) {
             std::vector<std::string> fens;
             for (unsigned int i = id; i < starting_fens.size(); i += thread_count) {
@@ -225,7 +225,7 @@ namespace selfplay {
                 th.join();
         }
 
-        logger.print("Finished generating data");
+        Logger("Finished generating data");
 
         combine_data(directory_path, output_path);
     }

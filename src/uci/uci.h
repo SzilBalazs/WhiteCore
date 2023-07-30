@@ -79,7 +79,7 @@ namespace uci {
             greetings();
         });
         commands.emplace_back("isready", [&](context tokens) {
-            logger.print("readyok");
+            Logger("readyok");
         });
         commands.emplace_back("position", [&](context tokens) {
             parse_position(tokens);
@@ -90,7 +90,7 @@ namespace uci {
         commands.emplace_back("eval", [&](context tokens) {
             nn::NNUE network{};
             network.refresh(board.to_features());
-            logger.print("Eval:", network.evaluate(board.get_stm()));
+            Logger("Eval:", network.evaluate(board.get_stm()));
         });
         commands.emplace_back("gen", [&](context tokens) {
             search::Limits limits;
@@ -129,7 +129,7 @@ namespace uci {
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);
             U64 node_count = test::perft<true, false>(board, depth);
-            logger.print("Total node count: ", node_count);
+            Logger("Total node count: ", node_count);
         });
         commands.emplace_back("go", [&](context tokens) {
             search::Limits limits = parse_limits(tokens);
@@ -155,8 +155,6 @@ namespace uci {
                 }
             }
         });
-
-        logger.info("UCI::register_commands", "Registered ", commands.size(), "commands");
     }
 
     void UCI::register_options() {
@@ -182,8 +180,6 @@ namespace uci {
 
         board.load(STARTING_FEN);
 
-        logger.info("UCI::start", "UCI Loop has started!");
-
         while (should_continue) {
             std::string line;
             getline(std::cin, line);
@@ -191,8 +187,6 @@ namespace uci {
             if (std::cin.eof()) {
                 break;
             }
-
-            logger.info("UCI::start", "in>", line);
 
             std::vector<std::string> tokens = convert_to_tokens(line);
 
@@ -205,12 +199,12 @@ namespace uci {
     }
 
     void UCI::greetings() {
-        logger.print("id", "name", "WhiteCore", VERSION);
-        logger.print("id author Balazs Szilagyi");
+        Logger("id", "name", "WhiteCore", VERSION);
+        Logger("id author Balazs Szilagyi");
         for (const Option &opt : options) {
-            logger.print(opt.to_string());
+            Logger(opt.to_string());
         }
-        logger.print("uciok");
+        Logger("uciok");
     }
 
     search::Limits UCI::parse_limits(UCI::context tokens) {
@@ -246,7 +240,6 @@ namespace uci {
         for (; idx < tokens.size(); idx++) {
             core::Move move = move_from_string(board, tokens[idx]);
             if (move == core::NULL_MOVE) {
-                logger.error("load_position", "Invalid move", tokens[idx]);
                 break;
             } else {
                 board.make_move(move);
@@ -273,7 +266,6 @@ namespace uci {
                 return opt.get_value<T>();
             }
         }
-        logger.error("UCI::get_option", "Unable to find option", name);
         throw std::invalid_argument("UCI::get_option(): unable to find option " + name);
     }
 

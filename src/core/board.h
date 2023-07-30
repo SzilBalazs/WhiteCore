@@ -271,8 +271,6 @@ namespace core {
         void load(const std::string &fen) {
             board_clear();
 
-            logger.info("Board::load", "Loading fen", fen);
-
             std::stringstream ss(fen);
             std::string pieces, stm, rights, ep, move50;
             ss >> pieces >> stm >> rights >> ep >> move50;
@@ -295,7 +293,7 @@ namespace core {
                 state.stm = BLACK;
                 state.hash.xor_stm();
             } else {
-                logger.error("Board::load", "Invalid stm string!");
+                throw std::runtime_error("Invalid fen string: " + fen);
             }
 
             state.rights = CastlingRights(rights);
@@ -310,8 +308,6 @@ namespace core {
             if (state.ep != NULL_SQUARE) {
                 state.hash.xor_ep(state.ep);
             }
-
-            logger.info("Board::load", "Finished loading fen");
         }
 
         [[nodiscard]] std::string get_fen() const {
@@ -440,8 +436,6 @@ namespace core {
 
         void board_clear() {
 
-            logger.info("Board::board_clear", "Clearing board...");
-
             for (Bitboard &i : bb_pieces) i = 0;
             for (Bitboard &i : bb_colors) i = 0;
 
@@ -451,8 +445,6 @@ namespace core {
 
             states.clear();
             states.emplace_back();
-
-            logger.info("Board::board_clear", "Board has been cleared");
         }
     };
 

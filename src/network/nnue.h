@@ -43,7 +43,7 @@ namespace nn {
             int offset = sizeof(int);
 
             if (magic != MAGIC) {
-                logger.print("Invalid default network file with magic", magic);
+                Logger("Invalid default network file with magic", magic);
                 throw std::invalid_argument("Invalid default network file with magic" + std::to_string(magic));
             }
 

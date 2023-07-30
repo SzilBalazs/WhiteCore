@@ -128,7 +128,7 @@ namespace search {
             if (shared.uci_mode) {
                 int64_t elapsed_time = shared.tm.get_elapsed_time();
 
-                logger.print("info", "depth", int(depth), "seldepth", int(max_ply),
+                Logger("info", "depth", int(depth), "seldepth", int(max_ply),
                              "nodes", shared.node_count,
                              "score", score_to_string(score), "time", elapsed_time,
                              "nps", calculate_nps(elapsed_time, shared.node_count),
@@ -140,7 +140,7 @@ namespace search {
             if (id == 0) {
                 shared.is_searching = false;
                 if (shared.uci_mode) {
-                    logger.print("bestmove", shared.best_move);
+                    Logger("bestmove", shared.best_move);
                 }
             }
         }

@@ -57,7 +57,7 @@ Square square_from_string(const std::string &s) {
     } else if ('A' <= s[0] && s[0] <= 'Z') {
         return Square((s[0] - 'A') + (s[1] - '1') * 8);
     } else {
-        logger.error("square_from_string", "Invalid string: " + s);
+        throw std::runtime_error("Invalid square string: " + s);
     }
 
     return NULL_SQUARE;
@@ -80,7 +80,7 @@ Piece piece_from_char(char c) {
         piece.color = WHITE;
         c += 32;
     } else {
-        logger.error("piece_from_char", "Invalid char");
+        throw std::runtime_error("Invalid piece char: " + std::string(c, 1));
     }
 
     switch (c) {
@@ -103,7 +103,7 @@ Piece piece_from_char(char c) {
             piece.type = KING;
             break;
         default:
-            logger.error("piece_from_char", "Invalid char!");
+            throw std::runtime_error("Invalid piece char: " + std::string(c, 1));
     }
     return piece;
 }

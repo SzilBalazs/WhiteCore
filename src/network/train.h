@@ -218,7 +218,7 @@ namespace nn {
         }
 
         void index_training_data(const std::string &training_data) {
-            logger.print("Indexing training data...");
+            Logger("Indexing training data...");
 
             entry_count = 0;
 
@@ -229,7 +229,7 @@ namespace nn {
             }
             file.close();
 
-            logger.print("Found", entry_count, "positions");
+            Logger("Found", entry_count, "positions");
         }
     };
 } // namespace nn

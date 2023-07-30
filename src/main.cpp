@@ -32,20 +32,10 @@ namespace search {
     Depth lmr_reductions[200][MAX_PLY + 1];
 }
 
-Logger logger;
-
 void init_all() {
-    logger.init("log.txt");
-    logger.info("init_all", "Logger has been initialized");
-
     core::init_masks();
-    logger.info("init_all", "Bitboard masks have been initialized");
-
     core::init_magic();
-    logger.info("init_all", "Magic has been initialized");
-
     search::init_lmr();
-    logger.info("init_all", "LMR has been initialized");
 }
 
 int main(int argc, char *argv[]) {
@@ -66,6 +56,5 @@ int main(int argc, char *argv[]) {
         protocol.start();
     }
 
-    logger.info("main", "Exiting with return code 0");
     return 0;
 }

@@ -78,5 +78,5 @@ void run_bench() {
     int64_t end_time = now();
     int64_t elapsed_time = end_time - start_time + 1;
     int64_t nps = calculate_nps(elapsed_time, nodes);
-    logger.print(nodes, "nodes", nps, "nps");
+    Logger(nodes, "nodes", nps, "nps");
 }

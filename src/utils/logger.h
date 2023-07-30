@@ -17,70 +17,27 @@
 
 #pragma once
 
-#include <fstream>
 #include <iostream>
-#include <string>
+#include <sstream>
 
-// #define LOGGING
-
-static void exception_handler();
-
-struct Logger {
-
-    std::ofstream file;
-
-    Logger() = default;
-
-    void init(const std::string &filename) {
-#ifdef LOGGING
-        file.open(filename, std::ios::out);
-#endif
-        std::set_terminate(exception_handler);
+class Logger {
+public:
+    template<typename... Args>
+    explicit Logger(Args... args) {
+        print(args...);
+        std::cout << ss.str() << std::flush;
     }
 
     template<typename T, typename... Args>
     void print(T a, Args... args) {
-        std::cout << a << " ";
+        ss << a << " ";
         print(args...);
     }
 
     void print() {
-        std::cout << std::endl;
+        ss << "\n";
     }
 
-    template<typename T, typename... Args>
-    void info(T a, Args... args) {
-#ifdef LOGGING
-        file << "[INFO] " << a << "(): ";
-        log(args...);
-#endif
-    }
-
-    template<typename T, typename... Args>
-    void error(T a, Args... args) {
-#ifdef LOGGING
-        file << "[INFO] " << a << "(): ";
-        log(args...);
-#endif
-    }
-
-    template<typename T, typename... Args>
-    void log(T a, Args... args) {
-        file << a << " ";
-        log(args...);
-    }
-
-    void log() {
-        file << std::endl;
-    }
+private:
+    std::stringstream ss;
 };
-
-extern Logger logger;
-
-static void exception_handler() {
-    if (logger.file.is_open()) {
-        logger.error("Logger", "exception_handler was called: closing log file and aborting");
-        logger.file.close();
-    }
-    std::abort();
-}
