@@ -27,11 +27,16 @@ namespace search {
         void add_cutoff(core::Move move, Depth depth, Ply ply) {
             killer_moves[ply][1] = killer_moves[ply][0];
             killer_moves[ply][0] = move;
-            butterfly[move.get_from()][move.get_to()] += 100 * depth;
+            update_butterfly(move, depth * 100);
         }
 
         void decrease_history(core::Move move, Depth depth) {
-            butterfly[move.get_from()][move.get_to()] -= 100 * depth;
+            update_butterfly(move, -depth * 100);
+        }
+
+        void update_butterfly(core::Move move, int bonus) {
+            int scaled = bonus - butterfly[move.get_from()][move.get_to()] * std::abs(bonus) / 32768;
+            butterfly[move.get_from()][move.get_to()] += scaled;
         }
 
         void clear() {
