@@ -22,11 +22,13 @@
 namespace search {
     struct History {
         core::Move killer_moves[MAX_PLY + 10][2];
+        core::Move counter_moves[64][64];
         Score butterfly[64][64];
 
-        void add_cutoff(core::Move move, Depth depth, Ply ply) {
+        void add_cutoff(core::Move move, core::Move last_move, Depth depth, Ply ply) {
             killer_moves[ply][1] = killer_moves[ply][0];
             killer_moves[ply][0] = move;
+            counter_moves[last_move.get_from()][last_move.get_to()] = move;
             update_butterfly(move, depth * 100);
         }
 

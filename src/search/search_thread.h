@@ -206,6 +206,7 @@ namespace search {
             constexpr bool pv_node = node_type != NON_PV_NODE;
             constexpr bool non_pv_node = !pv_node;
 
+            const core::Move last_move = ss->ply >= 1 ? (ss-1)->move : core::NULL_MOVE;
             const Score mate_ply = -MATE_VALUE + ss->ply;
             const bool in_check = board.is_check();
 
@@ -279,7 +280,7 @@ namespace search {
             }
 
         search_moves:
-            MoveList<false> move_list(board, hash_move, history, ss->ply);
+            MoveList<false> move_list(board, hash_move, last_move, history, ss->ply);
 
             if (move_list.empty()) {
                 return in_check ? mate_ply : 0;
@@ -336,7 +337,7 @@ namespace search {
                 if (score >= beta) {
 
                     if (move.is_quiet()) {
-                        history.add_cutoff(move, depth, ss->ply);
+                        history.add_cutoff(move, last_move, depth, ss->ply);
                         for (core::Move *current_move = quiet_moves; current_move != next_quiet_move; current_move++) {
                             history.decrease_history(*current_move, depth);
                         }
@@ -382,7 +383,7 @@ namespace search {
             if (static_eval > alpha)
                 alpha = static_eval;
 
-            MoveList<true> move_list(board, core::NULL_MOVE, history, 0);
+            MoveList<true> move_list(board, core::NULL_MOVE, core::NULL_MOVE, history, 0);
 
             while (!move_list.empty()) {
                 core::Move move = move_list.next_move();
