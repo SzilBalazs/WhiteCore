@@ -285,6 +285,8 @@ namespace search {
                 return in_check ? mate_ply : 0;
             }
 
+            history.killer_moves[ss->ply+1][0] = history.killer_moves[ss->ply+1][1] = core::NULL_MOVE;
+
             core::Move quiet_moves[200];
             core::Move *next_quiet_move = quiet_moves;
 
