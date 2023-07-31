@@ -30,10 +30,11 @@ namespace search {
         static constexpr unsigned int MOVE_SCORE_CAPTURE = 8'000'000;
         static constexpr unsigned int MOVE_SCORE_FIRST_KILLER = 7'000'000;
         static constexpr unsigned int MOVE_SCORE_SECOND_KILLER = 6'000'000;
+        static constexpr unsigned int MOVE_SCORE_COUNTER = 5'000'000;
 
     public:
-        MoveList(const core::Board &board, const core::Move &hash_move, const History &history, const Ply &ply) : current(0), board(board),
-                                                                                                                  hash_move(hash_move), history(history), ply(ply) {
+        MoveList(const core::Board &board, const core::Move &hash_move, const core::Move &last_move, const History &history, const Ply &ply) : current(0), board(board),
+                                                                                                                  hash_move(hash_move), last_move(last_move), history(history), ply(ply) {
             size = core::gen_moves(board, moves, captures_only) - moves;
             std::transform(moves, moves+size, scores, [this](const core::Move& move) {
                 return score_move(move);
@@ -60,6 +61,7 @@ namespace search {
         Score scores[200];
         const core::Board &board;
         const core::Move &hash_move;
+        const core::Move &last_move;
         const History &history;
         const Ply &ply;
 
@@ -80,6 +82,8 @@ namespace search {
                 return MOVE_SCORE_FIRST_KILLER;
             } else if (move == history.killer_moves[ply][1]) {
                 return MOVE_SCORE_SECOND_KILLER;
+            } else if (move == history.counter_moves[last_move.get_from()][last_move.get_to()]) {
+                return MOVE_SCORE_COUNTER;
             } else {
                 return history.butterfly[move.get_from()][move.get_to()];
             }
