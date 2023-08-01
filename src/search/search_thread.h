@@ -298,8 +298,14 @@ namespace search {
 
                 if (skip_quiets && move.is_quiet() && !move.is_promo()) continue;
 
-                if (non_root_node && non_pv_node && !in_check && depth <= 5 && made_moves >= 5 + depth * depth) {
-                    skip_quiets = true;
+                if (non_root_node && non_pv_node && !in_check) {
+                    if (depth <= 5 && made_moves >= 5 + depth * depth) {
+                        skip_quiets = true;
+                    }
+
+                    if (depth <= 5 && static_eval + 33 + depth * 53 + improving * 71 < alpha) {
+                        skip_quiets = true;
+                    }
                 }
 
                 shared.node_count++;
