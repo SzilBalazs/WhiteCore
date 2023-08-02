@@ -24,7 +24,7 @@
 
 namespace nn {
 
-    constexpr int L1_SIZE = 256;
+    constexpr size_t L1_SIZE = 256;
 
     struct Gradient {
         layers::DenseLayerGradient<768, L1_SIZE> l0;

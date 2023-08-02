@@ -28,7 +28,7 @@
 
 namespace nn::layers {
 
-    template<unsigned int IN, unsigned int OUT>
+    template<size_t IN, size_t OUT>
     struct DenseLayerGradient {
         std::array<float, OUT> biases;
         std::array<float, IN * OUT> weights;
@@ -39,23 +39,23 @@ namespace nn::layers {
         }
 
         void operator+=(const DenseLayerGradient &g) {
-            for (unsigned int i = 0; i < OUT; i++) {
+            for (size_t i = 0; i < OUT; i++) {
                 biases[i] += g.biases[i];
             }
-            for (unsigned int i = 0; i < IN * OUT; i++) {
+            for (size_t i = 0; i < IN * OUT; i++) {
                 weights[i] += g.weights[i];
             }
         }
     };
 
-    template<unsigned int IN, unsigned int OUT, typename T, typename T2, typename ACTIVATION = activations::none<T>>
+    template<size_t IN, size_t OUT, typename T, typename T2, typename ACTIVATION = activations::none<T>>
     class DenseLayer {
     private:
         static_assert(std::is_invocable_r_v<T2, decltype(ACTIVATION::forward), T2>, "Invalid ACTIVATION::forward");
         static_assert(std::is_invocable_r_v<T2, decltype(ACTIVATION::backward), T2>, "Invalid ACTIVATION::backward");
 
         void activate(std::array<T2, OUT> &output) const {
-            for (unsigned int i = 0; i < OUT; i++) {
+            for (size_t i = 0; i < OUT; i++) {
                 output[i] = ACTIVATION::forward(output[i]);
             }
         }
@@ -81,11 +81,11 @@ namespace nn::layers {
         void randomize(std::mt19937 &mt) {
             std::uniform_real_distribution<T> dist(-0.1, 0.1);
 
-            for (unsigned int i = 0; i < IN * OUT; i++) {
+            for (size_t i = 0; i < IN * OUT; i++) {
                 weights[i] = dist(mt);
             }
 
-            for (unsigned int i = 0; i < OUT; i++) {
+            for (size_t i = 0; i < OUT; i++) {
                 biases[i] = dist(mt);
             }
         }
@@ -99,10 +99,10 @@ namespace nn::layers {
         void quantize(std::ofstream &file) {
             std::array<QTYPE, OUT> qbiases;
             std::array<QTYPE, IN * OUT> qweights;
-            for (unsigned int i = 0; i < OUT; i++) {
+            for (size_t i = 0; i < OUT; i++) {
                 qbiases[i] = round(biases[i] * QBIAS_SCALE);
             }
-            for (unsigned int i = 0; i < IN * OUT; i++) {
+            for (size_t i = 0; i < IN * OUT; i++) {
                 qweights[i] = round(weights[i] * QWEIGHT_SCALE);
             }
 
@@ -111,12 +111,12 @@ namespace nn::layers {
         }
 
         void forward(const std::vector<unsigned int> &input_features, std::array<T2, OUT> &output) const {
-            for (unsigned int i = 0; i < OUT; i++) {
+            for (size_t i = 0; i < OUT; i++) {
                 output[i] = biases[i];
             }
 
             for (unsigned int i : input_features) {
-                for (unsigned int j = 0; j < OUT; j++) {
+                for (size_t j = 0; j < OUT; j++) {
                     output[j] += weights[i * OUT + j];
                 }
             }
@@ -124,12 +124,12 @@ namespace nn::layers {
         }
 
         void forward(const std::array<T, IN> &input, std::array<T2, OUT> &output) const {
-            for (unsigned int i = 0; i < OUT; i++) {
+            for (size_t i = 0; i < OUT; i++) {
                 output[i] = biases[i];
             }
 
-            for (unsigned int i = 0; i < IN; i++) {
-                for (unsigned int j = 0; j < OUT; j++) {
+            for (size_t i = 0; i < IN; i++) {
+                for (size_t j = 0; j < OUT; j++) {
                     output[j] += input[i] * weights[i * OUT + j];
                 }
             }
@@ -142,13 +142,13 @@ namespace nn::layers {
             std::array<T, OUT> loss_before_activation;
             std::fill(input_loss.begin(), input_loss.end(), 0);
 
-            for (unsigned int i = 0; i < OUT; i++) {
+            for (size_t i = 0; i < OUT; i++) {
                 loss_before_activation[i] = loss[i] * ACTIVATION::backward(output[i]);
                 gradient.biases[i] += loss_before_activation[i];
             }
 
-            for (unsigned int i = 0; i < IN; i++) {
-                for (unsigned int j = 0; j < OUT; j++) {
+            for (size_t i = 0; i < IN; i++) {
+                for (size_t j = 0; j < OUT; j++) {
                     gradient.weights[i * OUT + j] += input[i] * loss_before_activation[j];
                     input_loss[i] += weights[i * OUT + j] * loss_before_activation[j];
                 }
@@ -160,13 +160,13 @@ namespace nn::layers {
 
             std::array<T, OUT> loss_before_activation;
 
-            for (unsigned int i = 0; i < OUT; i++) {
+            for (size_t i = 0; i < OUT; i++) {
                 loss_before_activation[i] = loss[i] * ACTIVATION::backward(output[i]);
                 gradient.biases[i] += loss_before_activation[i];
             }
 
             for (unsigned int i : input_features) {
-                for (unsigned int j = 0; j < OUT; j++) {
+                for (size_t j = 0; j < OUT; j++) {
                     gradient.weights[i * OUT + j] += loss_before_activation[j];
                 }
             }

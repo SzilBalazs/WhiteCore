@@ -47,9 +47,9 @@ namespace nn {
             }
         }
 
-        void read_batch(unsigned int batch_size, TrainingEntry *entries, bool &is_new_epoch) {
+        void read_batch(size_t batch_size, TrainingEntry *entries, bool &is_new_epoch) {
             std::string line;
-            for (unsigned int i = 0; i < batch_size; i++) {
+            for (size_t i = 0; i < batch_size; i++) {
                 if (std::getline(file, line)) {
                     entries[i] = parse_entry(line);
                 } else {

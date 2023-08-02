@@ -27,19 +27,19 @@
 
 namespace selfplay {
 
-    const unsigned int DEFAULT_HASH_SIZE = 32;
-    const unsigned int DEFAULT_THREAD_COUNT = 1;
-    const unsigned int BLOCK_SIZE = 100000;
+    constexpr unsigned int DEFAULT_HASH_SIZE = 32;
+    constexpr unsigned int DEFAULT_THREAD_COUNT = 1;
+    constexpr unsigned int PROGRESS_BAR_WIDTH = 25;
+    constexpr unsigned int BLOCK_SIZE = 100000;
 
     std::atomic<uint64_t> game_count, position_count;
 
-    const unsigned int PROGRESS_BAR_WIDTH = 25;
-
     std::string get_date() {
+        const auto TIME_FORMAT = "%Y-%m-%d-%H-%M-%S";
         auto t = std::time(nullptr);
         auto tm = *std::localtime(&t);
         std::stringstream ss;
-        ss << std::put_time(&tm, "%Y-%m-%d-%H-%M-%S");
+        ss << std::put_time(&tm, TIME_FORMAT);
         return ss.str();
     }
 

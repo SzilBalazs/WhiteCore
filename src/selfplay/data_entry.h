@@ -46,7 +46,7 @@ namespace selfplay {
                                                                                                                            best_move(best_move), eval(eval),
                                                                                                                            result(result) {}
 
-        std::string to_string() const {
+        [[nodiscard]] std::string to_string() const {
             std::stringstream ss;
             ss << fen << ";" << ply << ";" << best_move.to_uci() << ";"
                << int(eval) << ";" << get_wdl(result.value_or(DRAW)) << ";";

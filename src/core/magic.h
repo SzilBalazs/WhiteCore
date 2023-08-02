@@ -64,7 +64,7 @@ namespace core {
         for (Square square = A1; square < 64; square += 1) {
             const Magic &magic = magics[square];
 
-            unsigned int length = 0;
+            size_t length = 0;
             Bitboard occ = 0;
             do {
                 occupied[length] = occ;
@@ -74,7 +74,7 @@ namespace core {
                 occ = (occ - magic.mask) & magic.mask;
             } while (occ != 0);
 
-            for (unsigned int i = 0; i < length; i++) {
+            for (size_t i = 0; i < length; i++) {
                 U64 index = get_magic_index(magic, occupied[i]);
 
                 magic.ptr[index] = attacked[i];

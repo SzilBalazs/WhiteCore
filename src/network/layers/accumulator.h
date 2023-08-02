@@ -29,13 +29,13 @@
 
 namespace nn::layers {
 
-    template<unsigned int IN, unsigned int OUT, typename T, typename ACTIVATION = activations::none<T>>
+    template<size_t IN, size_t OUT, typename T, typename ACTIVATION = activations::none<T>>
     class Accumulator {
 
         static_assert(std::is_invocable_r_v<T, decltype(ACTIVATION::forward), T>, "Invalid ACTIVATION::forward");
 
-        static constexpr unsigned int register_width = 256 / (sizeof(T) * 8);
-        static constexpr unsigned int chunk_count = OUT / register_width;
+        static constexpr size_t register_width = 256 / (sizeof(T) * 8);
+        static constexpr size_t chunk_count = OUT / register_width;
 
         static_assert(std::is_same_v<T, int16_t>, "Only int16 is supported for accumulators");
         static_assert(256 % sizeof(T) == 0);
@@ -65,14 +65,14 @@ namespace nn::layers {
 
         void add_feature(unsigned int feature) {
 #ifdef AVX2
-            for (unsigned int i = 0; i < chunk_count; i++) {
+            for (size_t i = 0; i < chunk_count; i++) {
                 const unsigned int offset = i * register_width;
                 __m256i base = _mm256_load_si256((__m256i *) &accumulator[offset]);
                 __m256i weight = _mm256_load_si256((__m256i *) &weights[feature * OUT + offset]);
                 _mm256_store_si256((__m256i *) &accumulator[offset], _mm256_add_epi16(base, weight));
             }
 #else
-                for (unsigned int j = 0; j < OUT; j++) {
+                for (size_t j = 0; j < OUT; j++) {
                     accumulator[j] += weights[feature * OUT + j];
                 }
 #endif
@@ -80,14 +80,14 @@ namespace nn::layers {
 
         void remove_feature(unsigned int feature) {
 #ifdef AVX2
-            for (unsigned int i = 0; i < chunk_count; i++) {
-                const unsigned int offset = i * register_width;
+            for (size_t i = 0; i < chunk_count; i++) {
+                const size_t offset = i * register_width;
                 __m256i base = _mm256_load_si256((__m256i *) &accumulator[offset]);
                 __m256i weight = _mm256_load_si256((__m256i *) &weights[feature * OUT + offset]);
                 _mm256_store_si256((__m256i *) &accumulator[offset], _mm256_sub_epi16(base, weight));
             }
 #else
-            for (unsigned int j = 0; j < OUT; j++) {
+            for (size_t j = 0; j < OUT; j++) {
                 accumulator[j] -= weights[feature * OUT + j];
             }
 #endif
@@ -98,13 +98,13 @@ namespace nn::layers {
 #ifdef AVX2
             static_assert(std::is_invocable_r_v<__m256i, decltype(ACTIVATION::_mm256_forward_epi16), __m256i>, "ACTIVATION::forward doesn't support AVX2 registers");
 
-            for (unsigned int i = 0; i < chunk_count; i++) {
-                const int offset = i * register_width;
+            for (size_t i = 0; i < chunk_count; i++) {
+                const size_t offset = i * register_width;
                 __m256i base = _mm256_load_si256((__m256i *) &accumulator[offset]);
                 _mm256_store_si256((__m256i *) &result[offset], ACTIVATION::_mm256_forward_epi16(base));
             }
 #else
-            for (unsigned int i = 0; i < OUT; i++) {
+            for (size_t i = 0; i < OUT; i++) {
                 result[i] = ACTIVATION::forward(accumulator[i]);
             }
 #endif

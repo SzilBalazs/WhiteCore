@@ -27,6 +27,6 @@ namespace core {
         Zobrist hash = Zobrist();
         Piece piece_captured = NULL_PIECE;
         CastlingRights rights = CastlingRights();
-        unsigned int move50 = 0;
+        size_t move50 = 0;
     };
 } // namespace core
