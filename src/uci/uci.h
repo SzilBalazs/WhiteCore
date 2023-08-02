@@ -120,9 +120,9 @@ namespace uci {
             std::optional<std::string> training_data = find_element<std::string>(tokens, "training_data");
             std::optional<std::string> validation_data = find_element<std::string>(tokens, "validation_data");
             std::optional<float> learning_rate = find_element<float>(tokens, "lr");
-            std::optional<int> epochs = find_element<int>(tokens, "epochs");
-            std::optional<int> batch_size = find_element<int>(tokens, "batch");
-            std::optional<int> threads = find_element<int>(tokens, "threads");
+            std::optional<size_t> epochs = find_element<size_t>(tokens, "epochs");
+            std::optional<size_t> batch_size = find_element<size_t>(tokens, "batch");
+            std::optional<size_t> threads = find_element<size_t>(tokens, "threads");
             nn::Trainer trainer(training_data.value_or("train.plain"), validation_data.value_or("validation.plain"), network_path, learning_rate.value_or(0.001f),
                                 epochs.value_or(10), batch_size.value_or(16384), threads.value_or(4));
         });
@@ -275,7 +275,7 @@ namespace uci {
         auto position = std::find(haystack.begin(), haystack.end(), needle);
         auto index = position - haystack.begin();
         if (position == haystack.end()) return std::nullopt;
-        if constexpr (std::is_same_v<T, int>)
+        if constexpr (std::is_same_v<T, int> || std::is_same_v<T, unsigned int>)
             return std::stoi(haystack[index + 1]);
         else if constexpr (std::is_same_v<T, float>)
             return std::stof(haystack[index + 1]);

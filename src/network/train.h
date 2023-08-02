@@ -32,8 +32,8 @@ namespace nn {
 
     class Trainer {
     public:
-        Trainer(const std::string &training_data, const std::string &validation_data, const std::optional<std::string> &network_path, float learning_rate, int epochs, int batch_size, int thread_count) :
-        adam(learning_rate), training_parser(training_data), validation_parser(validation_data), batch_size(batch_size), thread_count(thread_count) {
+        Trainer(const std::string &training_data, const std::string &validation_data, const std::optional<std::string> &network_path, float learning_rate, size_t epochs, size_t batch_size, size_t thread_count) :
+        adam(learning_rate), training_parser(training_data), validation_parser(validation_data), entry_count(0), batch_size(batch_size), thread_count(thread_count) {
 
             if (!std::filesystem::exists("networks")) {
                 std::filesystem::create_directory("networks");
@@ -56,7 +56,7 @@ namespace nn {
             training_parser.read_batch(batch_size, entries_next, _);
 
             int64_t iter = 0;
-            for (int epoch = 1; epoch <= epochs; epoch++) {
+            for (size_t epoch = 1; epoch <= epochs; epoch++) {
                 int64_t start_time = now();
                 bool is_new_epoch = false;
                 float checkpoint_error = 0.0f;
@@ -150,8 +150,8 @@ namespace nn {
         Adam adam;
         DataParser training_parser;
         DataParser validation_parser;
-        unsigned int entry_count;
-        int batch_size, thread_count;
+        size_t entry_count;
+        size_t batch_size, thread_count;
         std::vector<Gradient> gradients;
         std::vector<float> errors;
         std::vector<int> accuracy;
@@ -167,7 +167,7 @@ namespace nn {
             accuracy.assign(thread_count, 0);
 
             std::vector<std::thread> ths;
-            for (int id = 0; id < thread_count; id++) {
+            for (size_t id = 0; id < thread_count; id++) {
                 ths.emplace_back(&Trainer::process_batch<false>, this, id);
             }
 
@@ -193,7 +193,7 @@ namespace nn {
         void process_batch(int id) {
             Gradient &g = gradients[id];
 
-            for (int i = id; i < batch_size; i += thread_count) {
+            for (size_t i = id; i < batch_size; i += thread_count) {
                 TrainingEntry &entry = entries[i];
 
                 std::array<float, L1_SIZE> l0_output;
@@ -219,8 +219,6 @@ namespace nn {
 
         void index_training_data(const std::string &training_data) {
             Logger("Indexing training data...");
-
-            entry_count = 0;
 
             std::string tmp;
             std::ifstream file(training_data, std::ios::in);

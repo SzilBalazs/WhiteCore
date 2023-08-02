@@ -41,7 +41,6 @@ namespace selfplay {
 
     private:
         search::SearchManager sm;
-        // Network net;
     };
 
 } // namespace selfplay

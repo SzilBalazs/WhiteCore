@@ -102,7 +102,7 @@ namespace core {
 
         [[nodiscard]] bool is_draw() const {
             if (get_move50() >= 100) return true;
-            int cnt = 0;
+            unsigned int cnt = 0;
             for (const BoardState &st : states) {
                 if (st.hash == states.back().hash) {
                     cnt++;
@@ -159,7 +159,9 @@ namespace core {
 
             // Remove state dependent hash values
             state.hash.xor_stm();
-            if (state_old.ep != NULL_SQUARE) state.hash.xor_ep(state_old.ep);
+            if (state_old.ep != NULL_SQUARE) {
+                state.hash.xor_ep(state_old.ep);
+            }
             state.hash.xor_castle(state_old.rights);
 
             if (move.eq_flag(EP_CAPTURE)) {

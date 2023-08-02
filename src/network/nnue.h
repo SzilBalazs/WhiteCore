@@ -104,7 +104,7 @@ namespace nn {
 
     private:
         static constexpr int MAGIC = -4;
-        static constexpr unsigned int L1_SIZE = 256;
+        static constexpr size_t L1_SIZE = 256;
 
         alignas(64) std::array<int16_t, L1_SIZE> l0_output;
         alignas(64) std::array<int32_t, 1> l1_output;
