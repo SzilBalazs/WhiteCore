@@ -16,10 +16,10 @@
 //
 
 #include "../search/time_manager.h"
+#include "../utils/rng.h"
 #include "data_entry.h"
 #include "engine.h"
 
-#include <ctime>
 #include <filesystem>
 #include <iomanip>
 #include <random>
@@ -33,15 +33,6 @@ namespace selfplay {
     constexpr unsigned int BLOCK_SIZE = 100000;
 
     std::atomic<uint64_t> game_count, position_count;
-
-    std::string get_date() {
-        const auto TIME_FORMAT = "%Y-%m-%d-%H-%M-%S";
-        auto t = std::time(nullptr);
-        auto tm = *std::localtime(&t);
-        std::stringstream ss;
-        ss << std::put_time(&tm, TIME_FORMAT);
-        return ss.str();
-    }
 
     std::optional<GameResult> get_game_result(const core::Board &board) {
 
@@ -139,71 +130,58 @@ namespace selfplay {
         Logger("Finished combining");
     }
 
-    void start_generation(const search::Limits &limits, const std::string &book_path, const std::string &output_path, unsigned int thread_count, int dropout) {
-        game_count = 0;
-        position_count = 0;
+    void compress_data(const std::string &input_path, const std::string &output_file) {
 
-        // TODO argument for network file
-        if (!std::filesystem::exists(book_path)) {
-            Logger("Invalid book path: " + book_path);
-            throw std::invalid_argument("Invalid book path: " + book_path);
+        std::stringstream ss;
+        ss << "zstd " << input_path << " -o " << output_file << " --rm #19";
+
+        const std::string cmd = ss.str();
+        Logger(">", cmd);
+
+        system(cmd.c_str());
+
+        Logger("Finished compressing");
+    }
+
+    std::string get_run_name(const search::Limits &limits, const std::string &id) {
+        std::stringstream ss;
+        ss << id << "_" << limits.to_string() << "_" << (position_count / 1000) << "k";
+
+        return ss.str();
+    }
+
+    void populate_starting_fens(const uint64_t games_to_play, std::vector<std::string> &fens) {
+        for (uint64_t i = 0; i < games_to_play; i++) {
+            fens.emplace_back(rng::gen_fen());
         }
+    }
 
-        if (!std::filesystem::exists("selfplay")) {
-            std::filesystem::create_directory("selfplay");
+    void try_to_create_directory(const std::string &path) {
+        if (!std::filesystem::exists(path)) {
+            std::filesystem::create_directory(path);
         }
+    }
 
-        std::string date = get_date();
-        std::string directory_path = "selfplay/" + date;
-        if (!std::filesystem::exists(directory_path)) {
-            std::filesystem::create_directory(directory_path);
-        }
+    void print_progress(const uint64_t games_to_play) {
 
-        std::ifstream book(book_path, std::ios::in);
-        std::vector<std::string> starting_fens;
-        std::string tmp;
+        const int64_t start_time = now();
 
-        std::random_device rd;
-        std::mt19937 g(rd());
-        std::uniform_int_distribution<int> dist(0, dropout - 1);
-
-        while (std::getline(book, tmp)) {
-            if (dist(g) == 0)
-                starting_fens.emplace_back(tmp);
-        }
-
-        book.close();
-
-        std::vector<std::thread> threads;
-
-        Logger("Starting", thread_count, "threads...");
-        for (unsigned int id = 0; id < thread_count; id++) {
-            std::vector<std::string> fens;
-            for (unsigned int i = id; i < starting_fens.size(); i += thread_count) {
-                fens.emplace_back(starting_fens[i]);
-            }
-            threads.emplace_back(gen_games, limits, fens, directory_path + "/" + std::to_string(id) + ".plain");
-        }
-
-        const unsigned int total_games = starting_fens.size();
-        int64_t start_time = now();
-
-        while (game_count != total_games) {
+        while (game_count != games_to_play) {
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
 
-            int64_t current_time = now();
-            int64_t elapsed_time = current_time - start_time + 1;
+            const int64_t current_time = now();
+            const int64_t elapsed_time = current_time - start_time + 1;
 
-            float progress = float(game_count + 1) / float(total_games);
+            const float progress = float(game_count + 1) / float(games_to_play);
 
-            int64_t total_time = elapsed_time / progress;
-            int64_t eta = (1.0f - progress) * total_time;
+            const int64_t total_time = elapsed_time / progress;
+            const int64_t eta = (1.0f - progress) * total_time;
 
-            unsigned int percentage = progress * 100;
-            uint64_t pos_per_s = position_count * 1000ULL / elapsed_time;
+            const unsigned int percentage = progress * 100;
+            const uint64_t pos_per_s = position_count * 1000ULL / elapsed_time;
 
-            unsigned int progress_position = PROGRESS_BAR_WIDTH * progress;
+            const unsigned int progress_position = PROGRESS_BAR_WIDTH * progress;
 
             std::cout << "[";
             for (unsigned int i = 0; i < PROGRESS_BAR_WIDTH; i++) {
@@ -215,19 +193,50 @@ namespace selfplay {
                     std::cout << " ";
                 }
             }
-            std::cout << "] " << percentage << "% - " << game_count << "/" << total_games << " games - ETA " << (eta / 1000) << "s - " << pos_per_s << " pos/s \r" << std::flush;
+            std::cout << "] " << percentage << "% - " << game_count << "/" << games_to_play << " games - ETA " << (eta / 1000) << "s - " << pos_per_s << " pos/s \r" << std::flush;
         }
 
         std::cout << std::endl;
+    }
 
-        for (std::thread &th : threads) {
+    void start_generation(const search::Limits &limits, const uint64_t games_to_play, const unsigned int thread_count) {
+
+        game_count = 0;
+        position_count = 0;
+
+        const std::string run_id = rng::gen_id();
+        const std::string directory_path = "selfplay/" + run_id;
+
+        try_to_create_directory("selfplay");
+        try_to_create_directory("data");
+        try_to_create_directory(directory_path);
+
+        std::vector<std::string> starting_fens;
+        std::vector<std::thread> workers;
+
+        populate_starting_fens(games_to_play, starting_fens);
+
+        for (unsigned int id = 0; id < thread_count; id++) {
+            std::vector<std::string> workload;
+            for (unsigned int i = id; i < starting_fens.size(); i += thread_count) {
+                workload.emplace_back(starting_fens[i]);
+            }
+            workers.emplace_back(gen_games, limits, workload, directory_path + "/" + std::to_string(id) + ".plain");
+        }
+
+        print_progress(games_to_play);
+
+        for (std::thread &th : workers) {
             if (th.joinable())
                 th.join();
         }
 
-        Logger("Finished generating data");
+        const std::string output_path = "data/" + get_run_name(limits, run_id);
 
-        combine_data(directory_path, output_path);
+        combine_data(directory_path, output_path + ".plain");
+        compress_data(output_path + ".plain", output_path + ".zst");
+
+        exit(0);
     }
 
 } // namespace selfplay

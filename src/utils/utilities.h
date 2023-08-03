@@ -59,16 +59,6 @@ Square square_from_string(const std::string &s) {
     } else {
         throw std::runtime_error("Invalid square string: " + s);
     }
-
-    return NULL_SQUARE;
-}
-
-constexpr Square square_mirror(Square square) {
-    return Square(56 - square + square_to_file(square));
-}
-
-constexpr Square square_flip(Square sq) {
-    return Square(int(sq) ^ 56);
 }
 
 Piece piece_from_char(char c) {

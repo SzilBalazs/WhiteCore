@@ -96,11 +96,9 @@ namespace uci {
             search::Limits limits;
             limits.max_nodes = find_element<int64_t>(tokens, "nodes");
             limits.depth = find_element<int64_t>(tokens, "depth");
-            std::optional<std::string> book = find_element<std::string>(tokens, "book");
-            std::optional<std::string> output = find_element<std::string>(tokens, "out");
             std::optional<int> thread_count = find_element<int>(tokens, "threads");
-            std::optional<int> dropout = find_element<int>(tokens, "dropout");
-            selfplay::start_generation(limits, book.value_or("book.epd"), output.value_or("data.plain"), thread_count.value_or(1), dropout.value_or(1));
+            std::optional<int> games_to_play = find_element<int>(tokens, "games");
+            selfplay::start_generation(limits, games_to_play.value_or(100'000), thread_count.value_or(1));
         });
         commands.emplace_back("split", [&](context tokens) {
             std::optional<std::string> input_data = find_element<std::string>(tokens, "input");

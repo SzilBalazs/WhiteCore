@@ -42,5 +42,15 @@ namespace search {
             limit.move_time = max_time;
             return limit;
         }
+
+        [[nodiscard]] std::string to_string() const {
+            if (max_nodes) {
+                return "n" + std::to_string(max_nodes.value() / 1000) + "k";
+            }
+            if (depth) {
+                return "d" + std::to_string(depth.value());
+            }
+            return "unknown";
+        }
     };
 } // namespace search
