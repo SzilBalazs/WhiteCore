@@ -16,6 +16,7 @@
 #
 
 import urllib.request
+import argparse
 import re
 
 man5 = "https://tablebase.lichess.ovh/tables/standard/3-4-5/"
@@ -42,16 +43,20 @@ def dl_tablebase(url):
         urllib.request.urlretrieve(f"{url}{eg}", f"{eg}")
 
 
-def main():
-    prompt_man5 = input("Download 5 man? (y/n)")
-    prompt_man6 = input("Download 6 man? (y/n)")
-    if prompt_man5 == "y":
+def main(man5_flag, man6_flag):
+    if man5_flag:
         print("Downloading 5 man...")
         dl_tablebase(man5)
-    if prompt_man6 == "y":
+    if man6_flag:
         print("Downloading 6 man...")
         dl_tablebase(man6)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='Downloads from Tablebase.')
+    parser.add_argument('--man5', action='store_true')
+    parser.add_argument('--man6', action='store_true')
+
+    args = parser.parse_args()
+
+    main(args.man5, args.man6)

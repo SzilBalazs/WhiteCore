@@ -15,24 +15,41 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-
 import concurrent
-from concurrent.futures import ThreadPoolExecutor
+import argparse
 import subprocess
-
-
-THREAD_COUNT = 4
+from concurrent.futures import ThreadPoolExecutor
 
 
 def task():
-    output = subprocess.check_output(["./WhiteCore-v0-2", 'bench']).decode("utf8")
+    output = subprocess.check_output(["./WhiteCore", 'bench']).decode("utf8")
     return output
 
 
-executor = ThreadPoolExecutor(max_workers=THREAD_COUNT)
-futures = []
-for i in range(THREAD_COUNT):
-    futures.append(executor.submit(task))
+def parse_nps(output):
+    tokens = output.split()
+    nps_index = tokens.index('nps')
+    nps_value = int(tokens[nps_index - 1])
+    return nps_value
 
-for future in concurrent.futures.as_completed(futures):
-    print(future.result())
+
+def main(thread_count):
+    executor = ThreadPoolExecutor(max_workers=thread_count)
+    futures = [executor.submit(task) for _ in range(thread_count)]
+
+    nps_values = []
+
+    for future in concurrent.futures.as_completed(futures):
+        output = future.result()
+        nps = parse_nps(output)
+        nps_values.append(nps)
+
+    average_nps = sum(nps_values) / len(nps_values)
+    print(f"Average NPS: {int(average_nps)}")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Calculate average NPS.")
+    parser.add_argument("threads", type=int, help="Number of threads to use")
+    args = parser.parse_args()
+    main(args.threads)
