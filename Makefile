@@ -6,6 +6,11 @@ VERSION_MAJOR = 0
 VERSION_MINOR = 2
 CPP_FILES = src/main.cpp
 
+C_RED = \033[0;31m
+C_GREEN = \033[1;32m
+C_CYAN = \033[1;36m
+C_DEFAULT = \033[0m
+
 ifneq ($(wildcard .git/*),)
 	HASH := $(shell git rev-parse --short HEAD)
 else
@@ -85,7 +90,7 @@ $(TMP_EVALFILE):
 
 $(INCBIN_TOOL): $(TMP_EVALFILE)
 ifeq ($(uname_S), Windows)
-	@echo Compiling $(INCBIN_TOOL)
+	@echo -e "$(C_CYAN)Compiling $(C_RED)$(INCBIN_TOOL)$(C_CYAN)...$(C_DEFAULT)"
 	@clang -o $@ src/external/incbin/incbin.c
 endif
 
@@ -93,9 +98,9 @@ $(OUTPUT_BINARY): $(HEADERS) $(SOURCES) $(INCBIN_TOOL)
 ifeq ($(uname_S), Windows)
 	@./$(INCBIN_TOOL) src/network/nnue.h -o src/corenet.cpp
 endif
-	@echo Compiling $(NAME)
+	@echo -e "$(C_CYAN)Compiling $(C_RED)$(NAME)$(C_CYAN)...$(C_DEFAULT)"
 	@$(CXX) $(TARGET_FLAGS) $(CXXFLAGS) -o $@ $(CPP_FILES)
-	@echo Build has finished.
+	@echo -e "$(C_GREEN)Build has finished. $(C_DEFAULT)"
 	@rm $(TMP_EVALFILE)
 
 .PHONY: all
