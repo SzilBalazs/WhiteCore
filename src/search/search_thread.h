@@ -44,7 +44,7 @@ namespace search {
     struct SharedMemory {
         TimeManager tm;
         TT tt;
-        std::atomic<bool> is_searching;
+        bool is_searching;
         bool uci_mode = true;
         core::Move best_move;
         Score eval;
@@ -100,7 +100,8 @@ namespace search {
         void iterative_deepening() {
             Score prev_score = 0;
             for (Depth depth = 1; depth <= shared.tm.get_max_depth() && shared.is_searching; depth++) {
-                Score score = prev_score = aspiration_window(depth, prev_score);
+                Depth final_depth = depth + (id & 7);
+                Score score = prev_score = aspiration_window(final_depth, prev_score);
 
                 handle_iteration(score, depth);
             }
@@ -113,8 +114,6 @@ namespace search {
                 shared.eval = score;
             }
         }
-
-
 
         void handle_uci(Score score, Depth depth) {
             if (shared.uci_mode) {
@@ -207,7 +206,7 @@ namespace search {
                 max_ply = std::max(max_ply, ss->ply);
             }
 
-            if ((shared.node_count & 1023) == 0) {
+            if (id == 0 && (shared.node_count & 2047) == 0) {
                 manage_resources();
             }
 
