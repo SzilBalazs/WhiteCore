@@ -18,6 +18,7 @@
 #include "../core/board.h"
 #include "../network/nnue.h"
 #include "pv_array.h"
+#include "terminal_report.h"
 #include "history.h"
 #include "move_list.h"
 #include "time_manager.h"
@@ -113,26 +114,14 @@ namespace search {
             }
         }
 
-        static std::string score_to_string(Score score) {
-            Score abs_score = std::abs(score);
-            int mate_depth = MATE_VALUE - abs_score;
-            if (mate_depth <= MAX_PLY) {
-                int mate_ply = score > 0 ? mate_depth / 2 + 1 : -(mate_depth / 2);
-                return "mate " + std::to_string(mate_ply);
-            } else {
-                return "cp " + std::to_string(score);
-            }
-        }
+
 
         void handle_uci(Score score, Depth depth) {
             if (shared.uci_mode) {
                 int64_t elapsed_time = shared.tm.get_elapsed_time();
 
-                Logger("info", "depth", int(depth), "seldepth", int(max_ply),
-                             "nodes", shared.node_count,
-                             "score", score_to_string(score), "time", elapsed_time,
-                             "nps", calculate_nps(elapsed_time, shared.node_count),
-                             "pv", pv.get_line());
+                report::print_iteration(depth, max_ply, shared.node_count, score, elapsed_time,
+                                        calculate_nps(elapsed_time, shared.node_count), pv.get_line());
             }
         }
 
@@ -140,7 +129,7 @@ namespace search {
             if (id == 0) {
                 shared.is_searching = false;
                 if (shared.uci_mode) {
-                    Logger("bestmove", shared.best_move);
+                    report::print_bestmove(shared.best_move);
                 }
             }
         }
