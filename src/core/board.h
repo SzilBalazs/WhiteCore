@@ -365,25 +365,27 @@ namespace core {
             }
 
             std::cout << "\n     A   B   C   D   E   F   G   H  \n";
+            std::cout << "   ╭───┬───┬───┬───┬───┬───┬───┬───╮";
             for (int i = 8; i >= 1; i--) {
-                std::cout << "   +---+---+---+---+---+---+---+---+";
                 if (i <= 7 && !text.empty()) {
                     std::cout << "        " << text.back();
                     text.pop_back();
                 }
-                std::cout << "\n " << i << " |";
+                std::cout << "\n " << i << " │";
                 for (int j = 1; j <= 8; j++) {
                     Piece piece = piece_at(Square((i - 1) * 8 + (j - 1)));
-                    std::cout << (piece.color == WHITE ? ASCII_WHITE_PIECE : (piece.color == BLACK ? ASCII_BLACK_PIECE : "")) << " " << char_from_piece(piece) << " \u001b[0m|";
+                    std::cout << (piece.color == WHITE ? ASCII_WHITE_PIECE : (piece.color == BLACK ? ASCII_BLACK_PIECE : "")) << " " << char_from_piece(piece) << " \u001b[0m│";
                 }
                 if (i <= 7 && !text.empty()) {
                     std::cout << "        " << text.back();
                     text.pop_back();
                 }
                 std::cout << "\n";
+                if (i != 1) {
+                    std::cout << "   ├───┼───┼───┼───┼───┼───┼───┼───┤";
+                }
             }
-            std::cout << "   +---+---+---+---+---+---+---+---+\n\n"
-                      << std::endl;
+            std::cout << "   ╰───┴───┴───┴───┴───┴───┴───┴───╯\n\n" << std::flush;
         }
 
         [[nodiscard]] std::vector<unsigned int> to_features() const {
