@@ -19,6 +19,10 @@
 #include "uci/uci.h"
 #include "utils/bench.h"
 
+#ifdef _WIN64
+#include <windows.h>
+#endif
+
 namespace core {
     // Declarations
     Bitboard masks_bit[64], masks_adjacent_file[64], masks_adjacent_north[64], masks_adjacent_south[64], masks_pawn[64][2], masks_passed_pawn[64][2],
@@ -39,6 +43,13 @@ void init_all() {
 }
 
 int main(int argc, char *argv[]) {
+
+#ifdef _WIN64
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD f;
+    GetConsoleMode(hConsole, &f);
+    SetConsoleMode(hConsole, f | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+#endif
 
     std::string mode;
     if (argc >= 2) {
