@@ -17,10 +17,10 @@
 
 #include "../core/board.h"
 #include "../network/nnue.h"
-#include "pv_array.h"
-#include "terminal_report.h"
 #include "history.h"
 #include "move_list.h"
+#include "pv_array.h"
+#include "terminal_report.h"
 #include "time_manager.h"
 #include "tt.h"
 
@@ -114,8 +114,6 @@ namespace search {
             }
         }
 
-
-
         void handle_uci(Score score, Depth depth) {
             if (shared.uci_mode) {
                 int64_t elapsed_time = shared.tm.get_elapsed_time();
@@ -195,7 +193,7 @@ namespace search {
             constexpr bool pv_node = node_type != NON_PV_NODE;
             constexpr bool non_pv_node = !pv_node;
 
-            const core::Move last_move = ss->ply >= 1 ? (ss-1)->move : core::NULL_MOVE;
+            const core::Move last_move = ss->ply >= 1 ? (ss - 1)->move : core::NULL_MOVE;
             const Score mate_ply = -MATE_VALUE + ss->ply;
             const bool in_check = board.is_check();
 
@@ -207,7 +205,7 @@ namespace search {
                 max_ply = std::max(max_ply, ss->ply);
             }
 
-            if ((shared.node_count & 1023) == 0) {
+            if (id == 0 && (shared.node_count & 2047) == 0) {
                 manage_resources();
             }
 
@@ -236,7 +234,7 @@ namespace search {
                 return qsearch<node_type>(alpha, beta);
 
             Score static_eval = ss->eval = nnue.evaluate(board.get_stm());
-            bool improving = ss->ply >= 2 && ss->eval >= (ss-2)->eval;
+            bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
 
             if (root_node || in_check)
                 goto search_moves;
@@ -275,7 +273,7 @@ namespace search {
                 return in_check ? mate_ply : 0;
             }
 
-            history.killer_moves[ss->ply+1][0] = history.killer_moves[ss->ply+1][1] = core::NULL_MOVE;
+            history.killer_moves[ss->ply + 1][0] = history.killer_moves[ss->ply + 1][1] = core::NULL_MOVE;
 
             core::Move quiet_moves[200];
             core::Move *next_quiet_move = quiet_moves;

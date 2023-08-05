@@ -155,4 +155,4 @@ namespace search::report {
         std::cout << ss.str() << std::flush;
     }
 
-}
+} // namespace search::report
