@@ -304,7 +304,7 @@ namespace search {
                            std::abs(entry->eval) < WORST_MATE) {
 
                     Score singular_beta = entry->eval - depth * 3;
-                    Depth singular_depth = (depth - 1) / 2;
+                    Depth singular_depth = (depth * 2 - 1) / 3;
 
                     ss->excluded_move = move;
                     Score score = search<NON_PV_NODE>(singular_depth, singular_beta - 1, singular_beta, ss);
