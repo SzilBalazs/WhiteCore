@@ -150,7 +150,7 @@ namespace search {
             SearchStack stack[MAX_PLY + 10];
             SearchStack *ss = stack + 7;
             for (Ply i = -7; i <= MAX_PLY + 2; i++) {
-                (ss + i)->move = core::NULL_MOVE;
+                (ss + i)->excluded_move = core::NULL_MOVE;
                 (ss + i)->move = core::NULL_MOVE;
                 (ss + i)->eval = UNKNOWN_SCORE;
                 (ss + i)->ply = i;
@@ -303,7 +303,7 @@ namespace search {
                            entry->flag == TT_BETA && entry->depth >= depth &&
                            std::abs(entry->eval) < WORST_MATE) {
 
-                    Score singular_beta = entry->eval - depth * 3;
+                    Score singular_beta = entry->eval - depth;
                     Depth singular_depth = (depth - 1) / 2;
 
                     ss->excluded_move = move;
