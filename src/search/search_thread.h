@@ -44,11 +44,17 @@ namespace search {
     struct SharedMemory {
         TimeManager tm;
         TT tt;
-        std::atomic<bool> is_searching;
+        bool is_searching;
         bool uci_mode = true;
         core::Move best_move;
         Score eval;
-        int64_t node_count;
+        std::vector<int64_t> node_count;
+
+        int64_t get_node_count() {
+            int64_t res = 0;
+            for (int64_t i : node_count) res += i;
+            return res;
+        }
     };
 
     struct SearchStack {
@@ -118,8 +124,8 @@ namespace search {
             if (shared.uci_mode) {
                 int64_t elapsed_time = shared.tm.get_elapsed_time();
 
-                report::print_iteration(depth, max_ply, shared.node_count, score, elapsed_time,
-                                        calculate_nps(elapsed_time, shared.node_count), pv.get_line());
+                report::print_iteration(depth, max_ply, shared.get_node_count(), score, elapsed_time,
+                                        calculate_nps(elapsed_time, shared.get_node_count()), pv.get_line());
             }
         }
 
@@ -181,7 +187,7 @@ namespace search {
         }
 
         void manage_resources() {
-            if (shared.best_move != core::NULL_MOVE && !(shared.tm.time_left() && shared.node_count < shared.tm.get_max_nodes())) {
+            if (shared.best_move != core::NULL_MOVE && !(shared.tm.time_left() && shared.get_node_count() < shared.tm.get_max_nodes())) {
                 shared.is_searching = false;
             }
         }
@@ -205,7 +211,7 @@ namespace search {
                 max_ply = std::max(max_ply, ss->ply);
             }
 
-            if (id == 0 && (shared.node_count & 2047) == 0) {
+            if (id == 0 && (shared.node_count[id] & 2047) == 0) {
                 manage_resources();
             }
 
@@ -299,7 +305,7 @@ namespace search {
 
                 Depth new_depth = depth - 1 + extensions;
 
-                shared.node_count++;
+                shared.node_count[id]++;
                 board.make_move(move, &nnue);
                 Score score;
 
@@ -387,7 +393,7 @@ namespace search {
 
                 if (alpha > -WORST_MATE && !see(board, move, 0)) continue;
 
-                shared.node_count++;
+                shared.node_count[id]++;
                 board.make_move(move, &nnue);
                 Score score = -qsearch<node_type>(-beta, -alpha);
                 board.undo_move(move, &nnue);
