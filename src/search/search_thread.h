@@ -353,14 +353,14 @@ namespace search {
 
                 if (score >= beta) {
 
-                    if (!is_singular_root) {
-                        if (move.is_quiet()) {
-                            history.add_cutoff(move, last_move, depth, ss->ply);
-                            for (core::Move *current_move = quiet_moves; current_move != next_quiet_move; current_move++) {
-                                history.decrease_history(*current_move, depth);
-                            }
+                    if (move.is_quiet()) {
+                        history.add_cutoff(move, last_move, depth, ss->ply);
+                        for (core::Move *current_move = quiet_moves; current_move != next_quiet_move; current_move++) {
+                            history.decrease_history(*current_move, depth);
                         }
+                    }
 
+                    if (!is_singular_root) {
                         shared.tt.save(board.get_hash(), depth, beta, TT_BETA, move);
                     }
 
