@@ -300,7 +300,7 @@ namespace search {
                 if (in_check) {
                     extensions = 1;
                 } else if (non_root_node && depth >= 7 && move == hash_move &&
-                           entry->flag == TT_BETA && entry->depth >= depth - 3 &&
+                           entry->flag == TT_BETA && entry->depth >= depth &&
                            std::abs(entry->eval) < WORST_MATE) {
 
                     Score singular_beta = entry->eval - depth * 3;
