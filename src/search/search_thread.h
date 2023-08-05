@@ -217,10 +217,6 @@ namespace search {
                 return 0;
             }
 
-            if (in_check) {
-                depth++;
-            }
-
             std::optional<TTEntry> entry = shared.tt.probe(board.get_hash());
             TTFlag flag = TT_ALPHA;
             core::Move hash_move = entry ? entry->hash_move : core::NULL_MOVE;
@@ -295,6 +291,14 @@ namespace search {
                     }
                 }
 
+                Depth extensions = 0;
+
+                if (in_check) {
+                    extensions++;
+                }
+
+                Depth new_depth = depth - 1 + extensions;
+
                 shared.node_count++;
                 board.make_move(move, &nnue);
                 Score score;
@@ -307,18 +311,18 @@ namespace search {
                     R -= pv_node;
                     R += !improving;
 
-                    Depth new_depth = std::clamp(depth - R, 1, depth - 1);
-                    score = -search<NON_PV_NODE>(new_depth, -alpha - 1, -alpha, ss + 1);
+                    Depth D = std::clamp(new_depth - R, 1, depth - 1);
+                    score = -search<NON_PV_NODE>(D, -alpha - 1, -alpha, ss + 1);
 
                     if (score > alpha && R > 0) {
-                        score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ss + 1);
+                        score = -search<NON_PV_NODE>(new_depth, -alpha - 1, -alpha, ss + 1);
                     }
                 } else if (non_pv_node || made_moves != 0) {
-                    score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ss + 1);
+                    score = -search<NON_PV_NODE>(new_depth, -alpha - 1, -alpha, ss + 1);
                 }
 
                 if (pv_node && (made_moves == 0 || (alpha < score && score < beta))) {
-                    score = -search<PV_NODE>(depth - 1, -beta, -alpha, ss + 1);
+                    score = -search<PV_NODE>(new_depth, -beta, -alpha, ss + 1);
                 }
 
                 board.undo_move(move, &nnue);
