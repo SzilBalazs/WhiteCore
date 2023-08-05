@@ -312,6 +312,8 @@ namespace search {
 
                     if (score < singular_beta) {
                         extensions = 1;
+                    } else if (singular_beta >= beta) {
+                        return singular_beta;
                     }
                 }
 
