@@ -54,6 +54,7 @@ namespace search {
     struct SearchStack {
         Ply ply;
         core::Move move;
+        core::Move excluded_move;
         Score eval;
     };
 
@@ -150,6 +151,7 @@ namespace search {
             SearchStack *ss = stack + 7;
             for (Ply i = -7; i <= MAX_PLY + 2; i++) {
                 (ss + i)->move = core::NULL_MOVE;
+                (ss + i)->move = core::NULL_MOVE;
                 (ss + i)->eval = UNKNOWN_SCORE;
                 (ss + i)->ply = i;
             }
@@ -196,6 +198,7 @@ namespace search {
             const core::Move last_move = ss->ply >= 1 ? (ss - 1)->move : core::NULL_MOVE;
             const Score mate_ply = -MATE_VALUE + ss->ply;
             const bool in_check = board.is_check();
+            const bool is_singular_root = ss->excluded_move.is_ok();
 
             core::Move best_move = core::NULL_MOVE;
             Score best_score = -INF_SCORE;
@@ -217,7 +220,7 @@ namespace search {
                 return 0;
             }
 
-            std::optional<TTEntry> entry = shared.tt.probe(board.get_hash());
+            std::optional<TTEntry> entry = is_singular_root ? std::nullopt : shared.tt.probe(board.get_hash());
             TTFlag flag = TT_ALPHA;
             core::Move hash_move = entry ? entry->hash_move : core::NULL_MOVE;
 
@@ -232,7 +235,7 @@ namespace search {
             Score static_eval = ss->eval = nnue.evaluate(board.get_stm());
             bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
 
-            if (root_node || in_check)
+            if (root_node || in_check || is_singular_root)
                 goto search_moves;
 
             if (!entry && non_pv_node && depth >= 4)
@@ -266,7 +269,8 @@ namespace search {
             MoveList<false> move_list(board, hash_move, last_move, history, ss->ply);
 
             if (move_list.empty()) {
-                return in_check ? mate_ply : 0;
+                if (is_singular_root) return alpha;
+                else return in_check ? mate_ply : 0;
             }
 
             history.killer_moves[ss->ply + 1][0] = history.killer_moves[ss->ply + 1][1] = core::NULL_MOVE;
@@ -279,7 +283,7 @@ namespace search {
             while (!move_list.empty()) {
                 core::Move move = ss->move = move_list.next_move();
 
-                if (skip_quiets && move.is_quiet() && !move.is_promo()) continue;
+                if ((skip_quiets && move.is_quiet() && !move.is_promo()) || (ss->excluded_move == move)) continue;
 
                 if (non_root_node && non_pv_node && !in_check) {
                     if (depth <= 5 && made_moves >= 5 + depth * depth) {
@@ -294,7 +298,21 @@ namespace search {
                 Depth extensions = 0;
 
                 if (in_check) {
-                    extensions++;
+                    extensions = 1;
+                } else if (non_root_node && depth >= 7 && move == hash_move &&
+                           entry->flag == TT_BETA && entry->depth >= depth - 3 &&
+                           std::abs(entry->eval) < WORST_MATE) {
+
+                    Score singular_beta = entry->eval - depth * 3;
+                    Depth singular_depth = (depth - 1) / 2;
+
+                    ss->excluded_move = move;
+                    Score score = search<NON_PV_NODE>(singular_depth, singular_beta - 1, singular_beta, ss);
+                    ss->excluded_move = core::NULL_MOVE;
+
+                    if (score < singular_beta) {
+                        extensions = 1;
+                    }
                 }
 
                 Depth new_depth = depth - 1 + extensions;
@@ -333,14 +351,17 @@ namespace search {
 
                 if (score >= beta) {
 
-                    if (move.is_quiet()) {
-                        history.add_cutoff(move, last_move, depth, ss->ply);
-                        for (core::Move *current_move = quiet_moves; current_move != next_quiet_move; current_move++) {
-                            history.decrease_history(*current_move, depth);
+                    if (!is_singular_root) {
+                        if (move.is_quiet()) {
+                            history.add_cutoff(move, last_move, depth, ss->ply);
+                            for (core::Move *current_move = quiet_moves; current_move != next_quiet_move; current_move++) {
+                                history.decrease_history(*current_move, depth);
+                            }
                         }
+
+                        shared.tt.save(board.get_hash(), depth, beta, TT_BETA, move);
                     }
 
-                    shared.tt.save(board.get_hash(), depth, beta, TT_BETA, move);
                     return beta;
                 }
 
@@ -362,7 +383,9 @@ namespace search {
                 if (move.is_quiet()) *next_quiet_move++ = move;
             }
 
-            shared.tt.save(board.get_hash(), depth, best_score, flag, best_move);
+            if (!is_singular_root) {
+                shared.tt.save(board.get_hash(), depth, best_score, flag, best_move);
+            }
             return alpha;
         }
 
