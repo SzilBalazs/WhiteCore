@@ -305,11 +305,11 @@ namespace search {
 
                 Depth new_depth = depth - 1 + extensions;
 
+                shared.tt.prefetch(board.hash_after_move(move));
+
                 shared.node_count[id]++;
                 board.make_move(move, &nnue);
                 Score score;
-
-                shared.tt.prefetch(board.get_hash());
 
                 if (!in_check && depth >= 3 && made_moves >= 4 && !move.is_promo() && move.is_quiet()) {
                     Depth R = lmr_reductions[depth][made_moves];
