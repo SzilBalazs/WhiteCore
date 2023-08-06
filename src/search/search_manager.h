@@ -42,7 +42,7 @@ namespace search {
         }
 
         int64_t get_node_count() {
-            return shared.node_count;
+            return shared.get_node_count();
         }
 
         void set_uci_mode(bool uci_mode) {
@@ -69,7 +69,7 @@ namespace search {
                 threads.emplace_back(shared, thread_id);
                 threads.back().load_board(board);
             }
-            shared.node_count = 0;
+            shared.node_count.assign(allocated_threads, 0);
             shared.best_move = core::NULL_MOVE;
             shared.is_searching = true;
             for (SearchThread &thread : threads) {

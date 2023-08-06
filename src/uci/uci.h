@@ -171,7 +171,7 @@ namespace uci {
                 "Threads", "1", "spin", [&]() {
                     sm.allocate_threads(get_option<int>("Threads"));
                 },
-                1, 4);
+                1, 128);
         sm.allocate_threads(1);
     }
 
