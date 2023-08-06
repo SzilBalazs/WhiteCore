@@ -91,6 +91,21 @@ namespace search {
 
         History history;
 
+        template<bool to_tt>
+        static Score convert_tt_score(Score score, Ply ply) {
+
+            if constexpr (to_tt) {
+                ply *= -1;
+            }
+
+            if (score > WORST_MATE) {
+                score -= ply;
+            } else if (score < -WORST_MATE) {
+                score += ply;
+            }
+            return score;
+        }
+
         void search() {
             init_search();
             iterative_deepening();
@@ -219,8 +234,15 @@ namespace search {
                 return UNKNOWN_SCORE;
             }
 
-            if (non_root_node && board.is_draw()) {
-                return 0;
+            if (non_root_node) {
+                if (board.is_draw()) {
+                    return 0;
+                }
+
+                alpha = std::max(alpha, -MATE_VALUE + ss->ply);
+                beta = std::min(beta, MATE_VALUE - ss->ply - 1);
+                if (alpha >= beta)
+                    return alpha;
             }
 
             if (in_check) {
@@ -229,11 +251,12 @@ namespace search {
 
             std::optional<TTEntry> entry = shared.tt.probe(board.get_hash());
             TTFlag flag = TT_ALPHA;
+            Score tt_score = entry ? convert_tt_score<false>(entry->eval, ss->ply) : UNKNOWN_SCORE;
             core::Move hash_move = entry ? entry->hash_move : core::NULL_MOVE;
 
             if (entry && non_pv_node && entry->depth >= depth && board.get_move50() < 90 &&
-                (entry->flag == TT_EXACT || (entry->flag == TT_ALPHA && entry->eval <= alpha) || (entry->flag == TT_BETA && entry->eval >= beta))) {
-                return entry->eval;
+                (entry->flag == TT_EXACT || (entry->flag == TT_ALPHA && tt_score <= alpha) || (entry->flag == TT_BETA && tt_score >= beta))) {
+                return tt_score;
             }
 
             if (depth <= 0)
@@ -342,7 +365,7 @@ namespace search {
                         }
                     }
 
-                    shared.tt.save(board.get_hash(), depth, beta, TT_BETA, move);
+                    shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(beta, ss->ply), TT_BETA, move);
                     return beta;
                 }
 
@@ -364,7 +387,7 @@ namespace search {
                 if (move.is_quiet()) *next_quiet_move++ = move;
             }
 
-            shared.tt.save(board.get_hash(), depth, best_score, flag, best_move);
+            shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(best_score, ss->ply), flag, best_move);
             return alpha;
         }
 
