@@ -152,6 +152,8 @@ namespace search {
                 beta = prev_score + delta;
             }
 
+            max_ply = 0;
+
             SearchStack stack[MAX_PLY + 10];
             SearchStack *ss = stack + 7;
             for (Ply i = -7; i <= MAX_PLY + 2; i++) {

@@ -22,7 +22,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 def task():
-    output = subprocess.check_output(["./WhiteCore", 'bench']).decode("utf8")
+    output = subprocess.check_output(["./WhiteCore-v0-2", 'bench']).decode("utf8")
     return output
 
 
@@ -35,7 +35,7 @@ def parse_nps(output):
 
 def main(thread_count):
     executor = ThreadPoolExecutor(max_workers=thread_count)
-    futures = [executor.submit(task) for _ in range(thread_count)]
+    futures = [executor.submit(task) for _ in range(thread_count * 10)]
 
     nps_values = []
 
@@ -43,8 +43,11 @@ def main(thread_count):
         output = future.result()
         nps = parse_nps(output)
         nps_values.append(nps)
-
-    average_nps = sum(nps_values) / len(nps_values)
+        average_nps = sum(nps_values) / len(nps_values)
+        print(f"Average NPS: {int(average_nps)}\r", end="")
+    total_nps = sum(nps_values)
+    average_nps = total_nps / len(nps_values)
+    print(f"Total NPS: {total_nps / 10}")
     print(f"Average NPS: {int(average_nps)}")
 
 
