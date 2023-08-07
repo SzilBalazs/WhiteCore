@@ -17,14 +17,16 @@
 
 #pragma once
 
-#include "../external/incbin/incbin.h"
 #include "../core/constants.h"
+#include "../external/incbin/incbin.h"
 #include "../utils/logger.h"
 #include "activations/crelu.h"
 #include "layers/accumulator.h"
 #include "layers/dense_layer.h"
 
 #include <cassert>
+
+#pragma once
 
 namespace nn {
 
@@ -90,16 +92,16 @@ namespace nn {
             accumulator.remove_feature(get_feature_index(piece, sq));
         }
 
-        Score evaluate(Color stm) {
+        static constexpr unsigned int get_feature_index(Piece piece, unsigned int sq) {
+            return (piece.color == WHITE) * 384 + piece.type * 64 + sq;
+        }
+
+        Score forward(Color stm) {
             accumulator.push(l0_output);
             l1.forward(l0_output, l1_output);
             int32_t score = l1_output[0];
             if (stm == BLACK) score *= -1;
             return (score * 400) / (QSCALE * QSCALE);
-        }
-
-        static constexpr unsigned int get_feature_index(Piece piece, unsigned int sq) {
-            return (piece.color == WHITE) * 384 + piece.type * 64 + sq;
         }
 
     private:

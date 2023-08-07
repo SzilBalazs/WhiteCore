@@ -83,6 +83,10 @@ namespace core {
             return bb_pieces[pt];
         }
 
+        [[nodiscard]] constexpr Bitboard pieces(PieceType pt) const {
+            return bb_pieces[pt];
+        }
+
         template<Color color>
         [[nodiscard]] constexpr Bitboard sides() const {
             return bb_colors[color];

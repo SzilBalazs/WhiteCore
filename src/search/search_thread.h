@@ -16,7 +16,7 @@
 //
 
 #include "../core/board.h"
-#include "../network/nnue.h"
+#include "../network/eval.h"
 #include "history.h"
 #include "move_list.h"
 #include "pv_array.h"
@@ -264,7 +264,7 @@ namespace search {
             if (depth <= 0)
                 return qsearch<node_type>(alpha, beta);
 
-            Score static_eval = ss->eval = nnue.evaluate(board.get_stm());
+            Score static_eval = ss->eval = eval::evaluate(nnue, board);
             bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
 
             if (root_node || in_check)
@@ -400,7 +400,7 @@ namespace search {
                 return UNKNOWN_SCORE;
             }
 
-            Score static_eval = nnue.evaluate(board.get_stm());
+            Score static_eval = eval::evaluate(nnue, board);
 
             if (static_eval >= beta)
                 return beta;

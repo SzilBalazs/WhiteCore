@@ -19,6 +19,7 @@
 
 #include "../core/board.h"
 #include "../network/train.h"
+#include "../network/eval.h"
 #include "../search/search_manager.h"
 #include "../selfplay/selfplay.h"
 #include "../tests/perft.h"
@@ -94,7 +95,7 @@ namespace uci {
         commands.emplace_back("eval", [&](context tokens) {
             nn::NNUE network{};
             network.refresh(board.to_features());
-            Logger("Eval:", network.evaluate(board.get_stm()));
+            Logger("Eval:", eval::evaluate(network, board));
         });
         commands.emplace_back("gen", [&](context tokens) {
             search::Limits limits;
