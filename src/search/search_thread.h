@@ -317,7 +317,7 @@ namespace search {
                 if (skip_quiets && move.is_quiet() && !move.is_promo()) continue;
 
                 if (non_root_node && non_pv_node && !in_check) {
-                    if (depth <= 5 && made_moves >= 5 + depth * depth) {
+                    if (depth <= 5 && made_moves >= 5 + depth * depth / (2 - improving)) {
                         skip_quiets = true;
                     }
 
