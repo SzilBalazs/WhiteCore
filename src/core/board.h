@@ -144,74 +144,14 @@ namespace core {
         }
 
         [[nodiscard]] Zobrist hash_after_move(Move move) const {
-            const Color stm = get_stm();
-            const Direction UP = stm ? NORTH : -NORTH;
             const Square from = move.get_from();
             const Square to = move.get_to();
 
             Zobrist hash = get_hash();
             hash.xor_stm();
 
-            if (state.ep != NULL_SQUARE) {
-                hash.xor_ep(state.ep);
-            }
-
-            if (move.eq_flag(EP_CAPTURE)) {
-                Square sq = to + UP;
-                hash.xor_piece(sq, piece_at(sq));
-            }
-
-            if (move.eq_flag(DOUBLE_PAWN_PUSH)) {
-                hash.xor_ep(from);
-            }
-
-            CastlingRights rights = state.rights;
-            hash.xor_castle(rights);
-
-            if (rights.get(WK_MASK) && (from == E1 || from == H1 || to == H1)) {
-                rights.remove(WK_MASK);
-            }
-            if (rights.get(WQ_MASK) && (from == E1 || from == A1 || to == A1)) {
-                rights.remove(WQ_MASK);
-            }
-            if (rights.get(BK_MASK) && (from == E8 || from == H8 || to == H8)) {
-                rights.remove(BK_MASK);
-            }
-            if (rights.get(BQ_MASK) && (from == E8 || from == A8 || to == A8)) {
-                rights.remove(BQ_MASK);
-            }
-
-            hash.xor_castle(rights);
-
             Piece piece_moved = piece_at(from);
-
-            if (move.is_promo()) {
-                if (move.eq_flag(PROMO_BISHOP) || move.eq_flag(PROMO_CAPTURE_BISHOP)) {
-                    piece_moved.type = BISHOP;
-                } else if (move.eq_flag(PROMO_KNIGHT) || move.eq_flag(PROMO_CAPTURE_KNIGHT)) {
-                    piece_moved.type = KNIGHT;
-                } else if (move.eq_flag(PROMO_ROOK) || move.eq_flag(PROMO_CAPTURE_ROOK)) {
-                    piece_moved.type = ROOK;
-                } else if (move.eq_flag(PROMO_QUEEN) || move.eq_flag(PROMO_CAPTURE_QUEEN)) {
-                    piece_moved.type = QUEEN;
-                }
-            }
-
             hash_move_piece(hash, piece_moved, from, to);
-
-            if (move.eq_flag(KING_CASTLE)) {
-                if (stm == WHITE) {
-                    hash_move_piece(hash, Piece(ROOK, WHITE), H1, F1);
-                } else {
-                    hash_move_piece(hash, Piece(ROOK, BLACK), H8, F8);
-                }
-            } else if (move.eq_flag(QUEEN_CASTLE)) {
-                if (stm == WHITE) {
-                    hash_move_piece(hash, Piece(ROOK, WHITE), A1, D1);
-                } else {
-                    hash_move_piece(hash, Piece(ROOK, BLACK), A8, D8);
-                }
-            }
 
             return hash;
         }
