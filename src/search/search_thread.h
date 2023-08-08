@@ -120,10 +120,15 @@ namespace search {
 
         void iterative_deepening() {
             Score prev_score = 0;
+            int bm_stability = 0;
+            core::Move prev_bm = core::NULL_MOVE;
+
             for (Depth depth = 1; depth <= shared.tm.get_max_depth() && shared.is_searching; depth++) {
                 Score score = prev_score = aspiration_window(depth, prev_score);
 
                 handle_iteration(score, depth);
+
+                manage_time(prev_bm, bm_stability, depth);
             }
         }
 
@@ -132,6 +137,29 @@ namespace search {
                 handle_uci(score, depth);
                 shared.best_move = pv.get_best_move();
                 shared.eval = score;
+            }
+        }
+
+        void manage_time(core::Move &prev_bm, int &bm_stability, Depth depth) {
+
+            const core::Move bm = pv.get_best_move();
+
+            if (depth >= 5) {
+                if (bm == prev_bm) {
+                    bm_stability++;
+                } else {
+                    bm_stability = 0;
+                }
+            }
+
+            prev_bm = bm;
+
+            if (id == 0) {
+                bool should_continue = shared.tm.handle_iteration(bm_stability);
+
+                if (!should_continue) {
+                    shared.is_searching = false;
+                }
             }
         }
 

@@ -42,7 +42,7 @@ namespace search {
         TTFlag flag;          // 1 byte
     };
 
-        static_assert(sizeof(TTEntry) == 16);
+    static_assert(sizeof(TTEntry) == 16);
 
     class TT {
     public:
