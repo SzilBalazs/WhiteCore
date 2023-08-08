@@ -124,6 +124,12 @@ namespace search {
                 Score score = prev_score = aspiration_window(depth, prev_score);
 
                 handle_iteration(score, depth);
+
+                bool should_continue = shared.tm.handle_iteration();
+
+                if (!should_continue) {
+                    break;
+                }
             }
         }
 

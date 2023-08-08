@@ -23,18 +23,18 @@ namespace search {
     class TimeManager {
     public:
         void init(const Limits &limits) {
-
             calculate_allocated_time(limits);
 
             max_nodes = limits.max_nodes.value_or(INF_NODES);
             max_depth = limits.depth.value_or(MAX_PLY);
 
             start_time = now();
-            end_time = start_time + allocated_time - MOVE_OVERHEAD;
+
+            update_end_time(1.0);
         }
 
         [[nodiscard]] bool time_left() const {
-            return now() < end_time;
+            return now() < max_end_time;
         }
 
         [[nodiscard]] int64_t get_elapsed_time() const {
@@ -49,19 +49,41 @@ namespace search {
             return max_nodes;
         }
 
+        bool handle_iteration() {
+
+            update_end_time(1.0);
+
+            return now() < opt_end_time;
+        }
+
     private:
-        int64_t start_time, allocated_time, end_time, max_nodes, max_depth;
+        int64_t start_time, max_nodes, max_depth;
+        int64_t opt_base_time, opt_end_time;
+        int64_t max_time_usage, max_end_time;
 
         void calculate_allocated_time(const Limits &limits) {
-            int64_t moves_to_go = limits.moves_to_go.value_or(30);
+            int64_t moves_to_go = limits.moves_to_go.value_or(20);
             int64_t increment = limits.increment.value_or(0);
+
             if (limits.time_left) {
                 int64_t time_left = limits.time_left.value();
-                allocated_time = (time_left + moves_to_go * increment) / moves_to_go;
-                allocated_time = std::min(allocated_time, time_left);
+
+                opt_base_time = (time_left + moves_to_go * increment) / (moves_to_go + 5);
+                max_time_usage = (time_left + moves_to_go * increment) / moves_to_go;
+
+                max_time_usage = std::min(max_time_usage, time_left);
             } else {
-                allocated_time = limits.move_time.value_or(INF_TIME);
+                opt_base_time = INF_TIME;
+                max_time_usage = limits.move_time.value_or(INF_TIME);
             }
+        }
+
+        void update_end_time(double scale) {
+            int64_t scaled = double(opt_base_time) * scale;
+            scaled = std::min(scaled, max_time_usage);
+
+            opt_end_time = start_time + scaled - MOVE_OVERHEAD;
+            max_end_time = start_time + max_time_usage - MOVE_OVERHEAD;
         }
     };
 } // namespace search
