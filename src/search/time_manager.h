@@ -49,9 +49,13 @@ namespace search {
             return max_nodes;
         }
 
-        bool handle_iteration() {
+        bool handle_iteration(int bm_stability) {
 
-            update_end_time(1.0);
+            const double bm_scale = 1.2 - std::min(bm_stability, 10) * 0.04;
+
+            double scale = bm_scale;
+
+            update_end_time(scale);
 
             return now() < opt_end_time;
         }
