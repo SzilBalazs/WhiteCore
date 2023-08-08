@@ -476,7 +476,8 @@ namespace core {
 
 
     Bitboard get_all_attackers(const Board &board, Square square, Bitboard occ) {
-        return (((masks_pawn[square][WHITE] | masks_pawn[square][BLACK]) & board.pieces<PAWN>()) |
+        return ((masks_pawn[square][BLACK] & board.pieces<WHITE, PAWN>()) |
+                (masks_pawn[square][WHITE] & board.pieces<BLACK, PAWN>()) |
                 (attacks_piece<KNIGHT>(square, occ) & board.pieces<KNIGHT>()) |
                 (attacks_piece<BISHOP>(square, occ) & board.pieces<BISHOP>()) |
                 (attacks_piece<ROOK>(square, occ) & board.pieces<ROOK>()) |

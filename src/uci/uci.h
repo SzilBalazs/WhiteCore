@@ -75,6 +75,7 @@ namespace uci {
     };
 
     void UCI::register_commands() {
+
         commands.emplace_back("uci", [&](context tokens) {
             greetings();
             search::report::set_pretty_output(false);
