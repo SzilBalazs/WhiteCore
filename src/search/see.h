@@ -39,7 +39,7 @@ namespace search {
 
         core::Bitboard rooks = board.pieces<ROOK>() | board.pieces<QUEEN>();
         core::Bitboard bishops = board.pieces<BISHOP>() | board.pieces<QUEEN>();
-        core::Bitboard occ = board.occupied() ^ core::Bitboard(from) ^ core::Bitboard(to);
+        core::Bitboard occ = board.occupied() & (~core::Bitboard(from)) & (~core::Bitboard(to));
 
         // Initialize the current attacker as the piece that made the capture
         core::Bitboard attacker = from;
@@ -66,7 +66,6 @@ namespace search {
                 }
                 break;
             }
-
 
             occ ^= attacker;
 
