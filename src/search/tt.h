@@ -78,7 +78,7 @@ namespace search {
         void save(U64 hash, Depth depth, Score eval, TTFlag flag, core::Move best_move) {
             TTEntry *entry = get_entry(hash);
 
-            if (flag == TT_ALPHA && entry->hash) {
+            if (flag == TT_ALPHA && entry->hash == hash) {
                 best_move = core::NULL_MOVE;
             }
 
