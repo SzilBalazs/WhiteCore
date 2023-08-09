@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "../core/board.h"
+#include "../chess/board.h"
 #include "../uci/uci.h"
 
 #include <vector>

@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "../core/board.h"
+#include "../chess/board.h"
 #include "search_thread.h"
 #include "time_manager.h"
 #include "tt.h"

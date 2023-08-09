@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "../core/board.h"
+#include "../chess/board.h"
 
 namespace search {
 

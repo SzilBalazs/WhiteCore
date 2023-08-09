@@ -18,7 +18,7 @@
 #pragma once
 
 #include "../activations/none.h"
-#include "../../core/constants.h"
+#include "../../chess/constants.h"
 
 #include <array>
 #include <cstring>

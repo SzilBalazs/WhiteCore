@@ -18,7 +18,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "../core/constants.h"
+#include "../chess/constants.h"
 
 #pragma once
 

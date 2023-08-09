@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "../core/move.h"
+#include "../chess/move.h"
 
 namespace search {
     struct PVArray {

@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "../core/constants.h"
-#include "../core/move.h"
+#include "../chess/constants.h"
+#include "../chess/move.h"
 
 #include <cstring>
 

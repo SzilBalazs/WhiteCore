@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "../core/board.h"
+#include "../chess/board.h"
 #include "../network/train.h"
 #include "../search/search_manager.h"
 #include "../selfplay/selfplay.h"

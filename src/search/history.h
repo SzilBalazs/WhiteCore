@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "../core/move.h"
+#include "../chess/move.h"
 
 namespace search {
     struct History {

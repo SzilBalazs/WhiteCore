@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "../core/movegen.h"
+#include "../chess/movegen.h"
 
 #include <random>
 #include <string>
