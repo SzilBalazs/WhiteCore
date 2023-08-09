@@ -22,6 +22,11 @@
 namespace search {
     class TimeManager {
     public:
+        /**
+         * Initializes time management with the given limits.
+         *
+         * @param limits Limits for the search.
+         */
         void init(const Limits &limits) {
             calculate_allocated_time(limits);
 
@@ -33,22 +38,48 @@ namespace search {
             update_end_time(1.0);
         }
 
+        /**
+         * Checks whether there is time left for continued search.
+         *
+         * @return Returns if the current time is lesser than the maximum end time.
+         */
         [[nodiscard]] bool time_left() const {
             return now() < max_end_time;
         }
 
+        /**
+         * Computes the total elapsed time since the start of the search.
+         *
+         * @return Returns the difference between the current time and the start time.
+         */
         [[nodiscard]] int64_t get_elapsed_time() const {
             return now() - start_time;
         }
 
+        /**
+         * Gets the maximum searchable depth.
+         *
+         * @return Returns value of the maximum searchable depth.
+         */
         [[nodiscard]] Depth get_max_depth() const {
             return max_depth;
         }
 
+        /**
+         * Get the maximum number of nodes to be searched.
+         *
+         * @return Returns value of maximum number of nodes to be searched.
+         */
         [[nodiscard]] int64_t get_max_nodes() const {
             return max_nodes;
         }
 
+        /**
+         * Computes a scale factor to be applied on the optimal end time.
+         *
+         * @param bm_stability The stability of the best move.
+         * @return Returns if the search should continue.
+         */
         bool handle_iteration(int bm_stability) {
 
             const double bm_scale = 1.2 - std::min(bm_stability, 10) * 0.04;

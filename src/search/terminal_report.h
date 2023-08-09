@@ -28,10 +28,21 @@ namespace search::report {
 
     bool pretty_output = true;
 
+    /**
+     * @brief Switches the output mode of the search results.
+     *
+     * @param x Boolean variable to decide if output should be made pretty.
+     */
     void set_pretty_output(bool x) {
         pretty_output = x;
     }
 
+    /**
+     * @brief Converts an integer to its corresponding ASCII color code
+     *
+     * @param a integer value of the color to be returned
+     * @return A string representing the color in ASCII
+     */
     std::string get_ascii_color(int a) {
         return "\u001b[38;5;" + std::to_string(a) + "m";
     }
@@ -114,6 +125,17 @@ namespace search::report {
         }
     }
 
+    /**
+     * Prints the information for the current iteration.
+     *
+     * @param depth Depth of the iteration.
+     * @param seldepth Selective depth of the iteration.
+     * @param nodes Total number of nodes searched in the given iteration.
+     * @param score Evaluation score of the root position.
+     * @param time Amount of time spent so far, in milliseconds.
+     * @param nps Nodes per second.
+     * @param pv_line The principle variation line. A string of moves separated by spaces.
+     */
     void print_iteration(const int depth, const int seldepth, const uint64_t nodes, const Score score,
                          const uint64_t time, const uint64_t nps, const std::string &pv_line) {
 
@@ -149,6 +171,11 @@ namespace search::report {
         }
     }
 
+    /**
+     * Prints the best move found in the search for a given position.
+     *
+     * @param bestmove The best move found by the search.
+     */
     void print_bestmove(const chess::Move bestmove) {
         std::stringstream ss;
         ss << "bestmove " << bestmove << "\n";

@@ -55,7 +55,7 @@ namespace search {
         /**
          * Returns number of positions searched so far.
          *
-         * @return Number of positions searched so far
+         * @return Number of positions searched so far.
          */
         int64_t get_node_count() {
             return shared.get_node_count();
@@ -70,6 +70,12 @@ namespace search {
             shared.uci_mode = uci_mode;
         }
 
+        /**
+         * Joins all the search workers to the main thread.
+         *
+         * @tparam wait_to_finish If true, the search will be forced to stop.
+         * @tparam wait_to_finish otherwise will wait for the search to finish.
+         */
         template<bool wait_to_finish>
         void join() {
             if (!wait_to_finish) {
@@ -83,6 +89,12 @@ namespace search {
             threads.clear();
         }
 
+        /**
+         * Searches a position to find the best move.
+         *
+         * @tparam block If true, the function will block until all threads have completed
+         * @param board The board on which the search will be performed
+         */
         template<bool block>
         void search(const chess::Board &board) {
             join<false>();
@@ -99,15 +111,28 @@ namespace search {
             if (block) join<true>();
         }
 
+        /**
+         * Stops all the running search threads.
+         *
+         */
         void stop() {
             join<false>();
         }
 
+        /**
+         * Waits for all the threads to complete and then fetches the result of the search.
+         *
+         * @return A pair consisting of the best move (first) and the evaluation score (second)
+         */
         std::pair<chess::Move, Score> get_result() {
             join<true>();
             return {shared.best_move, shared.eval};
         }
 
+        /**
+         * This function clears the transposition table.
+         *
+         */
         void tt_clear() {
             shared.tt.clear();
         }

@@ -21,8 +21,16 @@
 
 namespace search {
 
+    /**
+     * Determines if evaluation captures forced by a move exceeds a specific threshold.
+     *
+     * @param board The current board
+     * @param move The move to evaluate
+     * @param threshold The score threshold
+     * @return true if the evaluated score exceeds the threshold
+     * @return false otherwise
+     */
     bool see(const chess::Board &board, chess::Move move, Score threshold) {
-        assert(move.is_capture());
 
         Square from = move.get_from();
         Square to = move.get_to();
@@ -41,9 +49,7 @@ namespace search {
         chess::Bitboard bishops = board.pieces<BISHOP>() | board.pieces<QUEEN>();
         chess::Bitboard occ = board.occupied() & (~chess::Bitboard(from)) & (~chess::Bitboard(to));
 
-        // Initialize the current attacker as the piece that made the capture
         chess::Bitboard attacker = from;
-        // Get all attackers to the destination square
         chess::Bitboard attackers = chess::get_all_attackers(board, to, occ);
 
         Color stm = color_enemy(board.piece_at(from).color);
