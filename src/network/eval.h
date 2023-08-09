@@ -16,12 +16,12 @@
 
 #pragma once
 
-#include "../core/board.h"
+#include "../chess/board.h"
 #include "nnue.h"
 
 namespace eval {
 
-    Score evaluate(const core::Board &board, nn::NNUE &nnue) {
+    Score evaluate(const chess::Board &board, nn::NNUE &nnue) {
         const int piece_count = board.occupied().pop_count();
 
         if (piece_count == 2) {
