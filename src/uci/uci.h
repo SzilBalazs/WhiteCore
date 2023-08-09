@@ -101,7 +101,7 @@ namespace uci {
             search::Limits limits;
             limits.max_nodes = find_element<int64_t>(tokens, "nodes");
             limits.depth = find_element<int64_t>(tokens, "depth");
-            std::optional<int> thread_count = find_element<int>(tokens, "threads");
+            std::optional<size_t> thread_count = find_element<size_t>(tokens, "threads");
             std::optional<int> games_to_play = find_element<int>(tokens, "games");
             selfplay::start_generation(limits, games_to_play.value_or(100'000), thread_count.value_or(1));
         });

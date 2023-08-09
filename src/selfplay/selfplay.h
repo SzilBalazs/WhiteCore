@@ -32,7 +32,7 @@ namespace selfplay {
     constexpr unsigned int PROGRESS_BAR_WIDTH = 25;
     constexpr unsigned int BLOCK_SIZE = 100000;
 
-    std::atomic<uint64_t> game_count, position_count;
+    std::vector<uint64_t> game_count_vec, position_count_vec;
 
     std::optional<GameResult> get_game_result(const core::Board &board) {
 
@@ -52,7 +52,7 @@ namespace selfplay {
         return std::nullopt;
     }
 
-    void run_game(Engine &engine, const search::Limits &limits, const std::string &starting_fen, std::vector<DataEntry> &entries, unsigned int hash_size = DEFAULT_HASH_SIZE, const unsigned int thread_count = DEFAULT_THREAD_COUNT) {
+    void run_game(Engine &engine, const search::Limits &limits, const std::string &starting_fen, std::vector<DataEntry> &entries, size_t thread_id, unsigned int hash_size = DEFAULT_HASH_SIZE, const unsigned int thread_count = DEFAULT_THREAD_COUNT) {
         engine.init(hash_size, thread_count);
         core::Board board;
         board.load(starting_fen);
@@ -65,7 +65,7 @@ namespace selfplay {
 
             if (!board.is_check() && move.is_quiet() && std::abs(eval) < WORST_MATE) {
                 tmp.emplace_back(board.get_fen(), ply, move, eval, std::nullopt);
-                position_count++;
+                position_count_vec[thread_id]++;
             }
 
             board.make_move(move);
@@ -80,7 +80,7 @@ namespace selfplay {
         }
     }
 
-    void gen_games(const search::Limits &limits, const std::vector<std::string> &starting_fens, const std::string &output_path) {
+    void gen_games(const search::Limits &limits, const std::vector<std::string> &starting_fens, const std::string &output_path, size_t thread_id) {
 
         Engine engine;
 
@@ -90,8 +90,8 @@ namespace selfplay {
 
         std::vector<DataEntry> entries;
         for (const std::string &fen : starting_fens) {
-            run_game(engine, limits, fen, entries);
-            game_count++;
+            run_game(engine, limits, fen, entries, thread_id);
+            game_count_vec[thread_id]++;
 
             if (entries.size() >= BLOCK_SIZE) {
                 std::shuffle(entries.begin(), entries.end(), g);
@@ -144,6 +144,9 @@ namespace selfplay {
     }
 
     std::string get_run_name(const search::Limits &limits, const std::string &id) {
+
+        uint64_t position_count = std::reduce(position_count_vec.begin(), position_count_vec.end());
+
         std::stringstream ss;
         ss << id << "_" << limits.to_string() << "_" << (position_count / 1000) << "k";
 
@@ -165,10 +168,14 @@ namespace selfplay {
     void print_progress(const uint64_t games_to_play) {
 
         const int64_t start_time = now();
+        uint64_t game_count = 0, position_count = 0;
 
         while (game_count != games_to_play) {
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
+
+            game_count = std::reduce(game_count_vec.begin(), game_count_vec.end());
+            position_count = std::reduce(position_count_vec.begin(), position_count_vec.end());
 
             const int64_t current_time = now();
             const int64_t elapsed_time = current_time - start_time + 1;
@@ -199,10 +206,10 @@ namespace selfplay {
         std::cout << std::endl;
     }
 
-    void start_generation(const search::Limits &limits, const uint64_t games_to_play, const unsigned int thread_count) {
+    void start_generation(const search::Limits &limits, uint64_t games_to_play, size_t thread_count) {
 
-        game_count = 0;
-        position_count = 0;
+        game_count_vec.assign(thread_count, 0);
+        position_count_vec.assign(thread_count, 0);
 
         const std::string run_id = rng::gen_id();
         const std::string directory_path = "selfplay/" + run_id;
@@ -216,12 +223,12 @@ namespace selfplay {
 
         populate_starting_fens(games_to_play, starting_fens);
 
-        for (unsigned int id = 0; id < thread_count; id++) {
+        for (size_t id = 0; id < thread_count; id++) {
             std::vector<std::string> workload;
-            for (unsigned int i = id; i < starting_fens.size(); i += thread_count) {
+            for (size_t i = id; i < starting_fens.size(); i += thread_count) {
                 workload.emplace_back(starting_fens[i]);
             }
-            workers.emplace_back(gen_games, limits, workload, directory_path + "/" + std::to_string(id) + ".plain");
+            workers.emplace_back(gen_games, limits, workload, directory_path + "/" + std::to_string(id) + ".plain", id);
         }
 
         print_progress(games_to_play);
