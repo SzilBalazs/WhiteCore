@@ -30,7 +30,7 @@
 
 #define state states.back()
 
-namespace core {
+namespace chess {
 
     class Board {
 

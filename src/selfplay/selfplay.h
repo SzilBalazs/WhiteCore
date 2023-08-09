@@ -34,12 +34,12 @@ namespace selfplay {
 
     std::vector<uint64_t> game_count_vec, position_count_vec;
 
-    std::optional<GameResult> get_game_result(const core::Board &board) {
+    std::optional<GameResult> get_game_result(const chess::Board &board) {
 
         if (board.is_draw()) return DRAW;
 
-        core::Move moves[200];
-        int cnt = core::gen_moves(board, moves, false) - moves;
+        chess::Move moves[200];
+        int cnt = chess::gen_moves(board, moves, false) - moves;
 
         if (cnt == 0) {
             if (board.is_check()) {
@@ -54,7 +54,7 @@ namespace selfplay {
 
     void run_game(Engine &engine, const search::Limits &limits, const std::string &starting_fen, std::vector<DataEntry> &entries, size_t thread_id, unsigned int hash_size = DEFAULT_HASH_SIZE, const unsigned int thread_count = DEFAULT_THREAD_COUNT) {
         engine.init(hash_size, thread_count);
-        core::Board board;
+        chess::Board board;
         board.load(starting_fen);
         unsigned int ply = 0;
         std::optional<GameResult> result;

@@ -46,7 +46,7 @@ namespace search {
         TT tt;
         bool is_searching;
         bool uci_mode = true;
-        core::Move best_move;
+        chess::Move best_move;
         Score eval;
         std::vector<int64_t> node_count;
 
@@ -59,7 +59,7 @@ namespace search {
 
     struct SearchStack {
         Ply ply;
-        core::Move move;
+        chess::Move move;
         Score eval;
     };
 
@@ -67,7 +67,7 @@ namespace search {
     public:
         SearchThread(SharedMemory &shared_memory, unsigned int thread_id) : nnue(), shared(shared_memory), id(thread_id) {}
 
-        void load_board(const core::Board &position) {
+        void load_board(const chess::Board &position) {
             board = position;
         }
 
@@ -81,7 +81,7 @@ namespace search {
         }
 
     private:
-        core::Board board;
+        chess::Board board;
         nn::NNUE nnue;
         SharedMemory &shared;
         std::thread th;
@@ -114,14 +114,14 @@ namespace search {
 
         void init_search() {
             history.clear();
-            shared.best_move = core::NULL_MOVE;
+            shared.best_move = chess::NULL_MOVE;
             max_ply = 0;
         }
 
         void iterative_deepening() {
             Score prev_score = 0;
             int bm_stability = 0;
-            core::Move prev_bm = core::NULL_MOVE;
+            chess::Move prev_bm = chess::NULL_MOVE;
 
             for (Depth depth = 1; depth <= shared.tm.get_max_depth() && shared.is_searching; depth++) {
                 Score score = prev_score = aspiration_window(depth, prev_score);
@@ -140,9 +140,9 @@ namespace search {
             }
         }
 
-        void manage_time(core::Move &prev_bm, int &bm_stability, Depth depth) {
+        void manage_time(chess::Move &prev_bm, int &bm_stability, Depth depth) {
 
-            const core::Move bm = pv.get_best_move();
+            const chess::Move bm = pv.get_best_move();
 
             if (depth >= 5) {
                 if (bm == prev_bm) {
@@ -200,7 +200,7 @@ namespace search {
             SearchStack stack[MAX_PLY + 10];
             SearchStack *ss = stack + 7;
             for (Ply i = -7; i <= MAX_PLY + 2; i++) {
-                (ss + i)->move = core::NULL_MOVE;
+                (ss + i)->move = chess::NULL_MOVE;
                 (ss + i)->eval = UNKNOWN_SCORE;
                 (ss + i)->ply = i;
             }
@@ -232,7 +232,7 @@ namespace search {
         }
 
         void manage_resources() {
-            if (shared.best_move != core::NULL_MOVE && !(shared.tm.time_left() && shared.get_node_count() < shared.tm.get_max_nodes())) {
+            if (shared.best_move != chess::NULL_MOVE && !(shared.tm.time_left() && shared.get_node_count() < shared.tm.get_max_nodes())) {
                 shared.is_searching = false;
             }
         }
@@ -244,11 +244,11 @@ namespace search {
             constexpr bool pv_node = node_type != NON_PV_NODE;
             constexpr bool non_pv_node = !pv_node;
 
-            const core::Move last_move = ss->ply >= 1 ? (ss - 1)->move : core::NULL_MOVE;
+            const chess::Move last_move = ss->ply >= 1 ? (ss - 1)->move : chess::NULL_MOVE;
             const Score mate_ply = -MATE_VALUE + ss->ply;
             const bool in_check = board.is_check();
 
-            core::Move best_move = core::NULL_MOVE;
+            chess::Move best_move = chess::NULL_MOVE;
             Score best_score = -INF_SCORE;
 
             if (id == 0) {
@@ -282,7 +282,7 @@ namespace search {
             std::optional<TTEntry> entry = shared.tt.probe(board.get_hash());
             TTFlag flag = TT_ALPHA;
             Score tt_score = entry ? convert_tt_score<false>(entry->eval, ss->ply) : UNKNOWN_SCORE;
-            core::Move hash_move = entry ? entry->hash_move : core::NULL_MOVE;
+            chess::Move hash_move = entry ? entry->hash_move : chess::NULL_MOVE;
 
             if (entry && non_pv_node && entry->depth >= depth && board.get_move50() < 90 &&
                 (entry->flag == TT_EXACT || (entry->flag == TT_ALPHA && tt_score <= alpha) || (entry->flag == TT_BETA && tt_score >= beta))) {
@@ -312,7 +312,7 @@ namespace search {
 
             if (non_pv_node && depth >= 3 && static_eval >= beta && board.has_non_pawn()) {
                 Depth R = 3 + depth / 3 + std::min(3, (static_eval - beta) / 256);
-                ss->move = core::NULL_MOVE;
+                ss->move = chess::NULL_MOVE;
 
                 board.make_null_move();
                 Score score = -search<NON_PV_NODE>(depth - R, -beta, -beta + 1, ss + 1);
@@ -332,15 +332,15 @@ namespace search {
                 return in_check ? mate_ply : 0;
             }
 
-            history.killer_moves[ss->ply + 1][0] = history.killer_moves[ss->ply + 1][1] = core::NULL_MOVE;
+            history.killer_moves[ss->ply + 1][0] = history.killer_moves[ss->ply + 1][1] = chess::NULL_MOVE;
 
-            core::Move quiet_moves[200];
-            core::Move *next_quiet_move = quiet_moves;
+            chess::Move quiet_moves[200];
+            chess::Move *next_quiet_move = quiet_moves;
 
             bool skip_quiets = false;
             int made_moves = 0;
             while (!move_list.empty()) {
-                core::Move move = ss->move = move_list.next_move();
+                chess::Move move = ss->move = move_list.next_move();
 
                 if (skip_quiets && move.is_quiet() && !move.is_promo()) continue;
 
@@ -390,7 +390,7 @@ namespace search {
 
                     if (move.is_quiet()) {
                         history.add_cutoff(move, last_move, depth, ss->ply);
-                        for (core::Move *current_move = quiet_moves; current_move != next_quiet_move; current_move++) {
+                        for (chess::Move *current_move = quiet_moves; current_move != next_quiet_move; current_move++) {
                             history.decrease_history(*current_move, depth);
                         }
                     }
@@ -435,10 +435,10 @@ namespace search {
             if (static_eval > alpha)
                 alpha = static_eval;
 
-            MoveList<true> move_list(board, core::NULL_MOVE, core::NULL_MOVE, history, 0);
+            MoveList<true> move_list(board, chess::NULL_MOVE, chess::NULL_MOVE, history, 0);
 
             while (!move_list.empty()) {
-                core::Move move = move_list.next_move();
+                chess::Move move = move_list.next_move();
 
                 if (alpha > -WORST_MATE && !see(board, move, 0)) continue;
 

@@ -20,7 +20,7 @@
 #include "attacks.h"
 #include "board.h"
 
-namespace core {
+namespace chess {
 
     // Returns a bitboard of all the squares attacking a given square for the given color
     template<Color color>
@@ -543,7 +543,7 @@ namespace core {
     }
 
     bool Board::is_check() const {
-        return bool(core::get_attackers(*this, pieces<KING>(get_stm()).lsb()));
+        return bool(chess::get_attackers(*this, pieces<KING>(get_stm()).lsb()));
     }
 
 } // namespace core

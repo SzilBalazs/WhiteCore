@@ -63,14 +63,14 @@ namespace search {
         }
 
         template<bool block>
-        void search(const core::Board &board) {
+        void search(const chess::Board &board) {
             join<false>();
             for (unsigned int thread_id = 0; thread_id < allocated_threads; thread_id++) {
                 threads.emplace_back(shared, thread_id);
                 threads.back().load_board(board);
             }
             shared.node_count.assign(allocated_threads, 0);
-            shared.best_move = core::NULL_MOVE;
+            shared.best_move = chess::NULL_MOVE;
             shared.is_searching = true;
             for (SearchThread &thread : threads) {
                 thread.start();
@@ -82,7 +82,7 @@ namespace search {
             join<false>();
         }
 
-        std::pair<core::Move, Score> get_result() {
+        std::pair<chess::Move, Score> get_result() {
             join<true>();
             return {shared.best_move, shared.eval};
         }

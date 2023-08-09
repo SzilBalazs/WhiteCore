@@ -21,13 +21,13 @@
 
 namespace search {
 
-    bool see(const core::Board &board, core::Move move, Score threshold) {
+    bool see(const chess::Board &board, chess::Move move, Score threshold) {
         assert(move.is_capture());
 
         Square from = move.get_from();
         Square to = move.get_to();
 
-        if (move.is_promo() || move.eq_flag(core::Move::EP_CAPTURE)) return true;
+        if (move.is_promo() || move.eq_flag(chess::Move::EP_CAPTURE)) return true;
 
         Score value = PIECE_VALUES[board.piece_at(to).type] - threshold;
 
@@ -37,14 +37,14 @@ namespace search {
 
         if (value >= 0) return true;
 
-        core::Bitboard rooks = board.pieces<ROOK>() | board.pieces<QUEEN>();
-        core::Bitboard bishops = board.pieces<BISHOP>() | board.pieces<QUEEN>();
-        core::Bitboard occ = board.occupied() & (~core::Bitboard(from)) & (~core::Bitboard(to));
+        chess::Bitboard rooks = board.pieces<ROOK>() | board.pieces<QUEEN>();
+        chess::Bitboard bishops = board.pieces<BISHOP>() | board.pieces<QUEEN>();
+        chess::Bitboard occ = board.occupied() & (~chess::Bitboard(from)) & (~chess::Bitboard(to));
 
         // Initialize the current attacker as the piece that made the capture
-        core::Bitboard attacker = from;
+        chess::Bitboard attacker = from;
         // Get all attackers to the destination square
-        core::Bitboard attackers = core::get_all_attackers(board, to, occ);
+        chess::Bitboard attackers = chess::get_all_attackers(board, to, occ);
 
         Color stm = color_enemy(board.piece_at(from).color);
 
@@ -52,7 +52,7 @@ namespace search {
             attackers &= occ;
 
             PieceType type;
-            attacker = core::least_valuable_piece(board, attackers, stm, type);
+            attacker = chess::least_valuable_piece(board, attackers, stm, type);
 
             if (!attacker)
                 break;

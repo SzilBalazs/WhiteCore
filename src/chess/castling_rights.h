@@ -17,7 +17,7 @@
 
 #pragma once
 
-namespace core {
+namespace chess {
     struct CastlingRights {
 
         static constexpr unsigned char WHITE_KING = 1;

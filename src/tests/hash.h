@@ -30,7 +30,7 @@ namespace test {
         struct Test {
             std::string fen;
             std::vector<std::string> moves;
-            core::Zobrist hash;
+            chess::Zobrist hash;
 
             Test(std::string fen, std::vector<std::string> moves, U64 hash) : fen(std::move(fen)), moves(std::move(moves)), hash(hash) {}
         };
@@ -45,13 +45,13 @@ namespace test {
                 Test("rnbqk2r/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq - 0 1", {"e1g1"}, 730654048443189168ULL),
                 Test("rnbqk2r/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq - 0 1", {"e1g1", "e8g8"}, 9794721467020975390ULL)};
 
-        core::Board board;
+        chess::Board board;
         std::vector<Test> failed;
 
         for (const Test &test : tests) {
             board.load(test.fen);
             for (std::string str : test.moves) {
-                core::Move move = uci::move_from_string(board, str);
+                chess::Move move = uci::move_from_string(board, str);
                 board.make_move(move);
             }
             if (board.get_hash() != test.hash) {

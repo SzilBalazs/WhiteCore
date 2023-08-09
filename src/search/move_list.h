@@ -34,10 +34,10 @@ namespace search {
         static constexpr unsigned int MOVE_SCORE_BAD_CAPTURE = 4'000'000;
 
     public:
-        MoveList(const core::Board &board, const core::Move &hash_move, const core::Move &last_move, const History &history, const Ply &ply) : current(0), board(board),
+        MoveList(const chess::Board &board, const chess::Move &hash_move, const chess::Move &last_move, const History &history, const Ply &ply) : current(0), board(board),
                                                                                                                   hash_move(hash_move), last_move(last_move), history(history), ply(ply) {
-            size = core::gen_moves(board, moves, captures_only) - moves;
-            std::transform(moves, moves+size, scores, [this](const core::Move& move) {
+            size = chess::gen_moves(board, moves, captures_only) - moves;
+            std::transform(moves, moves+size, scores, [this](const chess::Move& move) {
                 return score_move(move);
             });
         }
@@ -46,7 +46,7 @@ namespace search {
             return current == size;
         }
 
-        [[nodiscard]] core::Move next_move() {
+        [[nodiscard]] chess::Move next_move() {
             for (unsigned int i = current; i < size; i++) {
                 if (scores[i] > scores[current]) {
                     std::swap(scores[i], scores[current]);
@@ -57,22 +57,22 @@ namespace search {
         }
 
     private:
-        core::Move moves[200];
+        chess::Move moves[200];
         unsigned int size, current;
         Score scores[200];
-        const core::Board &board;
-        const core::Move &hash_move;
-        const core::Move &last_move;
+        const chess::Board &board;
+        const chess::Move &hash_move;
+        const chess::Move &last_move;
         const History &history;
         const Ply &ply;
 
-        [[nodiscard]] Score get_mvv_lva(const core::Move &move) const {
-            return move.eq_flag(core::Move::EP_CAPTURE)
+        [[nodiscard]] Score get_mvv_lva(const chess::Move &move) const {
+            return move.eq_flag(chess::Move::EP_CAPTURE)
                            ? MVVLVA[PAWN][PAWN]
                            : MVVLVA[board.piece_at(move.get_to()).type][board.piece_at(move.get_from()).type];
         }
 
-        [[nodiscard]] Score score_move(const core::Move &move) const {
+        [[nodiscard]] Score score_move(const chess::Move &move) const {
             if (move == hash_move) {
                 return MOVE_SCORE_HASH;
             } else if (move.is_promo()) {

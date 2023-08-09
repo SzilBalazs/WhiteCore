@@ -38,11 +38,11 @@ namespace selfplay {
     struct DataEntry {
         std::string fen;
         unsigned int ply;
-        core::Move best_move;
+        chess::Move best_move;
         Score eval;
         std::optional<GameResult> result;
 
-        DataEntry(std::string fen, unsigned int ply, core::Move best_move, Score eval, std::optional<GameResult> result) : fen(std::move(fen)), ply(ply),
+        DataEntry(std::string fen, unsigned int ply, chess::Move best_move, Score eval, std::optional<GameResult> result) : fen(std::move(fen)), ply(ply),
                                                                                                                            best_move(best_move), eval(eval),
                                                                                                                            result(result) {}
 

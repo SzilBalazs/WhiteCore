@@ -30,15 +30,15 @@
 
 namespace uci {
 
-    core::Move move_from_string(core::Board &board, const std::string &str) {
-        core::Move moves[200];
-        core::Move *moves_end = core::gen_moves(board, moves, false);
-        for (core::Move *it = moves; it != moves_end; it++) {
+    chess::Move move_from_string(chess::Board &board, const std::string &str) {
+        chess::Move moves[200];
+        chess::Move *moves_end = chess::gen_moves(board, moves, false);
+        for (chess::Move *it = moves; it != moves_end; it++) {
             if (it->to_uci() == str) {
                 return *it;
             }
         }
-        return core::NULL_MOVE;
+        return chess::NULL_MOVE;
     }
 
     class UCI {
@@ -55,7 +55,7 @@ namespace uci {
         std::vector<Command> commands;
         std::vector<Option> options;
         bool should_continue = true;
-        core::Board board;
+        chess::Board board;
         search::SearchManager sm;
 
         void register_commands();
@@ -241,8 +241,8 @@ namespace uci {
         }
         if (idx < tokens.size() && tokens[idx] == "moves") idx++;
         for (; idx < tokens.size(); idx++) {
-            core::Move move = move_from_string(board, tokens[idx]);
-            if (move == core::NULL_MOVE) {
+            chess::Move move = move_from_string(board, tokens[idx]);
+            if (move == chess::NULL_MOVE) {
                 break;
             } else {
                 board.make_move(move);

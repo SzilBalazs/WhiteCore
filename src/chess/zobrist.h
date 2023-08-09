@@ -21,7 +21,7 @@
 #include "castling_rights.h"
 #include "randoms.h"
 
-namespace core {
+namespace chess {
     struct Zobrist {
 
         U64 hash = 0;

@@ -22,7 +22,7 @@
 #include "../utils/utilities.h"
 #include "constants.h"
 
-namespace core {
+namespace chess {
     class Move {
     public:
 

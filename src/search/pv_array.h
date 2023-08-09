@@ -20,7 +20,7 @@
 namespace search {
     struct PVArray {
 
-        core::Move array[500][500];
+        chess::Move array[500][500];
         Ply length[500];
 
         std::string get_line() {
@@ -31,11 +31,11 @@ namespace search {
             return line;
         }
 
-        core::Move get_best_move() {
+        chess::Move get_best_move() {
             return array[0][0];
         }
 
-        void update(Ply ply, core::Move move) {
+        void update(Ply ply, chess::Move move) {
             array[ply][ply] = move;
             for (Ply i = ply + 1; i < length[ply + 1]; i++) {
                 array[ply][i] = array[ply + 1][i];

@@ -23,7 +23,7 @@
 #include <windows.h>
 #endif
 
-namespace core {
+namespace chess {
     // Declarations
     Bitboard masks_bit[64], masks_adjacent_file[64], masks_adjacent_north[64], masks_adjacent_south[64], masks_pawn[64][2], masks_passed_pawn[64][2],
             masks_knight[64], masks_king[64], masks_file[64], masks_rank[64], masks_rook[64], masks_diagonal[64],
@@ -37,8 +37,8 @@ namespace search {
 }
 
 void init_all() {
-    core::init_masks();
-    core::init_magic();
+    chess::init_masks();
+    chess::init_magic();
     search::init_lmr();
 }
 

@@ -19,7 +19,7 @@
 
 #include "constants.h"
 
-namespace core {
+namespace chess {
     extern const U64 rand_table[793];
 
     constexpr U64 const *rand_table_pieces = rand_table;

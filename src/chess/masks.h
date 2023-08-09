@@ -19,7 +19,7 @@
 
 #include "bitboard.h"
 
-namespace core {
+namespace chess {
     extern Bitboard masks_adjacent_file[64];
     extern Bitboard masks_adjacent_north[64];
     extern Bitboard masks_adjacent_south[64];

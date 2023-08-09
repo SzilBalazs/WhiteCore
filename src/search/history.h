@@ -21,29 +21,29 @@
 
 namespace search {
     struct History {
-        core::Move killer_moves[MAX_PLY + 10][2];
-        core::Move counter_moves[64][64];
+        chess::Move killer_moves[MAX_PLY + 10][2];
+        chess::Move counter_moves[64][64];
         Score butterfly[64][64];
 
-        void add_cutoff(core::Move move, core::Move last_move, Depth depth, Ply ply) {
+        void add_cutoff(chess::Move move, chess::Move last_move, Depth depth, Ply ply) {
             killer_moves[ply][1] = killer_moves[ply][0];
             killer_moves[ply][0] = move;
             counter_moves[last_move.get_from()][last_move.get_to()] = move;
             update_butterfly(move, depth * 100);
         }
 
-        void decrease_history(core::Move move, Depth depth) {
+        void decrease_history(chess::Move move, Depth depth) {
             update_butterfly(move, -depth * 100);
         }
 
-        void update_butterfly(core::Move move, int bonus) {
+        void update_butterfly(chess::Move move, int bonus) {
             int scaled = bonus - butterfly[move.get_from()][move.get_to()] * std::abs(bonus) / 32768;
             butterfly[move.get_from()][move.get_to()] += scaled;
         }
 
         void clear() {
             for (int i = 0; i < MAX_PLY + 2; i++) {
-                killer_moves[i][0] = killer_moves[i][1] = core::NULL_MOVE;
+                killer_moves[i][0] = killer_moves[i][1] = chess::NULL_MOVE;
             }
             for (int i = 0; i < 64; i++) {
                 for (int j = 0; j < 64; j++) {

@@ -56,7 +56,7 @@ void run_bench() {
             "r2qk2r/pbpnbppp/1p1ppn2/8/2PP4/P1N2NP1/1PQ1PPBP/R1B1K2R w KQkq - 2 9",
             "r1bqkb1r/pp1p1ppp/8/2p1P3/1n2Q3/8/PPP2PPP/RNB1KB1R b KQkq - 5 9"};
 
-    core::Board board;
+    chess::Board board;
     search::SearchManager sm;
     sm.set_uci_mode(false);
     sm.allocate_threads(1);

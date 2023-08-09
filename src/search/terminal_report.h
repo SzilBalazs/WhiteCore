@@ -149,7 +149,7 @@ namespace search::report {
         }
     }
 
-    void print_bestmove(const core::Move bestmove) {
+    void print_bestmove(const chess::Move bestmove) {
         std::stringstream ss;
         ss << "bestmove " << bestmove << "\n";
         std::cout << ss.str() << std::flush;

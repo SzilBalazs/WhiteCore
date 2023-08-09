@@ -20,7 +20,7 @@
 #include "constants.h"
 #include "zobrist.h"
 
-namespace core {
+namespace chess {
     struct BoardState {
         Color stm = WHITE;
         Square ep = NULL_SQUARE;
