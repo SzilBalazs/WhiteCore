@@ -43,4 +43,4 @@ namespace search {
             length[ply] = length[ply + 1];
         }
     };
-}
+} // namespace search

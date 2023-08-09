@@ -35,9 +35,9 @@ namespace search {
 
     public:
         MoveList(const chess::Board &board, const chess::Move &hash_move, const chess::Move &last_move, const History &history, const Ply &ply) : current(0), board(board),
-                                                                                                                  hash_move(hash_move), last_move(last_move), history(history), ply(ply) {
+                                                                                                                                                  hash_move(hash_move), last_move(last_move), history(history), ply(ply) {
             size = chess::gen_moves(board, moves, captures_only) - moves;
-            std::transform(moves, moves+size, scores, [this](const chess::Move& move) {
+            std::transform(moves, moves + size, scores, [this](const chess::Move &move) {
                 return score_move(move);
             });
         }

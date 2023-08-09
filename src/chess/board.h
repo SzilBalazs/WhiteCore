@@ -407,7 +407,8 @@ namespace chess {
                     std::cout << "   ├───┼───┼───┼───┼───┼───┼───┼───┤";
                 }
             }
-            std::cout << "   ╰───┴───┴───┴───┴───┴───┴───┴───╯\n\n" << std::flush;
+            std::cout << "   ╰───┴───┴───┴───┴───┴───┴───┴───╯\n\n"
+                      << std::flush;
         }
 
         [[nodiscard]] std::vector<unsigned int> to_features() const {
@@ -496,6 +497,6 @@ namespace chess {
         }
         return 0;
     }
-} // namespace core
+} // namespace chess
 
 #undef state

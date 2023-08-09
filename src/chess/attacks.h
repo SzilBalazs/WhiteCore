@@ -93,4 +93,4 @@ namespace chess {
                 return 0;
         }
     }
-} // namespace core
+} // namespace chess

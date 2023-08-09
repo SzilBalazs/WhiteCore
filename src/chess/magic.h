@@ -225,4 +225,4 @@ namespace chess {
         init_magic(magic_rook, ROOK);
         init_magic(magic_bishop, BISHOP);
     }
-} // namespace core
+} // namespace chess

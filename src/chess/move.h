@@ -25,7 +25,6 @@
 namespace chess {
     class Move {
     public:
-
         static constexpr unsigned int PROMO_FLAG = 1 << 3;
         static constexpr unsigned int CAPTURE_FLAG = 1 << 2;
         static constexpr unsigned int SPECIAL1_FLAG = 1 << 1;
@@ -59,7 +58,7 @@ namespace chess {
         constexpr Move() = default;
 
         // Returns the to square of the move
-        [[nodiscard]]  constexpr Square get_to() const {
+        [[nodiscard]] constexpr Square get_to() const {
             return Square(data & 0x3f);
         }
 
@@ -124,7 +123,7 @@ namespace chess {
         }
 
         // Returns the move in UCI format as a string
-        [[nodiscard]]  std::string to_uci() const {
+        [[nodiscard]] std::string to_uci() const {
             std::string res;
             if (is_promo()) {
                 if (!is_special_1() && !is_special_2())
@@ -149,4 +148,4 @@ namespace chess {
         os << move.to_uci();
         return os;
     }
-} // namespace core
+} // namespace chess

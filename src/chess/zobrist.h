@@ -50,4 +50,4 @@ namespace chess {
             hash ^= rand_table_castling[rights.data];
         }
     };
-} // namespace core
+} // namespace chess

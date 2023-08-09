@@ -429,4 +429,4 @@ namespace chess {
             0xe986b3827b29384ULL, 0x588d0a2e71b7eb7cULL,
             0xff160c9a2fd263c3ULL, 0xf981c0baf19691beULL,
             0x286a031935c089ccULL};
-} // namespace core
+} // namespace chess

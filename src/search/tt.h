@@ -34,12 +34,12 @@ namespace search {
         TT_BETA = 3
     };
 
-    struct TTEntry {          // Total: 16 bytes
-        U64 hash;             // 8 bytes
-        Score eval;           // 4 bytes
+    struct TTEntry {           // Total: 16 bytes
+        U64 hash;              // 8 bytes
+        Score eval;            // 4 bytes
         chess::Move hash_move; // 2 bytes
-        Depth depth;          // 1 byte
-        TTFlag flag;          // 1 byte
+        Depth depth;           // 1 byte
+        TTFlag flag;           // 1 byte
     };
 
     static_assert(sizeof(TTEntry) == 16);

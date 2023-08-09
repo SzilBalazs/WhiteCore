@@ -77,4 +77,4 @@ namespace chess {
             return res;
         }
     };
-} // namespace core
+} // namespace chess

@@ -20,8 +20,8 @@
 #include "../chess/movegen.h"
 
 #include <random>
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace rng {
 
@@ -66,4 +66,4 @@ namespace rng {
 
         return board.get_fen();
     }
-}
+} // namespace rng

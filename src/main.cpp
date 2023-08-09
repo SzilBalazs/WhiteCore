@@ -30,7 +30,7 @@ namespace chess {
             masks_anti_diagonal[64], masks_bishop[64], masks_common_ray[64][64];
     LineType line_type[64][64];
     Bitboard attack_table_rook[102400], attack_table_bishop[5248];
-} // namespace core
+} // namespace chess
 
 namespace search {
     Depth lmr_reductions[200][MAX_PLY + 1];

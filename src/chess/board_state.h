@@ -29,4 +29,4 @@ namespace chess {
         CastlingRights rights = CastlingRights();
         size_t move50 = 0;
     };
-} // namespace core
+} // namespace chess

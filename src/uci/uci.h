@@ -80,7 +80,7 @@ namespace uci {
             greetings();
             search::report::set_pretty_output(false);
         });
-        commands.emplace_back("pretty", [&](context tokens){
+        commands.emplace_back("pretty", [&](context tokens) {
             search::report::set_pretty_output(true);
         });
         commands.emplace_back("isready", [&](context tokens) {

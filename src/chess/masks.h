@@ -130,4 +130,4 @@ namespace chess {
             }
         }
     }
-} // namespace core
+} // namespace chess

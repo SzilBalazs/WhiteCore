@@ -546,4 +546,4 @@ namespace chess {
         return bool(chess::get_attackers(*this, pieces<KING>(get_stm()).lsb()));
     }
 
-} // namespace core
+} // namespace chess
