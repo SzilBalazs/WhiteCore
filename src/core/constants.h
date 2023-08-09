@@ -81,11 +81,6 @@ constexpr int MVVLVA[6][6] = {
 };
 // clang-format on
 
-constexpr unsigned char WK_MASK = 1;
-constexpr unsigned char WQ_MASK = 2;
-constexpr unsigned char BK_MASK = 4;
-constexpr unsigned char BQ_MASK = 8;
-
 const std::string ASCII_WHITE_PIECE = "\u001b[90;107m";
 const std::string ASCII_BLACK_PIECE = "\u001b[100;97m";
 

@@ -494,25 +494,25 @@ namespace core {
         // Generate castling moves
         if constexpr (!captures_only) {
             if constexpr (color == WHITE) {
-                if (board.get_rights().get(WK_MASK) &&
+                if (board.get_rights()[CastlingRights::WHITE_KING] &&
                     (squares_safe & WK_CASTLE_SAFE) == WK_CASTLE_SAFE && (empty & WK_CASTLE_EMPTY) == WK_CASTLE_EMPTY) {
 
                     *moves++ = Move(E1, G1, KING_CASTLE);
                 }
 
-                if (board.get_rights().get(WQ_MASK) &&
+                if (board.get_rights()[CastlingRights::WHITE_QUEEN] &&
                     (squares_safe & WQ_CASTLE_SAFE) == WQ_CASTLE_SAFE && (empty & WQ_CASTLE_EMPTY) == WQ_CASTLE_EMPTY) {
 
                     *moves++ = Move(E1, C1, QUEEN_CASTLE);
                 }
             } else {
-                if (board.get_rights().get(BK_MASK) &&
+                if (board.get_rights()[CastlingRights::BLACK_KING] &&
                     (squares_safe & BK_CASTLE_SAFE) == BK_CASTLE_SAFE && (empty & BK_CASTLE_EMPTY) == BK_CASTLE_EMPTY) {
 
                     *moves++ = Move(E8, G8, KING_CASTLE);
                 }
 
-                if (board.get_rights().get(BQ_MASK) &&
+                if (board.get_rights()[CastlingRights::BLACK_QUEEN] &&
                     (squares_safe & BQ_CASTLE_SAFE) == BQ_CASTLE_SAFE && (empty & BQ_CASTLE_EMPTY) == BQ_CASTLE_EMPTY) {
 
                     *moves++ = Move(E8, C8, QUEEN_CASTLE);

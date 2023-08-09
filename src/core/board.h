@@ -234,17 +234,17 @@ namespace core {
                 }
             }
 
-            if (state.rights.get(WK_MASK) && (from == E1 || from == H1 || to == H1)) {
-                state.rights.remove(WK_MASK);
+            if (state.rights[CastlingRights::WHITE_KING] && (from == E1 || from == H1 || to == H1)) {
+                state.rights -= CastlingRights::WHITE_KING;
             }
-            if (state.rights.get(WQ_MASK) && (from == E1 || from == A1 || to == A1)) {
-                state.rights.remove(WQ_MASK);
+            if (state.rights[CastlingRights::WHITE_QUEEN] && (from == E1 || from == A1 || to == A1)) {
+                state.rights -= CastlingRights::WHITE_QUEEN;
             }
-            if (state.rights.get(BK_MASK) && (from == E8 || from == H8 || to == H8)) {
-                state.rights.remove(BK_MASK);
+            if (state.rights[CastlingRights::BLACK_KING] && (from == E8 || from == H8 || to == H8)) {
+                state.rights -= CastlingRights::BLACK_KING;
             }
-            if (state.rights.get(BQ_MASK) && (from == E8 || from == A8 || to == A8)) {
-                state.rights.remove(BQ_MASK);
+            if (state.rights[CastlingRights::BLACK_QUEEN] && (from == E8 || from == A8 || to == A8)) {
+                state.rights -= CastlingRights::BLACK_QUEEN;
             }
 
             state.hash.xor_castle(state.rights);
