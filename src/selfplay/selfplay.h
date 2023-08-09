@@ -145,7 +145,11 @@ namespace selfplay {
 
     std::string get_run_name(const search::Limits &limits, const std::string &id) {
 
-        uint64_t position_count = std::reduce(position_count_vec.begin(), position_count_vec.end());
+        uint64_t position_count = 0;
+
+        for (const uint64_t &i : position_count_vec) {
+            position_count += i;
+        }
 
         std::stringstream ss;
         ss << id << "_" << limits.to_string() << "_" << (position_count / 1000) << "k";
@@ -174,8 +178,15 @@ namespace selfplay {
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
 
-            game_count = std::reduce(game_count_vec.begin(), game_count_vec.end());
-            position_count = std::reduce(position_count_vec.begin(), position_count_vec.end());
+            game_count = position_count = 0;
+
+            for (const uint64_t &i : game_count_vec) {
+                game_count += i;
+            }
+
+            for (const uint64_t &i : position_count_vec) {
+                position_count += i;
+            }
 
             const int64_t current_time = now();
             const int64_t elapsed_time = current_time - start_time + 1;
