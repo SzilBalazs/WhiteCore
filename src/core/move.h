@@ -25,6 +25,26 @@
 namespace core {
     class Move {
     public:
+
+        static constexpr unsigned int PROMO_FLAG = 1 << 3;
+        static constexpr unsigned int CAPTURE_FLAG = 1 << 2;
+        static constexpr unsigned int SPECIAL1_FLAG = 1 << 1;
+        static constexpr unsigned int SPECIAL2_FLAG = 1 << 0;
+        static constexpr unsigned int QUIET_MOVE = 0;
+        static constexpr unsigned int CAPTURE = CAPTURE_FLAG;
+        static constexpr unsigned int DOUBLE_PAWN_PUSH = SPECIAL2_FLAG;
+        static constexpr unsigned int EP_CAPTURE = CAPTURE_FLAG | SPECIAL2_FLAG;
+        static constexpr unsigned int PROMO_KNIGHT = PROMO_FLAG;
+        static constexpr unsigned int PROMO_BISHOP = PROMO_FLAG | SPECIAL2_FLAG;
+        static constexpr unsigned int PROMO_ROOK = PROMO_FLAG | SPECIAL1_FLAG;
+        static constexpr unsigned int PROMO_QUEEN = PROMO_FLAG | SPECIAL1_FLAG | SPECIAL2_FLAG;
+        static constexpr unsigned int PROMO_CAPTURE_KNIGHT = CAPTURE_FLAG | PROMO_FLAG;
+        static constexpr unsigned int PROMO_CAPTURE_BISHOP = CAPTURE_FLAG | PROMO_FLAG | SPECIAL2_FLAG;
+        static constexpr unsigned int PROMO_CAPTURE_ROOK = CAPTURE_FLAG | PROMO_FLAG | SPECIAL1_FLAG;
+        static constexpr unsigned int PROMO_CAPTURE_QUEEN = CAPTURE_FLAG | PROMO_FLAG | SPECIAL1_FLAG | SPECIAL2_FLAG;
+        static constexpr unsigned int KING_CASTLE = SPECIAL1_FLAG;
+        static constexpr unsigned int QUEEN_CASTLE = SPECIAL1_FLAG | SPECIAL2_FLAG;
+
         // Initialize the move with a from square, to square, and flags
         constexpr Move(Square from, Square to, unsigned int flags) {
             data = (flags << 12) | (from << 6) | (to);

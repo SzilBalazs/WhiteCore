@@ -67,7 +67,7 @@ namespace search {
         const Ply &ply;
 
         [[nodiscard]] Score get_mvv_lva(const core::Move &move) const {
-            return move.eq_flag(EP_CAPTURE)
+            return move.eq_flag(core::Move::EP_CAPTURE)
                            ? MVVLVA[PAWN][PAWN]
                            : MVVLVA[board.piece_at(move.get_to()).type][board.piece_at(move.get_from()).type];
         }

@@ -27,7 +27,7 @@ namespace search {
         Square from = move.get_from();
         Square to = move.get_to();
 
-        if (move.is_promo() || move.eq_flag(EP_CAPTURE)) return true;
+        if (move.is_promo() || move.eq_flag(core::Move::EP_CAPTURE)) return true;
 
         Score value = PIECE_VALUES[board.piece_at(to).type] - threshold;
 
