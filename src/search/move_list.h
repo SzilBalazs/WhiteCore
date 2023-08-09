@@ -27,10 +27,11 @@ namespace search {
 
         static constexpr unsigned int MOVE_SCORE_HASH = 10'000'000;
         static constexpr unsigned int MOVE_SCORE_PROMO = 9'000'000;
-        static constexpr unsigned int MOVE_SCORE_CAPTURE = 8'000'000;
+        static constexpr unsigned int MOVE_SCORE_GOOD_CAPTURE = 8'000'000;
         static constexpr unsigned int MOVE_SCORE_FIRST_KILLER = 7'000'000;
         static constexpr unsigned int MOVE_SCORE_SECOND_KILLER = 6'000'000;
         static constexpr unsigned int MOVE_SCORE_COUNTER = 5'000'000;
+        static constexpr unsigned int MOVE_SCORE_BAD_CAPTURE = 4'000'000;
 
     public:
         MoveList(const core::Board &board, const core::Move &hash_move, const core::Move &last_move, const History &history, const Ply &ply) : current(0), board(board),
@@ -77,7 +78,7 @@ namespace search {
             } else if (move.is_promo()) {
                 return MOVE_SCORE_PROMO;
             } else if (move.is_capture()) {
-                return MOVE_SCORE_CAPTURE + get_mvv_lva(move);
+                return (see(board, move, 0) ? MOVE_SCORE_GOOD_CAPTURE : MOVE_SCORE_BAD_CAPTURE) + get_mvv_lva(move);
             } else if (move == history.killer_moves[ply][0]) {
                 return MOVE_SCORE_FIRST_KILLER;
             } else if (move == history.killer_moves[ply][1]) {
