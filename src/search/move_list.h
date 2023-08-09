@@ -34,6 +34,15 @@ namespace search {
         static constexpr unsigned int MOVE_SCORE_BAD_CAPTURE = 4'000'000;
 
     public:
+        /**
+         * The MoveList class provides an ordered list of legal moves.
+         *
+         * @param board The current board
+         * @param hash_move Previously found best move
+         * @param last_move Move played last turn
+         * @param history History object containing information about the search
+         * @param ply Distance from root
+         */
         MoveList(const chess::Board &board, const chess::Move &hash_move, const chess::Move &last_move, const History &history, const Ply &ply) : current(0), board(board),
                                                                                                                                                   hash_move(hash_move), last_move(last_move), history(history), ply(ply) {
             size = chess::gen_moves(board, moves, captures_only) - moves;
@@ -42,10 +51,19 @@ namespace search {
             });
         }
 
+        /**
+         *
+         * @return True if the move list is empty, otherwise false.
+         */
         [[nodiscard]] bool empty() const {
             return current == size;
         }
 
+        /**
+         * Selects the strongest candidate for the next move.
+         *
+         * @return The move that should be played next
+         */
         [[nodiscard]] chess::Move next_move() {
             for (unsigned int i = current; i < size; i++) {
                 if (scores[i] > scores[current]) {
