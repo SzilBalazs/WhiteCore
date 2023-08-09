@@ -80,6 +80,7 @@ clean:
 
 bench: $(OUTPUT_BINARY)
 	@echo Bench: $(shell ./$(OUTPUT_BINARY) bench | grep -Eo '^[0-9]+ nodes' | grep -o '[0-9]*')
+	@python scripts/bench.py 1
 
 train: $(OUTPUT_BINARY)
 	@$(CP) $(OUTPUT_BINARY) train/WhiteCore
