@@ -22,7 +22,7 @@
 #include "pv_array.h"
 #include "terminal_report.h"
 #include "time_manager.h"
-#include "tt.h"
+#include "transposition_table.h"
 
 #include <atomic>
 #include <thread>

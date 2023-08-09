@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "../chess/movegen.h"
+#include "../chess/move_generation.h"
 
 #include <random>
 #include <sstream>

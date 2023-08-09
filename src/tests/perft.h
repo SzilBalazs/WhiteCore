@@ -19,7 +19,7 @@
 
 #include <utility>
 
-#include "../chess/movegen.h"
+#include "../chess/move_generation.h"
 
 namespace test {
 

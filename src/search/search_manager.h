@@ -20,7 +20,7 @@
 #include "../chess/board.h"
 #include "search_thread.h"
 #include "time_manager.h"
-#include "tt.h"
+#include "transposition_table.h"
 
 namespace search {
     class SearchManager {
