@@ -83,7 +83,7 @@ namespace nn {
                     std::thread th_loading = std::thread(&DataParser::read_batch, &training_parser, batch_size, entries_next, std::ref(is_new_epoch));
 
                     std::vector<std::thread> ths;
-                    for (int id = 0; id < thread_count; id++) {
+                    for (size_t id = 0; id < thread_count; id++) {
                         ths.emplace_back(&Trainer::process_batch<true>, this, id);
                     }
 
@@ -93,7 +93,7 @@ namespace nn {
 
                     adam.update(gradients, network);
 
-                    for (int id = 0; id < thread_count; id++) {
+                    for (size_t id = 0; id < thread_count; id++) {
                         checkpoint_error += errors[id];
                         checkpoint_accuracy += accuracy[id];
                     }
@@ -177,7 +177,7 @@ namespace nn {
             float val_loss = 0.0f;
             int correct = 0.0f;
 
-            for (int id = 0; id < thread_count; id++) {
+            for (size_t id = 0; id < thread_count; id++) {
                 val_loss += errors[id];
                 correct += accuracy[id];
             }

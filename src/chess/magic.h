@@ -75,7 +75,7 @@ namespace chess {
             } while (occ != 0);
 
             for (size_t i = 0; i < length; i++) {
-                U64 index = get_magic_index(magic, occupied[i]);
+                uint64_t index = get_magic_index(magic, occupied[i]);
 
                 magic.ptr[index] = attacked[i];
             }

@@ -34,23 +34,36 @@ namespace search {
         TT_BETA = 3
     };
 
-    struct TTEntry {           // Total: 16 bytes
-        U64 hash;              // 8 bytes
-        Score eval;            // 4 bytes
-        chess::Move hash_move; // 2 bytes
-        Depth depth;           // 1 byte
-        TTFlag flag;           // 1 byte
+    struct TTEntry {                                // Total: 16 bytes
+        uint64_t hash = 0;                          // 8 bytes
+        Score eval = 0;                             // 4 bytes
+        chess::Move hash_move = chess::NULL_MOVE;   // 2 bytes
+        Depth depth = 0;                            // 1 byte
+        TTFlag flag = TT_NONE;                      // 1 byte
+
+        constexpr TTEntry() = default;
     };
 
     static_assert(sizeof(TTEntry) == 16);
 
     class TT {
     public:
-        void resize(unsigned int MB) {
-            if (bucket_count)
-                free(table);
 
-            unsigned int i = 10;
+        ~TT() {
+            free_table();
+        }
+
+        void free_table() {
+            if (bucket_count) {
+                free(table);
+                bucket_count = 0;
+            }
+        }
+
+        void resize(unsigned int MB) {
+            free_table();
+
+            uint64_t i = 10;
             while ((1ULL << i) <= MB * 1024ULL * 1024ULL / sizeof(TTEntry))
                 i++;
 
@@ -58,15 +71,15 @@ namespace search {
             mask = bucket_count - 1ULL;
 
             table = (TTEntry *) malloc(bucket_count * sizeof(TTEntry));
-
-            clear();
         }
 
         void clear() {
-            std::memset(table, 0, bucket_count * sizeof(TTEntry));
+            for (uint64_t i = 0; i < bucket_count; i++) {
+                table[i] = TTEntry();
+            }
         }
 
-        std::optional<TTEntry> probe(U64 hash) {
+        std::optional<TTEntry> probe(uint64_t hash) {
             TTEntry entry = *get_entry(hash);
 
             if (entry.hash != hash)
@@ -75,7 +88,7 @@ namespace search {
             return entry;
         }
 
-        void save(U64 hash, Depth depth, Score eval, TTFlag flag, chess::Move best_move) {
+        void save(uint64_t hash, Depth depth, Score eval, TTFlag flag, chess::Move best_move) {
             TTEntry *entry = get_entry(hash);
 
             if (flag == TT_ALPHA && entry->hash == hash) {
@@ -94,11 +107,11 @@ namespace search {
             }
         }
 
-        void prefetch(U64 hash) {
+        void prefetch(uint64_t hash) {
             __builtin_prefetch(get_entry(hash), 0);
         }
 
-        chess::Move get_hash_move(U64 hash) {
+        chess::Move get_hash_move(uint64_t hash) {
             TTEntry *entry = get_entry(hash);
             if (entry->hash == hash)
                 return entry->hash_move;
@@ -106,11 +119,11 @@ namespace search {
         }
 
     private:
-        TTEntry *table;
-        unsigned int bucket_count = 0;
-        U64 mask = 0;
+        TTEntry *table = nullptr;
+        uint64_t bucket_count = 0;
+        uint64_t mask = 0;
 
-        TTEntry *get_entry(U64 hash) {
+        TTEntry *get_entry(uint64_t hash) {
             return table + (hash & mask);
         }
     };

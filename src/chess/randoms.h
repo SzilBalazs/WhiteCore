@@ -20,18 +20,18 @@
 #include "constants.h"
 
 namespace chess {
-    extern const U64 rand_table[793];
+    extern const uint64_t rand_table[793];
 
-    constexpr U64 const *rand_table_pieces = rand_table;
-    constexpr U64 const *rand_table_castling = rand_table + 768;
-    constexpr U64 const *rand_table_ep = rand_table + 784;
-    constexpr U64 const *rand_table_color = rand_table + 792;
+    constexpr uint64_t const *rand_table_pieces = rand_table;
+    constexpr uint64_t const *rand_table_castling = rand_table + 768;
+    constexpr uint64_t const *rand_table_ep = rand_table + 784;
+    constexpr uint64_t const *rand_table_color = rand_table + 792;
 
     // 2 colors * 6 types * 64 square = 768
     // 16 for castling rights
     // 8 number for the file of the epSquare
     // 1 number if the side is black
-    constexpr U64 rand_table[793] = {
+    constexpr uint64_t rand_table[793] = {
             0x4ef488bfae17abbaULL, 0x1b608e38d5cf7308ULL,
             0x851dabc8d9c029daULL, 0x62ff3fd5ca1fe189ULL,
             0xb58f435e51ec54d9ULL, 0xd6478aa5957c39eaULL,

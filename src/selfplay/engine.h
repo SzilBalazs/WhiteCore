@@ -30,6 +30,7 @@ namespace selfplay {
         void init(unsigned int hash_size, unsigned int thread_count) {
             sm.allocate_hash(hash_size);
             sm.allocate_threads(thread_count);
+            sm.tt_clear();
         }
 
         std::pair<chess::Move, Score> search(const chess::Board &board, const search::Limits &limits) {

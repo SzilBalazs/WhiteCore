@@ -96,7 +96,10 @@ namespace nn::layers {
         void push(std::array<T, OUT> &result) {
 
 #ifdef AVX2
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
             static_assert(std::is_invocable_r_v<__m256i, decltype(ACTIVATION::_mm256_forward_epi16), __m256i>, "ACTIVATION::forward doesn't support AVX2 registers");
+#pragma GCC diagnostic pop
 
             for (size_t i = 0; i < chunk_count; i++) {
                 const size_t offset = i * register_width;
