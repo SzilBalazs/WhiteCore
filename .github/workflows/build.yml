@@ -1,0 +1,66 @@
+name: Build & Run Tests
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  WhiteCore:
+    runs-on: ${{matrix.os}}
+    name: ${{matrix.name}}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        compiler: [clang++, clang]
+        arch: [popcnt, avx2, bmi2]
+        include:
+          - os: ubuntu-latest
+            compiler: clang++
+            suffix: "-linux"
+            packages: |
+              sudo apt-get update
+              sudo apt-get install clang-15
+          - os: windows-latest
+            compiler: clang
+            suffix: "-win"
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install required packages
+        if: matrix.os == 'ubuntu-latest'
+        run: ${{ matrix.packages }}
+
+      - name: Build WhiteCore
+        run: |
+          ${{matrix.compiler}} --version
+          make CXX=${{matrix.compiler}} EXE=WhiteCore-${{matrix.arch}}${{matrix.suffix}} ARCH=${{matrix.arch}}
+
+      - name: Run tests
+        run: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} test
+
+      - name: Run bench
+        run: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} bench
+
+      - name: Run bench on Linux
+        id: obtain_bench
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          BENCH=$(./WhiteCore-${{matrix.arch}}${{matrix.suffix}} bench | grep -Eo '^[0-9]+ nodes' | grep -o '[0-9]*')
+          COMMIT_BENCH=$(git log -1 --pretty=%B | grep -Eo '^Bench: *[0-9]+' | grep -o '[0-9]*')
+          echo "::set-output name=BENCH::$BENCH"
+          echo "::set-output name=COMMIT_BENCH::$COMMIT_BENCH"
+
+      - name: Invalid bench
+        if: steps.obtain_bench.outputs.BENCH != steps.obtain_bench.outputs.COMMIT_BENCH &&
+          matrix.os == 'ubuntu-latest'
+        run: |
+          echo "::error::The commit bench ${{steps.obtain_bench.outputs.COMMIT_BENCH}} is not equal to the actual bench ${{steps.obtain_bench.outputs.BENCH}}!"
+          exit 1
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: WhiteCore
+          path: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}}
