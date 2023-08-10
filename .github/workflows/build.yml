@@ -1,4 +1,4 @@
-name: Build & Run Tests
+name: Check Bench & Run Tests
 
 on:
   push:
@@ -16,11 +16,13 @@ jobs:
         include:
           - os: ubuntu-latest
             suffix: "-linux"
+            name: ${{matrix.arch}} linux
             packages: |
               sudo apt-get update
               sudo apt-get install clang-15
           - os: windows-latest
             suffix: "-win"
+            name: ${{matrix.arch}} windows
 
     steps:
       - uses: actions/checkout@v3
