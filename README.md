@@ -9,31 +9,54 @@
 </a>
 </p>
 
-A WIP c++ chess engine created as a rewrite of BlackCore with big focus on originality.
+
+# Overview
+
+WhiteCore stands as a strong C++ chess engine using efficiently-updatable neural networks for positional evaluation. 
+It's the successor of BlackCore reimagined with focus on originality.
+
+## Getting Started
+
+The following commands can be used to build a native binary for the best performance.
+You will need clang++ for this.
+
+```
+git clone https://github.com/SzilBalazs/WhiteCore.git
+cd WhiteCore
+make
+./WhiteCore
+```
+
+## Usage
+
+WhiteCore in itself is a command line program, and requires a UCI compatible
+Chess GUI (like <a href="https://github.com/cutechess/cutechess">Cute Chess</a>
+or <a href="http://www.playwitharena.de/">Arena</a>) for the best user experience.
+
+## Files
+
+This project contains the following files:
+
+- **README.md** the file that you are reading.
+- **LICENSE** containing the license of this repository.
+- **src** folder contains the source code of WhiteCore
+- **scripts** folder contains scripts
+- **weights** folder contains neural networks
+- **train** is used for training NNUE
+- **.github** folder contains automated GitHub workflows like building this project.
+
+## Thanks to...
+
+### <a href="https://www.runpod.io/">Runpod</a>
+
+We're grateful to Runpod for their sponsorship of the FindingChess instance.
+Their donation of hardware is essential for the development of WhiteCore.
+
+### <a href="https://github.com/AndyGrant/OpenBench">OpenBench</a> by Andrew Grant
+
+FindingChess is a fork of the OpenBench framework, a platform that has played an important role 
+in the development process. It allows us to test ideas easily 
+using a distributed computational framework.
 
 
-### Progress
 
-- Movegen DONE
-- UCI support DONE
-- Basic search DONE
-- Lazy SMP DONE
-- Basic time management DONE
-- TT DONE
-- Basic tests DONE
-- Bench DONE
-- Self play built-in DONE
-- RL NNUE trainer built-in DONE
-- Make better readme TODO
-- Add more search heuristics TODO
-    - Asp window DONE
-    - History heuristics DONE
-    - SEE DONE
-    - NMP DONE
-    - RFP DONE
-    - FP TODO
-    - CMH TODO
-    - FMH TODO
-    - LMR DONE
-    - LMP DONE
-    - SE TODO

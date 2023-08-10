@@ -22,7 +22,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 def task():
-    output = subprocess.check_output(["./WhiteCore-v0-2", 'bench']).decode("utf8")
+    output = subprocess.check_output(["./WhiteCore", 'bench']).decode("utf8")
     return output
 
 
