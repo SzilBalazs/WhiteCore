@@ -350,6 +350,10 @@ namespace search {
                         if (depth <= 6 && !see(board, move, -depth * 100)) {
                             continue;
                         }
+                    } else {
+                        if (depth <= 5 && !see(board, move, -depth * 150)) {
+                            continue;
+                        }
                     }
 
                     if (depth <= 5 && made_moves >= 5 + depth * depth / (2 - improving)) {
