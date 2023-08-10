@@ -34,12 +34,12 @@ namespace search {
         TT_BETA = 3
     };
 
-    struct TTEntry {                                // Total: 16 bytes
-        uint64_t hash = 0;                          // 8 bytes
-        Score eval = 0;                             // 4 bytes
-        chess::Move hash_move = chess::NULL_MOVE;   // 2 bytes
-        Depth depth = 0;                            // 1 byte
-        TTFlag flag = TT_NONE;                      // 1 byte
+    struct TTEntry {                              // Total: 16 bytes
+        uint64_t hash = 0;                        // 8 bytes
+        Score eval = 0;                           // 4 bytes
+        chess::Move hash_move = chess::NULL_MOVE; // 2 bytes
+        Depth depth = 0;                          // 1 byte
+        TTFlag flag = TT_NONE;                    // 1 byte
 
         constexpr TTEntry() = default;
     };
@@ -48,7 +48,6 @@ namespace search {
 
     class TT {
     public:
-
         ~TT() {
             free_table();
         }
