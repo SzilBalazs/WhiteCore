@@ -12,17 +12,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        compiler: [clang++, clang]
         arch: [popcnt, avx2, bmi2]
         include:
           - os: ubuntu-latest
-            compiler: clang++
             suffix: "-linux"
             packages: |
               sudo apt-get update
               sudo apt-get install clang-15
           - os: windows-latest
-            compiler: clang
             suffix: "-win"
 
     steps:
@@ -34,8 +31,8 @@ jobs:
 
       - name: Build WhiteCore
         run: |
-          ${{matrix.compiler}} --version
-          make CXX=${{matrix.compiler}} EXE=WhiteCore-${{matrix.arch}}${{matrix.suffix}} ARCH=${{matrix.arch}}
+          clang++ --version
+          make EXE=WhiteCore-${{matrix.arch}}${{matrix.suffix}} ARCH=${{matrix.arch}}
 
       - name: Run tests
         run: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} test
