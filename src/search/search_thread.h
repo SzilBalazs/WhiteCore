@@ -298,8 +298,10 @@ namespace search {
             if (root_node || in_check)
                 goto search_moves;
 
-            if (!entry && non_pv_node && depth >= 4)
-                depth--;
+            if (!entry) {
+                depth -= depth >= 4;
+                depth -= pv_node;
+            }
 
             if (depth <= 3 && static_eval + 150 * depth <= alpha) {
                 Score score = qsearch<NON_PV_NODE>(alpha, beta);
