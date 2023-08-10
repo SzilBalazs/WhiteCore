@@ -434,9 +434,18 @@ namespace search {
 
         template<NodeType node_type>
         Score qsearch(Score alpha, Score beta) {
+            constexpr bool non_pv_node = node_type == NON_PV_NODE;
 
             if (!shared.is_searching) {
                 return UNKNOWN_SCORE;
+            }
+
+            std::optional<TTEntry> entry = shared.tt.probe(board.get_hash());
+            chess::Move hash_move = entry ? entry->hash_move : chess::NULL_MOVE;
+
+            if (entry && non_pv_node &&
+                (entry->flag == TT_EXACT || (entry->flag == TT_ALPHA && entry->eval <= alpha) || (entry->flag == TT_BETA && entry->eval >= beta))) {
+                return entry->eval;
             }
 
             Score static_eval = eval::evaluate(board, nnue);
@@ -446,14 +455,16 @@ namespace search {
             if (static_eval > alpha)
                 alpha = static_eval;
 
-            MoveList<true> move_list(board, chess::NULL_MOVE, chess::NULL_MOVE, history, 0);
+            MoveList<true> move_list(board, hash_move, chess::NULL_MOVE, history, 0);
 
             while (!move_list.empty()) {
                 chess::Move move = move_list.next_move();
 
                 if (alpha > -WORST_MATE && !see(board, move, 0)) continue;
 
+                shared.tt.prefetch(board.hash_after_move(move));
                 shared.node_count[id]++;
+
                 board.make_move(move, &nnue);
                 Score score = -qsearch<node_type>(-beta, -alpha);
                 board.undo_move(move, &nnue);
