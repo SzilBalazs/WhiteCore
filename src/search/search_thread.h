@@ -356,7 +356,7 @@ namespace search {
                         }
                     }
 
-                    if (depth <= 5 && made_moves >= 5 + depth * depth / (2 - improving)) {
+                    if (depth <= 6 && made_moves >= (5 + depth * depth) / (2 - improving)) {
                         skip_quiets = true;
                     }
 
