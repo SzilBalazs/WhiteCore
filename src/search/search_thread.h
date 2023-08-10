@@ -347,11 +347,11 @@ namespace search {
                 if (non_root_node && non_pv_node && !in_check && std::abs(best_score) < WORST_MATE) {
 
                     if (move.is_quiet()) {
-                        if (depth <= 6 && !see(board, move, -depth * 100)) {
+                        if (depth <= 8 && !see(board, move, -depth * 100)) {
                             continue;
                         }
                     } else {
-                        if (depth <= 5 && !see(board, move, -depth * 150)) {
+                        if (depth <= 6 && !see(board, move, -depth * 150)) {
                             continue;
                         }
                     }
