@@ -19,6 +19,7 @@ jobs:
               sudo apt-get install clang-15
           - os: windows-latest
             suffix: "-win"
+            exe-suffix: ".exe"
 
     steps:
       - uses: actions/checkout@v3
@@ -44,8 +45,8 @@ jobs:
         run: |
           BENCH=$(./WhiteCore-${{matrix.arch}}${{matrix.suffix}} bench | grep -Eo '^[0-9]+ nodes' | grep -o '[0-9]*')
           COMMIT_BENCH=$(git log -1 --pretty=%B | grep -Eo '^Bench: *[0-9]+' | grep -o '[0-9]*')
-          echo "::set-output name=BENCH::$BENCH"
-          echo "::set-output name=COMMIT_BENCH::$COMMIT_BENCH"
+          echo "BENCH=$BENCH" >> $GITHUB_ENV
+          echo "COMMIT_BENCH=$COMMIT_BENCH" >> $GITHUB_ENV
 
       - name: Invalid bench
         if: steps.obtain_bench.outputs.BENCH != steps.obtain_bench.outputs.COMMIT_BENCH &&
@@ -57,5 +58,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: WhiteCore
-          path: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}}
+          name: WhiteCore-Executables
+          path: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}}${{matrix.exe-suffix}
