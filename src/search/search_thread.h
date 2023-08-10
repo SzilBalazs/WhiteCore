@@ -241,8 +241,9 @@ namespace search {
         Score search(Depth depth, Score alpha, Score beta, SearchStack *ss) {
             constexpr bool root_node = node_type == ROOT_NODE;
             constexpr bool non_root_node = !root_node;
-            constexpr bool pv_node = node_type != NON_PV_NODE;
+            constexpr bool pv_node = node_type == ROOT_NODE || node_type == PV_NODE;
             constexpr bool non_pv_node = !pv_node;
+            constexpr bool weak_node = node_type == WEAK_NODE;
 
             const chess::Move last_move = ss->ply >= 1 ? (ss - 1)->move : chess::NULL_MOVE;
             const Score mate_ply = -MATE_VALUE + ss->ply;
@@ -376,9 +377,10 @@ namespace search {
 
                     R -= pv_node;
                     R += !improving;
+                    R += weak_node;
 
                     Depth D = std::clamp(depth - R, 1, depth - 1);
-                    score = -search<NON_PV_NODE>(D, -alpha - 1, -alpha, ss + 1);
+                    score = -search<WEAK_NODE>(D, -alpha - 1, -alpha, ss + 1);
 
                     if (score > alpha && R > 0) {
                         score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ss + 1);

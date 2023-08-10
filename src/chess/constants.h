@@ -122,7 +122,8 @@ enum Color {
 enum NodeType {
     ROOT_NODE,
     PV_NODE,
-    NON_PV_NODE
+    NON_PV_NODE,
+    WEAK_NODE
 };
 
 constexpr PieceType PIECE_TYPES_BY_VALUE[6] = {PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING};
