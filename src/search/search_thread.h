@@ -380,7 +380,7 @@ namespace search {
                     Depth D = std::clamp(depth - R, 1, depth - 1);
                     score = -search<NON_PV_NODE>(D, -alpha - 1, -alpha, ss + 1);
 
-                    if (score > alpha && R > 0) {
+                    if (score > alpha && D < depth - 1) {
                         score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ss + 1);
                     }
                 } else if (non_pv_node || made_moves != 0) {
