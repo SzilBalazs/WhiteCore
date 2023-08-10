@@ -7,7 +7,7 @@ on:
 jobs:
   WhiteCore:
     runs-on: ${{matrix.os}}
-    name: ${{matrix.name}}
+    name: WhiteCore ${{matrix.arch}} ${{matrix.os}}
 
     strategy:
       matrix:
@@ -16,13 +16,11 @@ jobs:
         include:
           - os: ubuntu-latest
             suffix: "-linux"
-            name: ${{matrix.arch}} linux
             packages: |
               sudo apt-get update
               sudo apt-get install clang-15
           - os: windows-latest
             suffix: "-win"
-            name: ${{matrix.arch}} windows
 
     steps:
       - uses: actions/checkout@v3
