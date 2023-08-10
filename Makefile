@@ -34,8 +34,8 @@ ifeq ($(uname_S), Windows)
 else
 	CP = cp
 	SUFFIX =
-	SOURCES := $(shell find $(SOURCEDIR) -name '*.cpp')
-    HEADERS := $(shell find $(SOURCEDIR) -name '*.h')
+	SOURCES := $(shell find . -not -path './src/external/*' -name '*.cpp')
+    HEADERS := $(shell find . -not -path './src/external/*' -name '*.h')
 endif
 
 ifeq ($(ARCH), native)
@@ -86,6 +86,9 @@ train: $(OUTPUT_BINARY)
 	@$(CP) $(OUTPUT_BINARY) train/WhiteCore
 	@cd train && source py/bin/activate && python trainer.py && deactivate
 
+format:
+	@clang-format -i $(SOURCES) $(HEADERS)
+
 $(TMP_EVALFILE):
 	@$(CP) $(EVALFILE) $(TMP_EVALFILE)
 
@@ -104,4 +107,4 @@ endif
 	@echo -e "$(C_GREEN)Build has finished. $(C_DEFAULT)"
 	@rm $(TMP_EVALFILE)
 
-.PHONY: all
+.PHONY: build clean bench train format

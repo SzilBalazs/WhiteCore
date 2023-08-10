@@ -1,0 +1,20 @@
+name: Check Code Formatting
+
+on: [push, pull_request]
+
+jobs:
+  WhiteCore:
+    runs-on: ubuntu-latest
+    name: Check Code Formatting
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Clang Format
+        run: sudo apt-get install -y clang-format-10
+
+      - name: Check code formatting
+        run: |
+          find . -not -path './src/external/*' -name '*.cpp' | xargs clang-format-10 -i
+          find . -not -path './src/external/*' -name '*.h' | xargs clang-format-10 -i
+          git diff --exit-code
