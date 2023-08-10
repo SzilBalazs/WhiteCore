@@ -59,4 +59,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: WhiteCore-Executables
-          path: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}}${{matrix.exe-suffix}
+          path: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}}${{matrix.exe-suffix}}
