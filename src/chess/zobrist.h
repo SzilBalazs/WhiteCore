@@ -24,13 +24,13 @@
 namespace chess {
     struct Zobrist {
 
-        U64 hash = 0;
+        uint64_t hash = 0;
 
         Zobrist() = default;
 
-        explicit Zobrist(U64 hash) : hash(hash) {}
+        explicit Zobrist(uint64_t hash) : hash(hash) {}
 
-        [[nodiscard]] operator U64() const {
+        [[nodiscard]] operator uint64_t() const {
             return hash;
         }
 

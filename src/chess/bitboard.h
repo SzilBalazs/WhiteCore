@@ -33,9 +33,9 @@ namespace chess {
     // Used for referencing the 64 squares of a board using a 64-bit number
     struct Bitboard {
 
-        U64 bb = 0;
+        uint64_t bb = 0;
 
-        constexpr Bitboard(U64 value) {
+        constexpr Bitboard(uint64_t value) {
             bb = value;
         }
 
@@ -143,7 +143,7 @@ namespace chess {
             return bb;
         }
 
-        [[nodiscard]] constexpr explicit operator U64() const {
+        [[nodiscard]] constexpr explicit operator uint64_t() const {
             return bb;
         }
     };

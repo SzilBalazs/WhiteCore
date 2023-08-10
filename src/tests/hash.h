@@ -32,7 +32,7 @@ namespace test {
             std::vector<std::string> moves;
             chess::Zobrist hash;
 
-            Test(std::string fen, std::vector<std::string> moves, U64 hash) : fen(std::move(fen)), moves(std::move(moves)), hash(hash) {}
+            Test(std::string fen, std::vector<std::string> moves, uint64_t hash) : fen(std::move(fen)), moves(std::move(moves)), hash(hash) {}
         };
 
         const std::vector<Test> tests = {

@@ -32,7 +32,6 @@
 #define AVX2
 #endif
 
-using U64 = uint64_t;
 using Score = int32_t;
 using Depth = int8_t;
 using Ply = int8_t;

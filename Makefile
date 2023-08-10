@@ -67,7 +67,7 @@ endif
 EVALFILE = weights/master.bin
 TMP_EVALFILE = tmp.bin
 DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG -D_CRT_SECURE_NO_WARNINGS
-CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -std=c++20 -O3 -flto -pthread -Wall
+CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -std=c++20 -O3 -flto=auto -pthread -Wall
 EXE = $(NAME)
 OUTPUT_BINARY = $(EXE)$(SUFFIX)
 INCBIN_TOOL = incbin_tool$(SUFFIX)

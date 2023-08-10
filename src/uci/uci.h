@@ -131,7 +131,7 @@ namespace uci {
         });
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);
-            U64 node_count = test::perft<true, false>(board, depth);
+            uint64_t node_count = test::perft<true, false>(board, depth);
             Logger("Total node count: ", node_count);
         });
         commands.emplace_back("go", [&](context tokens) {
