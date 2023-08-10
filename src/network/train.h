@@ -32,8 +32,7 @@ namespace nn {
 
     class Trainer {
     public:
-        Trainer(const std::string &training_data, const std::string &validation_data, const std::optional<std::string> &network_path, float learning_rate, size_t epochs, size_t batch_size, size_t thread_count) :
-        adam(learning_rate), training_parser(training_data), validation_parser(validation_data), entry_count(0), batch_size(batch_size), thread_count(thread_count) {
+        Trainer(const std::string &training_data, const std::string &validation_data, const std::optional<std::string> &network_path, float learning_rate, size_t epochs, size_t batch_size, size_t thread_count) : adam(learning_rate), training_parser(training_data), validation_parser(validation_data), entry_count(0), batch_size(batch_size), thread_count(thread_count) {
 
             if (!std::filesystem::exists("networks")) {
                 std::filesystem::create_directory("networks");

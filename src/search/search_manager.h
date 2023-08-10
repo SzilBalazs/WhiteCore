@@ -17,38 +17,65 @@
 
 #pragma once
 
-#include "../core/board.h"
+#include "../chess/board.h"
 #include "search_thread.h"
 #include "time_manager.h"
-#include "tt.h"
+#include "transposition_table.h"
 
 namespace search {
     class SearchManager {
     public:
-        void allocate_threads(unsigned int thread_count) {
+        /**
+         * Sets the number of threads to use for searching.
+         *
+         * @param thread_count Number of threads
+         */
+        void allocate_threads(size_t thread_count) {
             allocated_threads = thread_count;
         }
 
-        void allocate_hash(unsigned int MB) {
-            shared.tt.resize(MB);
+        /**
+         * Sets the amount of memory to use for the transposition table.
+         *
+         * @param hash_size Amount of memory in MB
+         */
+        void allocate_hash(unsigned int hash_size) {
+            shared.tt.resize(hash_size);
         }
 
+        /**
+         * Sets the resource limits of the search.
+         *
+         * @param limits Search limits
+         */
         void set_limits(const Limits &limits) {
             shared.tm.init(limits);
         }
 
-        int64_t get_elapsed_time() {
-            return shared.tm.get_elapsed_time();
-        }
-
+        /**
+         * Returns number of positions searched so far.
+         *
+         * @return Number of positions searched so far.
+         */
         int64_t get_node_count() {
             return shared.get_node_count();
         }
 
+        /**
+         * Disables/enables console output.
+         *
+         * @param uci_mode If true the search will print to the console.
+         */
         void set_uci_mode(bool uci_mode) {
             shared.uci_mode = uci_mode;
         }
 
+        /**
+         * Joins all the search workers to the main thread.
+         *
+         * @tparam wait_to_finish If true, the search will be forced to stop.
+         * @tparam wait_to_finish otherwise will wait for the search to finish.
+         */
         template<bool wait_to_finish>
         void join() {
             if (!wait_to_finish) {
@@ -62,15 +89,21 @@ namespace search {
             threads.clear();
         }
 
+        /**
+         * Searches a position to find the best move.
+         *
+         * @tparam block If true, the function will block until all threads have completed
+         * @param board The board on which the search will be performed
+         */
         template<bool block>
-        void search(const core::Board &board) {
+        void search(const chess::Board &board) {
             join<false>();
-            for (unsigned int thread_id = 0; thread_id < allocated_threads; thread_id++) {
+            for (size_t thread_id = 0; thread_id < allocated_threads; thread_id++) {
                 threads.emplace_back(shared, thread_id);
                 threads.back().load_board(board);
             }
             shared.node_count.assign(allocated_threads, 0);
-            shared.best_move = core::NULL_MOVE;
+            shared.best_move = chess::NULL_MOVE;
             shared.is_searching = true;
             for (SearchThread &thread : threads) {
                 thread.start();
@@ -78,21 +111,34 @@ namespace search {
             if (block) join<true>();
         }
 
+        /**
+         * Stops all the running search threads.
+         *
+         */
         void stop() {
             join<false>();
         }
 
-        std::pair<core::Move, Score> get_result() {
+        /**
+         * Waits for all the threads to complete and then fetches the result of the search.
+         *
+         * @return A pair consisting of the best move (first) and the evaluation score (second)
+         */
+        std::pair<chess::Move, Score> get_result() {
             join<true>();
             return {shared.best_move, shared.eval};
         }
 
+        /**
+         * This function clears the transposition table.
+         *
+         */
         void tt_clear() {
             shared.tt.clear();
         }
 
     private:
-        unsigned int allocated_threads;
+        size_t allocated_threads;
         std::vector<SearchThread> threads;
         SharedMemory shared;
     };

@@ -20,7 +20,7 @@
 #include "attacks.h"
 #include "board.h"
 
-namespace core {
+namespace chess {
 
     // Returns a bitboard of all the squares attacking a given square for the given color
     template<Color color>
@@ -48,20 +48,20 @@ namespace core {
     // Generates all promotion moves for a pawn from 'from' to 'to'
     // and adds them to the move list 'moves'
     [[nodiscard]] Move *make_promo(Move *moves, Square from, Square to) {
-        *moves++ = Move(from, to, PROMO_KNIGHT);
-        *moves++ = Move(from, to, PROMO_BISHOP);
-        *moves++ = Move(from, to, PROMO_ROOK);
-        *moves++ = Move(from, to, PROMO_QUEEN);
+        *moves++ = Move(from, to, Move::PROMO_KNIGHT);
+        *moves++ = Move(from, to, Move::PROMO_BISHOP);
+        *moves++ = Move(from, to, Move::PROMO_ROOK);
+        *moves++ = Move(from, to, Move::PROMO_QUEEN);
         return moves;
     }
 
     // Generates all promotion captures for a pawn from 'from' to 'to'
     // and adds them to the move list 'moves'
     [[nodiscard]] Move *make_promo_capture(Move *moves, Square from, Square to) {
-        *moves++ = Move(from, to, PROMO_CAPTURE_KNIGHT);
-        *moves++ = Move(from, to, PROMO_CAPTURE_BISHOP);
-        *moves++ = Move(from, to, PROMO_CAPTURE_ROOK);
-        *moves++ = Move(from, to, PROMO_CAPTURE_QUEEN);
+        *moves++ = Move(from, to, Move::PROMO_CAPTURE_KNIGHT);
+        *moves++ = Move(from, to, Move::PROMO_CAPTURE_BISHOP);
+        *moves++ = Move(from, to, Move::PROMO_CAPTURE_ROOK);
+        *moves++ = Move(from, to, Move::PROMO_CAPTURE_QUEEN);
         return moves;
     }
 
@@ -131,7 +131,7 @@ namespace core {
             Bitboard captures = attacks & enemy;
             while (captures) {
                 Square to = captures.pop_lsb();
-                *moves++ = Move(from, to, CAPTURE);
+                *moves++ = Move(from, to, Move::CAPTURE);
             }
         }
 
@@ -202,7 +202,7 @@ namespace core {
             // Iterate through double pawn pushes
             while (double_push) {
                 Square to = double_push.pop_lsb();
-                *moves++ = Move(to + (2 * DOWN), to, DOUBLE_PAWN_PUSH);
+                *moves++ = Move(to + (2 * DOWN), to, Move::DOUBLE_PAWN_PUSH);
             }
         }
 
@@ -214,13 +214,13 @@ namespace core {
         // Iterate through left captures
         while (captures_left) {
             Square to = captures_left.pop_lsb();
-            *moves++ = Move(to + DOWN_RIGHT, to, CAPTURE);
+            *moves++ = Move(to + DOWN_RIGHT, to, Move::CAPTURE);
         }
 
         // Iterate through right captures
         while (captures_right) {
             Square to = captures_right.pop_lsb();
-            *moves++ = Move(to + DOWN_LEFT, to, CAPTURE);
+            *moves++ = Move(to + DOWN_LEFT, to, Move::CAPTURE);
         }
 
         // Check if there are any pawns that can be promoted
@@ -290,7 +290,7 @@ namespace core {
                 bool adiag_pin = attack_adiag.get(king) && adiag_seen_sliders;
 
                 if (!(rank_pin || diag_pin || adiag_pin))
-                    *moves++ = Move(pawn_attacking, square_ep, EP_CAPTURE);
+                    *moves++ = Move(pawn_attacking, square_ep, Move::EP_CAPTURE);
 
                 occ.set(pawn_attacking);
                 occ.set(pawn_attacked);
@@ -322,7 +322,7 @@ namespace core {
                 bool adiag_pin = attack_adiag.get(king) && rank_seen_adiag;
 
                 if (!(rank_pin || diag_pin || adiag_pin))
-                    *moves++ = Move(pawn_attacking, square_ep, EP_CAPTURE);
+                    *moves++ = Move(pawn_attacking, square_ep, Move::EP_CAPTURE);
 
                 occ.set(pawn_attacking);
                 occ.set(pawn_attacked);
@@ -355,7 +355,7 @@ namespace core {
 
         while (king_captures) {
             Square to = king_captures.pop_lsb();
-            *moves++ = Move(king, to, CAPTURE);
+            *moves++ = Move(king, to, Move::CAPTURE);
         }
 
         return moves;
@@ -494,28 +494,28 @@ namespace core {
         // Generate castling moves
         if constexpr (!captures_only) {
             if constexpr (color == WHITE) {
-                if (board.get_rights().get(WK_MASK) &&
+                if (board.get_rights()[CastlingRights::WHITE_KING] &&
                     (squares_safe & WK_CASTLE_SAFE) == WK_CASTLE_SAFE && (empty & WK_CASTLE_EMPTY) == WK_CASTLE_EMPTY) {
 
-                    *moves++ = Move(E1, G1, KING_CASTLE);
+                    *moves++ = Move(E1, G1, Move::KING_CASTLE);
                 }
 
-                if (board.get_rights().get(WQ_MASK) &&
+                if (board.get_rights()[CastlingRights::WHITE_QUEEN] &&
                     (squares_safe & WQ_CASTLE_SAFE) == WQ_CASTLE_SAFE && (empty & WQ_CASTLE_EMPTY) == WQ_CASTLE_EMPTY) {
 
-                    *moves++ = Move(E1, C1, QUEEN_CASTLE);
+                    *moves++ = Move(E1, C1, Move::QUEEN_CASTLE);
                 }
             } else {
-                if (board.get_rights().get(BK_MASK) &&
+                if (board.get_rights()[CastlingRights::BLACK_KING] &&
                     (squares_safe & BK_CASTLE_SAFE) == BK_CASTLE_SAFE && (empty & BK_CASTLE_EMPTY) == BK_CASTLE_EMPTY) {
 
-                    *moves++ = Move(E8, G8, KING_CASTLE);
+                    *moves++ = Move(E8, G8, Move::KING_CASTLE);
                 }
 
-                if (board.get_rights().get(BQ_MASK) &&
+                if (board.get_rights()[CastlingRights::BLACK_QUEEN] &&
                     (squares_safe & BQ_CASTLE_SAFE) == BQ_CASTLE_SAFE && (empty & BQ_CASTLE_EMPTY) == BQ_CASTLE_EMPTY) {
 
-                    *moves++ = Move(E8, C8, QUEEN_CASTLE);
+                    *moves++ = Move(E8, C8, Move::QUEEN_CASTLE);
                 }
             }
         }
@@ -543,7 +543,7 @@ namespace core {
     }
 
     bool Board::is_check() const {
-        return bool(core::get_attackers(*this, pieces<KING>(get_stm()).lsb()));
+        return bool(chess::get_attackers(*this, pieces<KING>(get_stm()).lsb()));
     }
 
-} // namespace core
+} // namespace chess

@@ -20,7 +20,7 @@
 #include "../utils/utilities.h"
 #include "bitboard.h"
 
-namespace core {
+namespace chess {
     // Stores a magic entry.
     struct Magic {
         Bitboard *ptr;
@@ -225,4 +225,4 @@ namespace core {
         init_magic(magic_rook, ROOK);
         init_magic(magic_bishop, BISHOP);
     }
-} // namespace core
+} // namespace chess

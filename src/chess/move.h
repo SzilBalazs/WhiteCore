@@ -22,9 +22,28 @@
 #include "../utils/utilities.h"
 #include "constants.h"
 
-namespace core {
+namespace chess {
     class Move {
     public:
+        static constexpr unsigned int PROMO_FLAG = 1 << 3;
+        static constexpr unsigned int CAPTURE_FLAG = 1 << 2;
+        static constexpr unsigned int SPECIAL1_FLAG = 1 << 1;
+        static constexpr unsigned int SPECIAL2_FLAG = 1 << 0;
+        static constexpr unsigned int QUIET_MOVE = 0;
+        static constexpr unsigned int CAPTURE = CAPTURE_FLAG;
+        static constexpr unsigned int DOUBLE_PAWN_PUSH = SPECIAL2_FLAG;
+        static constexpr unsigned int EP_CAPTURE = CAPTURE_FLAG | SPECIAL2_FLAG;
+        static constexpr unsigned int PROMO_KNIGHT = PROMO_FLAG;
+        static constexpr unsigned int PROMO_BISHOP = PROMO_FLAG | SPECIAL2_FLAG;
+        static constexpr unsigned int PROMO_ROOK = PROMO_FLAG | SPECIAL1_FLAG;
+        static constexpr unsigned int PROMO_QUEEN = PROMO_FLAG | SPECIAL1_FLAG | SPECIAL2_FLAG;
+        static constexpr unsigned int PROMO_CAPTURE_KNIGHT = CAPTURE_FLAG | PROMO_FLAG;
+        static constexpr unsigned int PROMO_CAPTURE_BISHOP = CAPTURE_FLAG | PROMO_FLAG | SPECIAL2_FLAG;
+        static constexpr unsigned int PROMO_CAPTURE_ROOK = CAPTURE_FLAG | PROMO_FLAG | SPECIAL1_FLAG;
+        static constexpr unsigned int PROMO_CAPTURE_QUEEN = CAPTURE_FLAG | PROMO_FLAG | SPECIAL1_FLAG | SPECIAL2_FLAG;
+        static constexpr unsigned int KING_CASTLE = SPECIAL1_FLAG;
+        static constexpr unsigned int QUEEN_CASTLE = SPECIAL1_FLAG | SPECIAL2_FLAG;
+
         // Initialize the move with a from square, to square, and flags
         constexpr Move(Square from, Square to, unsigned int flags) {
             data = (flags << 12) | (from << 6) | (to);
@@ -39,7 +58,7 @@ namespace core {
         constexpr Move() = default;
 
         // Returns the to square of the move
-        [[nodiscard]]  constexpr Square get_to() const {
+        [[nodiscard]] constexpr Square get_to() const {
             return Square(data & 0x3f);
         }
 
@@ -104,7 +123,7 @@ namespace core {
         }
 
         // Returns the move in UCI format as a string
-        [[nodiscard]]  std::string to_uci() const {
+        [[nodiscard]] std::string to_uci() const {
             std::string res;
             if (is_promo()) {
                 if (!is_special_1() && !is_special_2())
@@ -129,4 +148,4 @@ namespace core {
         os << move.to_uci();
         return os;
     }
-} // namespace core
+} // namespace chess

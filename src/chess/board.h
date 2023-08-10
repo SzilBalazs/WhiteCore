@@ -30,7 +30,7 @@
 
 #define state states.back()
 
-namespace core {
+namespace chess {
 
     class Board {
 
@@ -186,7 +186,7 @@ namespace core {
             }
             state.hash.xor_castle(state_old.rights);
 
-            if (move.eq_flag(EP_CAPTURE)) {
+            if (move.eq_flag(Move::EP_CAPTURE)) {
                 state.piece_captured = Piece(PAWN, xstm);
                 square_clear(to + DOWN, nnue);
             } else {
@@ -199,7 +199,7 @@ namespace core {
                 assert(state.piece_captured.is_null());
             }
 
-            if (move.eq_flag(DOUBLE_PAWN_PUSH)) {
+            if (move.eq_flag(Move::DOUBLE_PAWN_PUSH)) {
                 state.ep = from + UP;
                 state.hash.xor_ep(state.ep);
             } else {
@@ -207,26 +207,26 @@ namespace core {
             }
 
             if (move.is_promo()) {
-                if (move.eq_flag(PROMO_BISHOP) || move.eq_flag(PROMO_CAPTURE_BISHOP)) {
+                if (move.eq_flag(Move::PROMO_BISHOP) || move.eq_flag(Move::PROMO_CAPTURE_BISHOP)) {
                     piece_moved.type = BISHOP;
-                } else if (move.eq_flag(PROMO_KNIGHT) || move.eq_flag(PROMO_CAPTURE_KNIGHT)) {
+                } else if (move.eq_flag(Move::PROMO_KNIGHT) || move.eq_flag(Move::PROMO_CAPTURE_KNIGHT)) {
                     piece_moved.type = KNIGHT;
-                } else if (move.eq_flag(PROMO_ROOK) || move.eq_flag(PROMO_CAPTURE_ROOK)) {
+                } else if (move.eq_flag(Move::PROMO_ROOK) || move.eq_flag(Move::PROMO_CAPTURE_ROOK)) {
                     piece_moved.type = ROOK;
-                } else if (move.eq_flag(PROMO_QUEEN) || move.eq_flag(PROMO_CAPTURE_QUEEN)) {
+                } else if (move.eq_flag(Move::PROMO_QUEEN) || move.eq_flag(Move::PROMO_CAPTURE_QUEEN)) {
                     piece_moved.type = QUEEN;
                 }
             }
 
             move_piece(piece_moved, from, to, nnue);
 
-            if (move.eq_flag(KING_CASTLE)) {
+            if (move.eq_flag(Move::KING_CASTLE)) {
                 if (stm == WHITE) {
                     move_piece(Piece(ROOK, WHITE), H1, F1, nnue);
                 } else {
                     move_piece(Piece(ROOK, BLACK), H8, F8, nnue);
                 }
-            } else if (move.eq_flag(QUEEN_CASTLE)) {
+            } else if (move.eq_flag(Move::QUEEN_CASTLE)) {
                 if (stm == WHITE) {
                     move_piece(Piece(ROOK, WHITE), A1, D1, nnue);
                 } else {
@@ -234,17 +234,17 @@ namespace core {
                 }
             }
 
-            if (state.rights.get(WK_MASK) && (from == E1 || from == H1 || to == H1)) {
-                state.rights.remove(WK_MASK);
+            if (state.rights[CastlingRights::WHITE_KING] && (from == E1 || from == H1 || to == H1)) {
+                state.rights -= CastlingRights::WHITE_KING;
             }
-            if (state.rights.get(WQ_MASK) && (from == E1 || from == A1 || to == A1)) {
-                state.rights.remove(WQ_MASK);
+            if (state.rights[CastlingRights::WHITE_QUEEN] && (from == E1 || from == A1 || to == A1)) {
+                state.rights -= CastlingRights::WHITE_QUEEN;
             }
-            if (state.rights.get(BK_MASK) && (from == E8 || from == H8 || to == H8)) {
-                state.rights.remove(BK_MASK);
+            if (state.rights[CastlingRights::BLACK_KING] && (from == E8 || from == H8 || to == H8)) {
+                state.rights -= CastlingRights::BLACK_KING;
             }
-            if (state.rights.get(BQ_MASK) && (from == E8 || from == A8 || to == A8)) {
-                state.rights.remove(BQ_MASK);
+            if (state.rights[CastlingRights::BLACK_QUEEN] && (from == E8 || from == A8 || to == A8)) {
+                state.rights -= CastlingRights::BLACK_QUEEN;
             }
 
             state.hash.xor_castle(state.rights);
@@ -267,13 +267,13 @@ namespace core {
                 piece_moved.type = PAWN;
             }
 
-            if (move.eq_flag(KING_CASTLE)) {
+            if (move.eq_flag(Move::KING_CASTLE)) {
                 if (stm == WHITE) {
                     move_piece(Piece(ROOK, WHITE), F1, H1, nnue);
                 } else {
                     move_piece(Piece(ROOK, BLACK), F8, H8, nnue);
                 }
-            } else if (move.eq_flag(QUEEN_CASTLE)) {
+            } else if (move.eq_flag(Move::QUEEN_CASTLE)) {
                 if (stm == WHITE) {
                     move_piece(Piece(ROOK, WHITE), D1, A1, nnue);
                 } else {
@@ -283,7 +283,7 @@ namespace core {
 
             move_piece(piece_moved, to, from, nnue);
 
-            if (move.eq_flag(EP_CAPTURE)) {
+            if (move.eq_flag(Move::EP_CAPTURE)) {
                 square_set(to + DOWN, state.piece_captured, nnue);
             } else if (move.is_capture()) {
                 square_set(to, state.piece_captured, nnue);
@@ -407,7 +407,8 @@ namespace core {
                     std::cout << "   ├───┼───┼───┼───┼───┼───┼───┼───┤";
                 }
             }
-            std::cout << "   ╰───┴───┴───┴───┴───┴───┴───┴───╯\n\n" << std::flush;
+            std::cout << "   ╰───┴───┴───┴───┴───┴───┴───┴───╯\n\n"
+                      << std::flush;
         }
 
         [[nodiscard]] std::vector<unsigned int> to_features() const {
@@ -496,6 +497,6 @@ namespace core {
         }
         return 0;
     }
-} // namespace core
+} // namespace chess
 
 #undef state

@@ -32,7 +32,7 @@ namespace selfplay {
             sm.allocate_threads(thread_count);
         }
 
-        std::pair<core::Move, Score> search(const core::Board &board, const search::Limits &limits) {
+        std::pair<chess::Move, Score> search(const chess::Board &board, const search::Limits &limits) {
             sm.set_limits(limits);
             sm.search<true>(board);
             return sm.get_result();

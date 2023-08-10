@@ -17,8 +17,8 @@
 
 #pragma once
 
+#include "../../chess/constants.h"
 #include "../activations/none.h"
-#include "../../core/constants.h"
 
 #include <array>
 #include <cstring>
@@ -72,9 +72,9 @@ namespace nn::layers {
                 _mm256_store_si256((__m256i *) &accumulator[offset], _mm256_add_epi16(base, weight));
             }
 #else
-                for (size_t j = 0; j < OUT; j++) {
-                    accumulator[j] += weights[feature * OUT + j];
-                }
+            for (size_t j = 0; j < OUT; j++) {
+                accumulator[j] += weights[feature * OUT + j];
+            }
 #endif
         }
 

@@ -81,11 +81,6 @@ constexpr int MVVLVA[6][6] = {
 };
 // clang-format on
 
-constexpr unsigned char WK_MASK = 1;
-constexpr unsigned char WQ_MASK = 2;
-constexpr unsigned char BK_MASK = 4;
-constexpr unsigned char BQ_MASK = 8;
-
 const std::string ASCII_WHITE_PIECE = "\u001b[90;107m";
 const std::string ASCII_BLACK_PIECE = "\u001b[100;97m";
 
@@ -162,27 +157,3 @@ struct Piece {
 constexpr Piece NULL_PIECE = Piece();
 constexpr PieceType index_to_type[7] = {KING, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, PIECE_EMPTY};
 constexpr Color index_to_color[3] = {WHITE, BLACK, COLOR_EMPTY};
-
-constexpr unsigned int PROMO_FLAG = 1 << 3;
-constexpr unsigned int CAPTURE_FLAG = 1 << 2;
-constexpr unsigned int SPECIAL1_FLAG = 1 << 1;
-constexpr unsigned int SPECIAL2_FLAG = 1 << 0;
-
-constexpr unsigned int QUIET_MOVE = 0;
-constexpr unsigned int CAPTURE = CAPTURE_FLAG;
-
-constexpr unsigned int DOUBLE_PAWN_PUSH = SPECIAL2_FLAG;
-constexpr unsigned int EP_CAPTURE = CAPTURE_FLAG | SPECIAL2_FLAG;
-
-constexpr unsigned int PROMO_KNIGHT = PROMO_FLAG;
-constexpr unsigned int PROMO_BISHOP = PROMO_FLAG | SPECIAL2_FLAG;
-constexpr unsigned int PROMO_ROOK = PROMO_FLAG | SPECIAL1_FLAG;
-constexpr unsigned int PROMO_QUEEN = PROMO_FLAG | SPECIAL1_FLAG | SPECIAL2_FLAG;
-
-constexpr unsigned int PROMO_CAPTURE_KNIGHT = CAPTURE_FLAG | PROMO_FLAG;
-constexpr unsigned int PROMO_CAPTURE_BISHOP = CAPTURE_FLAG | PROMO_FLAG | SPECIAL2_FLAG;
-constexpr unsigned int PROMO_CAPTURE_ROOK = CAPTURE_FLAG | PROMO_FLAG | SPECIAL1_FLAG;
-constexpr unsigned int PROMO_CAPTURE_QUEEN = CAPTURE_FLAG | PROMO_FLAG | SPECIAL1_FLAG | SPECIAL2_FLAG;
-
-constexpr unsigned int KING_CASTLE = SPECIAL1_FLAG;
-constexpr unsigned int QUEEN_CASTLE = SPECIAL1_FLAG | SPECIAL2_FLAG;

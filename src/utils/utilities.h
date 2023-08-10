@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "../core/constants.h"
+#include "../chess/constants.h"
 #include "logger.h"
 
 #include <chrono>

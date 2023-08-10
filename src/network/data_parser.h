@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "../core/constants.h"
+#include "../chess/constants.h"
 #include "../utils/utilities.h"
 #include "activations/sigmoid.h"
 #include "network.h"

@@ -20,7 +20,7 @@
 #include "magic.h"
 #include "masks.h"
 
-namespace core {
+namespace chess {
 
     [[nodiscard]] Bitboard attacks_rook(Square square, Bitboard occ) {
         const Magic &m = magic_rook[square];
@@ -93,4 +93,4 @@ namespace core {
                 return 0;
         }
     }
-} // namespace core
+} // namespace chess

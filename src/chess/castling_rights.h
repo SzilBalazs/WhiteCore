@@ -17,49 +17,64 @@
 
 #pragma once
 
-namespace core {
+namespace chess {
     struct CastlingRights {
+
+        static constexpr unsigned char WHITE_KING = 1;
+        static constexpr unsigned char WHITE_QUEEN = 2;
+        static constexpr unsigned char BLACK_KING = 4;
+        static constexpr unsigned char BLACK_QUEEN = 8;
+
         unsigned int data = 0;
 
         CastlingRights() = default;
 
         explicit CastlingRights(const std::string &str) {
             for (char c : str) {
-                if (c == 'K') add(WK_MASK);
-                else if (c == 'Q')
-                    add(WQ_MASK);
-                else if (c == 'k')
-                    add(BK_MASK);
-                else if (c == 'q')
-                    add(BQ_MASK);
+                if (c == 'K') {
+                    *this += WHITE_KING;
+                } else if (c == 'Q') {
+                    *this += WHITE_QUEEN;
+                } else if (c == 'k') {
+                    *this += BLACK_KING;
+                } else if (c == 'q') {
+                    *this += BLACK_QUEEN;
+                }
             }
         }
 
-        void add(unsigned int right) {
+        CastlingRights &operator+=(const unsigned int &right) {
             data |= right;
+            return *this;
         }
 
-        void remove(unsigned int right) {
+        CastlingRights &operator-=(const unsigned int &right) {
             data &= ~right;
+            return *this;
         }
 
-        [[nodiscard]] bool get(unsigned int right) const {
+        [[nodiscard]] bool operator[](const unsigned int &right) const {
             return data & right;
         }
 
         [[nodiscard]] std::string to_string() const {
             std::string res;
-            if (get(WK_MASK))
+            if ((*this)[WHITE_KING]) {
                 res += 'K';
-            if (get(WQ_MASK))
+            }
+            if ((*this)[WHITE_QUEEN]) {
                 res += 'Q';
-            if (get(BK_MASK))
+            }
+            if ((*this)[BLACK_KING]) {
                 res += 'k';
-            if (get(BQ_MASK))
+            }
+            if ((*this)[BLACK_QUEEN]) {
                 res += 'q';
-            if (res.empty())
+            }
+            if (res.empty()) {
                 res = "-";
+            }
             return res;
         }
     };
-} // namespace core
+} // namespace chess

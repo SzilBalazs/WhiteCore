@@ -15,27 +15,43 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "../core/move.h"
+#include "../chess/move.h"
 
 namespace search {
     struct PVArray {
 
-        core::Move array[500][500];
-        Ply length[500];
+        chess::Move array[MAX_PLY][MAX_PLY];
+        Ply length[MAX_PLY]{};
 
-        std::string get_line() {
-            std::string line;
+        /**
+        * Returns line as a string of UCI moves separated by spaces.
+        *
+        * @return String of UCI moves.
+        */
+        [[nodiscard]] std::string get_line() const {
+            std::stringstream line;
             for (int i = 0; i < length[0]; i++) {
-                line += array[0][i].to_uci() + " ";
+                line << array[0][i].to_uci() << " ";
             }
-            return line;
+            return line.str();
         }
 
-        core::Move get_best_move() {
+        /**
+        * Returns the best move in PVArray
+        *
+        * @return Best move
+        */
+        [[nodiscard]] chess::Move get_best_move() const {
             return array[0][0];
         }
 
-        void update(Ply ply, core::Move move) {
+        /**
+        * Updates PVArray with new data.
+        *
+        * @param ply  The ply to update.
+        * @param move The new move for the ply.
+        */
+        void update(Ply ply, chess::Move move) {
             array[ply][ply] = move;
             for (Ply i = ply + 1; i < length[ply + 1]; i++) {
                 array[ply][i] = array[ply + 1][i];
@@ -43,4 +59,4 @@ namespace search {
             length[ply] = length[ply + 1];
         }
     };
-}
+} // namespace search

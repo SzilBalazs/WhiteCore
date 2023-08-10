@@ -17,11 +17,11 @@
 
 #pragma once
 
-#include "../core/movegen.h"
+#include "../chess/move_generation.h"
 
 #include <random>
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace rng {
 
@@ -45,12 +45,12 @@ namespace rng {
         static std::random_device rd;
         static std::mt19937 gen(rd());
 
-        core::Board board;
+        chess::Board board;
         board.load(STARTING_FEN);
 
         for (size_t i = 0; i < depth; i++) {
-            core::Move buffer[200];
-            core::Move *end_ptr = core::gen_moves(board, buffer, false);
+            chess::Move buffer[200];
+            chess::Move *end_ptr = chess::gen_moves(board, buffer, false);
             size_t length = end_ptr - buffer;
 
             // If a checkmate/stalemate is reached we instead generate an entirely new fen
@@ -66,4 +66,4 @@ namespace rng {
 
         return board.get_fen();
     }
-}
+} // namespace rng

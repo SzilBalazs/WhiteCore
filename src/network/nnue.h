@@ -17,8 +17,8 @@
 
 #pragma once
 
+#include "../chess/constants.h"
 #include "../external/incbin/incbin.h"
-#include "../core/constants.h"
 #include "../utils/logger.h"
 #include "activations/crelu.h"
 #include "layers/accumulator.h"

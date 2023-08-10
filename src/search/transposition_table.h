@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "../core/constants.h"
-#include "../core/move.h"
+#include "../chess/constants.h"
+#include "../chess/move.h"
 
 #include <cstring>
 
@@ -34,12 +34,12 @@ namespace search {
         TT_BETA = 3
     };
 
-    struct TTEntry {          // Total: 16 bytes
-        U64 hash;             // 8 bytes
-        Score eval;           // 4 bytes
-        core::Move hash_move; // 2 bytes
-        Depth depth;          // 1 byte
-        TTFlag flag;          // 1 byte
+    struct TTEntry {           // Total: 16 bytes
+        U64 hash;              // 8 bytes
+        Score eval;            // 4 bytes
+        chess::Move hash_move; // 2 bytes
+        Depth depth;           // 1 byte
+        TTFlag flag;           // 1 byte
     };
 
     static_assert(sizeof(TTEntry) == 16);
@@ -75,11 +75,11 @@ namespace search {
             return entry;
         }
 
-        void save(U64 hash, Depth depth, Score eval, TTFlag flag, core::Move best_move) {
+        void save(U64 hash, Depth depth, Score eval, TTFlag flag, chess::Move best_move) {
             TTEntry *entry = get_entry(hash);
 
             if (flag == TT_ALPHA && entry->hash == hash) {
-                best_move = core::NULL_MOVE;
+                best_move = chess::NULL_MOVE;
             }
 
             if (entry->hash != hash || best_move.is_ok()) {
@@ -98,11 +98,11 @@ namespace search {
             __builtin_prefetch(get_entry(hash), 0);
         }
 
-        core::Move get_hash_move(U64 hash) {
+        chess::Move get_hash_move(U64 hash) {
             TTEntry *entry = get_entry(hash);
             if (entry->hash == hash)
                 return entry->hash_move;
-            return core::NULL_MOVE;
+            return chess::NULL_MOVE;
         }
 
     private:

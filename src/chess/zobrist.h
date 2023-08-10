@@ -21,7 +21,7 @@
 #include "castling_rights.h"
 #include "randoms.h"
 
-namespace core {
+namespace chess {
     struct Zobrist {
 
         U64 hash = 0;
@@ -50,4 +50,4 @@ namespace core {
             hash ^= rand_table_castling[rights.data];
         }
     };
-} // namespace core
+} // namespace chess

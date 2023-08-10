@@ -28,7 +28,7 @@
 #include <nmmintrin.h>
 #endif
 
-namespace core {
+namespace chess {
 
     // Used for referencing the 64 squares of a board using a 64-bit number
     struct Bitboard {
@@ -263,4 +263,4 @@ namespace core {
         }
         return result;
     }
-} // namespace core
+} // namespace chess
