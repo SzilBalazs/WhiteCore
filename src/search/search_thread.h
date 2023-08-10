@@ -307,7 +307,7 @@ namespace search {
                     return score;
             }
 
-            if (non_pv_node && depth <= 6 && static_eval - (depth - improving) * 70 >= beta && std::abs(beta) < WORST_MATE)
+            if (non_pv_node && depth <= 7 && static_eval - (depth - improving) * 70 >= beta && std::abs(beta) < WORST_MATE)
                 return static_eval;
 
             if (non_pv_node && depth >= 3 && static_eval >= beta && board.has_non_pawn()) {
