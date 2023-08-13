@@ -174,6 +174,12 @@ namespace uci {
                 },
                 1, 128);
         sm.allocate_threads(1);
+
+        options.emplace_back(
+                "UCI_ShowWDL", "false", "check", [&](){
+                    search::report::set_show_wdl(get_option<bool>("UCI_ShowWDL"));
+                });
+        search::report::set_show_wdl(false);
     }
 
     void UCI::start() {

@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "../chess/constants.h"
+#include "wdl_model.h"
 
 #pragma once
 
@@ -27,6 +28,7 @@ namespace search::report {
     const std::string ASCII_RESET_COLOR = "\u001b[0m";
 
     bool pretty_output = true;
+    bool show_wdl = false;
 
     /**
      * @brief Switches the output mode of the search results.
@@ -35,6 +37,10 @@ namespace search::report {
      */
     void set_pretty_output(bool x) {
         pretty_output = x;
+    }
+
+    void set_show_wdl(bool x) {
+        show_wdl = x;
     }
 
     /**
@@ -117,12 +123,21 @@ namespace search::report {
     std::string score_to_string(Score score) {
         Score abs_score = std::abs(score);
         int mate_depth = MATE_VALUE - abs_score;
+        std::stringstream res;
         if (mate_depth <= MAX_PLY) {
             int mate_ply = score > 0 ? mate_depth / 2 + 1 : -(mate_depth / 2);
-            return "mate " + std::to_string(mate_ply);
+            res << "mate " << mate_ply;
         } else {
-            return "cp " + std::to_string(score);
+            res << "cp " << score;
         }
+
+        if (show_wdl) {
+            auto [w, l] = cp_to_wl(score);
+            int d = 1000 - w - l;
+            res << " wdl " << w << " " << d << " " << l;
+        }
+
+        return res.str();
     }
 
     /**

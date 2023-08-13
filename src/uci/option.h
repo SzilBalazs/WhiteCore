@@ -66,6 +66,8 @@ namespace uci {
         T get_value() const {
             if constexpr (std::is_same_v<T, int>)
                 return std::stoi(value);
+            else if constexpr (std::is_same_v<T, bool>)
+                return value == "true";
             else
                 return value;
         }
