@@ -19,18 +19,16 @@
 
 #include "../chess/constants.h"
 
-#include <utility>
 #include <cmath>
+#include <utility>
 
 namespace search {
 
     constexpr float win_polynomial[5] = {
-            -2.48486993e-12, -1.35086324e-09, 1.63515294e-06, 1.28794334e-03, 2.27129636e-01
-    };
+            -2.48486993e-12, -1.35086324e-09, 1.63515294e-06, 1.28794334e-03, 2.27129636e-01};
 
     constexpr float loss_polynomial[5] = {
-            -2.33054260e-12, 1.40330209e-09, 1.53833569e-06, -1.31063191e-03, 2.43447833e-01
-    };
+            -2.33054260e-12, 1.40330209e-09, 1.53833569e-06, -1.31063191e-03, 2.43447833e-01};
 
     std::pair<int, int> cp_to_wl(Score score) {
         float cp = score;
@@ -47,4 +45,4 @@ namespace search {
 
         return {std::round(win_chance * 1000), std::round(loss_chance * 1000)};
     }
-}
+} // namespace search
