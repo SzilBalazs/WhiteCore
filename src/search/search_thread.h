@@ -289,26 +289,31 @@ namespace search {
                 return tt_score;
             }
 
-            if (depth <= 0)
-                return qsearch<node_type>(alpha, beta);
+            if (depth <= 0) {
+                return qsearch<node_type>(alpha, beta, ss);
+            }
 
             Score static_eval = ss->eval = eval::evaluate(board, nnue);
             bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
 
-            if (root_node || in_check)
+            if (root_node || in_check) {
                 goto search_moves;
-
-            if (!entry && non_pv_node && depth >= 4)
-                depth--;
-
-            if (depth <= 3 && static_eval + 150 * depth <= alpha) {
-                Score score = qsearch<NON_PV_NODE>(alpha, beta);
-                if (score <= alpha)
-                    return score;
             }
 
-            if (non_pv_node && depth <= 6 && static_eval - (depth - improving) * 70 >= beta && std::abs(beta) < WORST_MATE)
+            if (!entry && non_pv_node && depth >= 4) {
+                depth--;
+            }
+
+            if (depth <= 3 && static_eval + 150 * depth <= alpha) {
+                Score score = qsearch<NON_PV_NODE>(alpha, beta, ss);
+                if (score <= alpha) {
+                    return score;
+                }
+            }
+
+            if (non_pv_node && depth <= 6 && static_eval - (depth - improving) * 70 >= beta && std::abs(beta) < WORST_MATE) {
                 return static_eval;
+            }
 
             if (non_pv_node && depth >= 3 && static_eval >= beta && board.has_non_pawn()) {
                 Depth R = 3 + depth / 3 + std::min(3, (static_eval - beta) / 256);
@@ -433,7 +438,7 @@ namespace search {
         }
 
         template<NodeType node_type>
-        Score qsearch(Score alpha, Score beta) {
+        Score qsearch(Score alpha, Score beta, SearchStack *ss) {
             constexpr bool non_pv_node = node_type == NON_PV_NODE;
 
             if (!shared.is_searching) {
@@ -442,12 +447,14 @@ namespace search {
 
             std::optional<TTEntry> entry = shared.tt.probe(board.get_hash());
             chess::Move hash_move = entry ? entry->hash_move : chess::NULL_MOVE;
+            TTFlag flag = TT_ALPHA;
 
             if (entry && non_pv_node &&
                 (entry->flag == TT_EXACT || (entry->flag == TT_ALPHA && entry->eval <= alpha) || (entry->flag == TT_BETA && entry->eval >= beta))) {
                 return entry->eval;
             }
 
+            chess::Move best_move = chess::NULL_MOVE;
             Score static_eval = eval::evaluate(board, nnue);
 
             if (static_eval >= beta)
@@ -466,20 +473,25 @@ namespace search {
                 shared.node_count[id]++;
 
                 board.make_move(move, &nnue);
-                Score score = -qsearch<node_type>(-beta, -alpha);
+                Score score = -qsearch<node_type>(-beta, -alpha, ss + 1);
                 board.undo_move(move, &nnue);
 
                 if (score == UNKNOWN_SCORE) {
                     return UNKNOWN_SCORE;
                 }
 
-                if (score >= beta)
+                if (score >= beta) {
+                    shared.tt.save(board.get_hash(), 0, convert_tt_score<true>(beta, ss->ply), TT_BETA, move);
                     return beta;
+                }
                 if (score > alpha) {
+                    best_move = move;
+                    flag = TT_EXACT;
                     alpha = score;
                 }
             }
 
+            shared.tt.save(board.get_hash(), 0, convert_tt_score<true>(alpha, ss->ply), flag, best_move);
             return alpha;
         }
     };
