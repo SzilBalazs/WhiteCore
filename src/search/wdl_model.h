@@ -31,6 +31,10 @@ namespace search {
             -2.33054260e-12, 1.40330209e-09, 1.53833569e-06, -1.31063191e-03, 2.43447833e-01};
 
     std::pair<int, int> cp_to_wl(Score score) {
+
+        if (score > 500) return {1000, 0};
+        else if (score < -500) return {0, 1000};
+
         float cp = score;
         float win_chance = win_polynomial[0];
         float loss_chance = loss_polynomial[0];
