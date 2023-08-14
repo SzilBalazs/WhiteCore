@@ -88,6 +88,7 @@ namespace search {
         unsigned int id;
         Ply max_ply;
         PVArray pv;
+        int64_t nodes_searched[64][64];
 
         History history;
 
@@ -114,6 +115,11 @@ namespace search {
 
         void init_search() {
             history.clear();
+            for (auto &i : nodes_searched) {
+                for (int64_t &j : i) {
+                    j = 0;
+                }
+            }
             shared.best_move = chess::NULL_MOVE;
             max_ply = 0;
         }
@@ -154,8 +160,10 @@ namespace search {
 
             prev_bm = bm;
 
-            if (id == 0) {
-                bool should_continue = shared.tm.handle_iteration(bm_stability);
+            const double bm_effort = double(nodes_searched[bm.get_from()][bm.get_to()]) / double(shared.node_count[id]);
+
+            if (id == 0 && depth >= 7) {
+                bool should_continue = shared.tm.handle_iteration(bm_stability, bm_effort);
 
                 if (!should_continue) {
                     shared.is_searching = false;
@@ -366,6 +374,7 @@ namespace search {
                 }
 
                 shared.tt.prefetch(board.hash_after_move(move));
+                const int64_t nodes_before = shared.node_count[id];
 
                 shared.node_count[id]++;
                 board.make_move(move, &nnue);
@@ -392,6 +401,13 @@ namespace search {
                 }
 
                 board.undo_move(move, &nnue);
+
+                const int64_t nodes_after = shared.node_count[id];
+                const int64_t nodes_spent = nodes_after - nodes_before;
+
+                if constexpr (root_node) {
+                    nodes_searched[move.get_from()][move.get_to()] += nodes_spent;
+                }
 
                 if (!shared.is_searching) {
                     return UNKNOWN_SCORE;

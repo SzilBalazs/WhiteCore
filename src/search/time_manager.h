@@ -80,11 +80,11 @@ namespace search {
          * @param bm_stability The stability of the best move.
          * @return Returns if the search should continue.
          */
-        bool handle_iteration(int bm_stability) {
-
+        bool handle_iteration(int bm_stability, double bm_effort) {
             const double bm_scale = 1.2 - std::min(bm_stability, 10) * 0.04;
+            const double effort_scale = 1.5 - bm_effort;
 
-            double scale = bm_scale;
+            const double scale = bm_scale * effort_scale;
 
             update_end_time(scale);
 
