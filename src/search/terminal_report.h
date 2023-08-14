@@ -108,6 +108,16 @@ namespace search::report {
         return res.str();
     }
 
+    std::string pretty_wdl(Score score) {
+        std::stringstream res;
+        auto [w, l] = wdl_model::cp_to_wl(score);
+        int d = 1000 - w - l;
+
+        res << "(W" << w / 10 << "% D" << d / 10 << "% L" << l / 10 << "%)";
+
+        return res.str();
+    }
+
     std::string pretty_pv(const std::string &pv, const std::string &line_color) {
         std::stringstream in(pv);
         std::stringstream res;
@@ -165,6 +175,7 @@ namespace search::report {
 
             res << line_color << std::setw(6) << ss_depth.str() << " "
                 << score_color(score) << std::setw(9) << pretty_score(score) << " "
+                << line_color << std::setw(18) << pretty_wdl(score) << " "
                 << line_color << std::setw(7) << pretty_int(nodes) << " "
                 << line_color << std::setw(7) << pretty_int(nps) << " "
                 << line_color << std::setw(7) << pretty_milli(time) << "    "
