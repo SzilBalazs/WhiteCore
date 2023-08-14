@@ -64,6 +64,14 @@ namespace rng {
             board.make_move(buffer[random_index]);
         }
 
+        chess::Move buffer[200];
+        chess::Move *end_ptr = chess::gen_moves(board, buffer, false);
+        size_t length = end_ptr - buffer;
+
+        if (length == 0) {
+            return gen_fen();
+        }
+
         return board.get_fen();
     }
 } // namespace rng
