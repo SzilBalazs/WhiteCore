@@ -33,6 +33,12 @@ with open("out.txt", "r") as f:
         if score > 700 or score < -700:
             continue
 
+        # Skip positions with blunders because they were generated as low depth data.
+        if score > 200 and wdl == -1:
+            continue
+        if score < -200 and wdl == 1:
+            continue
+
         if score not in wins:
             wins[score] = 0
             losses[score] = 0

@@ -132,7 +132,7 @@ namespace search::report {
         }
 
         if (show_wdl) {
-            auto [w, l] = cp_to_wl(score);
+            auto [w, l] = wdl_model::cp_to_wl(score);
             int d = 1000 - w - l;
             res << " wdl " << w << " " << d << " " << l;
         }
