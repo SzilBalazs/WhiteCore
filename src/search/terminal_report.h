@@ -162,7 +162,7 @@ namespace search::report {
      * @param pv_line The principle variation line. A string of moves separated by spaces.
      */
     void print_iteration(const int depth, const int seldepth, const uint64_t nodes, const Score score,
-                         const uint64_t time, const uint64_t nps, const std::string &pv_line) {
+                         const uint64_t time, const uint64_t nps, const uint64_t hashfull, const std::string &pv_line) {
 
         if (pretty_output) {
 
@@ -190,7 +190,7 @@ namespace search::report {
 
             ss << "info depth " << depth << " seldepth " << seldepth << " nodes " << nodes
                << " score " << score_to_string(score) << " time " << time << " nps " << nps
-               << " pv " << pv_line << "\n";
+               << " hashfull " << hashfull << " pv " << pv_line << "\n";
 
 
             std::cout << ss.str() << std::flush;

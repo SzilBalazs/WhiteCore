@@ -72,6 +72,19 @@ namespace search {
             table = (TTEntry *) malloc(bucket_count * sizeof(TTEntry));
         }
 
+        uint64_t get_hash_full() {
+
+            if (bucket_count == 0) {
+                return 0;
+            }
+
+            uint64_t res = 0;
+            for (uint64_t i = 0; i < 1000; i++) {
+                res += i == (table[i].hash & mask);
+            }
+            return res;
+        }
+
         void clear() {
             for (uint64_t i = 0; i < bucket_count; i++) {
                 table[i] = TTEntry();

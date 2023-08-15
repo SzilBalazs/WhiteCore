@@ -176,7 +176,7 @@ namespace search {
                 int64_t elapsed_time = shared.tm.get_elapsed_time();
 
                 report::print_iteration(depth, max_ply, shared.get_node_count(), score, elapsed_time,
-                                        calculate_nps(elapsed_time, shared.get_node_count()), pv.get_line());
+                                        calculate_nps(elapsed_time, shared.get_node_count()), shared.tt.get_hash_full(), pv.get_line());
             }
         }
 
