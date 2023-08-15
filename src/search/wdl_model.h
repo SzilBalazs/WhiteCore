@@ -50,6 +50,9 @@ namespace search::wdl_model {
             loss_chance += loss_polynomial[i];
         }
 
-        return {std::round(win_chance * 1000), std::round(loss_chance * 1000)};
+        int w = std::round(win_chance * 1000);
+        int l = std::round(loss_chance * 1000);
+
+        return {std::clamp(w, 0, 1000), std::clamp(l, 0, 1000)};
     }
 } // namespace search::wdl_model

@@ -166,20 +166,21 @@ namespace uci {
                     sm.allocate_hash(get_option<int>("Hash"));
                 },
                 1, 65536);
-        sm.allocate_hash(32);
 
         options.emplace_back(
                 "Threads", "1", "spin", [&]() {
                     sm.allocate_threads(get_option<int>("Threads"));
                 },
                 1, 128);
-        sm.allocate_threads(1);
 
         options.emplace_back(
                 "UCI_ShowWDL", "false", "check", [&]() {
                     search::report::set_show_wdl(get_option<bool>("UCI_ShowWDL"));
                 });
-        search::report::set_show_wdl(false);
+
+        for (Option &opt : options) {
+            opt.update();
+        }
     }
 
     void UCI::start() {

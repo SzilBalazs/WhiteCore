@@ -57,9 +57,7 @@ namespace uci {
 
         void set_value(const std::optional<std::string> &new_value) {
             value = new_value.value_or(default_value);
-            if (func) {
-                func.value()();
-            }
+            update();
         }
 
         template<typename T>
@@ -72,6 +70,11 @@ namespace uci {
                 return value;
         }
 
+        void update() {
+            if (func) {
+                func.value()();
+            }
+        }
 
     private:
         std::string name;
