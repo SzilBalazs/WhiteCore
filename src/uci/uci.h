@@ -174,6 +174,12 @@ namespace uci {
                 1, 128);
 
         options.emplace_back(
+                "Move_Overhead", "30", "spin", [&]() {
+                    search::TimeManager::MOVE_OVERHEAD = get_option<int>("Move_Overhead");
+                },
+                0, 1000);
+
+        options.emplace_back(
                 "UCI_ShowWDL", "false", "check", [&]() {
                     search::report::set_show_wdl(get_option<bool>("UCI_ShowWDL"));
                 });

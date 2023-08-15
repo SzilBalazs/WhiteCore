@@ -38,7 +38,6 @@ using Ply = int8_t;
 
 constexpr int64_t INF_TIME = 1'000'000'000'000'000;
 constexpr int64_t INF_NODES = 1'000'000'000'000'000;
-constexpr int64_t MOVE_OVERHEAD = 30;
 constexpr Score UNKNOWN_SCORE = 300000;
 constexpr Score INF_SCORE = 200000;
 constexpr Score MATE_VALUE = 100000;

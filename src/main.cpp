@@ -34,6 +34,7 @@ namespace chess {
 
 namespace search {
     Depth lmr_reductions[200][MAX_PLY + 1];
+    int64_t TimeManager::MOVE_OVERHEAD = 30;
 }
 
 void init_all() {
