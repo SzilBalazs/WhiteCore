@@ -51,7 +51,7 @@ def parse_comments(node):
         time_spent = extract_time(comment)
         depth_reached = extract_depth(comment)
 
-        if node.turn() == 0:
+        if node.turn() == 1:
             p1_times_spent.append(time_spent)
             p1_depths_reached.append(depth_reached)
         else:
