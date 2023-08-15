@@ -33,6 +33,19 @@ WhiteCore in itself is a command line program, and requires a UCI compatible
 Chess GUI (like <a href="https://github.com/cutechess/cutechess">Cute Chess</a>
 or <a href="http://www.playwitharena.de/">Arena</a>) for the best user experience.
 
+## Custom UCI Commands
+
+ | Command      | Description                                                                                                                                                                             |
+ |--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+ | `pretty`     | Enables the pretty output option for the console. This improves the readability of the search reports by adding indentation and colors. Can be disabled by sending the \"uci\" command. |
+ | `display`    | Displays the current board status.                                                                                                                                                      |
+ | `eval`       | Evaluates and displays the current board state using nnue.                                                                                                                              |
+ | `gen`        | Generates self-play games using specific parameters.                                                                                                                                    |
+ | `split`      | Splits input data into two output datasets in a particular proportion.                                                                                                                  |
+ | `quantize`   | Quantizes the neural network weights for performance reasons.                                                                                                                           |
+ | `train`      | Trains a neural network with specific parameters.                                                                                                                                       |
+ | `perft`      | Used for performance testing and validation of the move generator.                                                                                                                      |
+
 ## Files
 
 This project contains the following files:

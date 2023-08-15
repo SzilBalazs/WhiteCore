@@ -27,7 +27,7 @@ namespace search::report {
 
     const std::string ASCII_RESET_COLOR = "\u001b[0m";
 
-    bool pretty_output = true;
+    bool pretty_output = false;
     bool show_wdl = false;
 
     /**

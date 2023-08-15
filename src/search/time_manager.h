@@ -22,7 +22,6 @@
 namespace search {
     class TimeManager {
     public:
-
         static int64_t MOVE_OVERHEAD;
 
         /**
