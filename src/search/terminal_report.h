@@ -118,20 +118,82 @@ namespace search::report {
         return res.str();
     }
 
-    std::string pretty_pv(const std::string &pv, const std::string &line_color) {
+    std::string pretty_pv(const chess::Board &board, const std::string &pv, const std::string &line_color) {
         std::stringstream in(pv);
         std::stringstream res;
         res << get_ascii_color(87);
 
-        int cnt = 10;
+        chess::Board tmp = board;
+
+        int cnt = 0;
         std::string move;
         while (getline(in, move, ' ')) {
-            if (cnt < 0) {
-                res << ASCII_RESET_COLOR << "\n │         │           │                     │          │          │          │ " << line_color;
-                cnt = 10;
+
+            cnt++;
+
+            chess::Move uci_move = chess::move_from_string(tmp, move);
+            if (!uci_move.is_ok()) {
+                throw std::runtime_error("Invalid PV");
             }
-            res << move << " " << line_color;
-            cnt--;
+
+            std::stringstream san_move;
+
+            if (uci_move.eq_flag(chess::Move::KING_CASTLE)) {
+                san_move << "O-O";
+            } else if (uci_move.eq_flag(chess::Move::QUEEN_CASTLE)) {
+                san_move << "O-O-O";
+            } else {
+                Piece piece = tmp.piece_at(uci_move.get_from());
+
+                if (piece.type != PAWN) {
+                    san_move << char_from_piece(Piece(piece.type, WHITE));
+                } else if (uci_move.is_capture()) {
+                    san_move << char('a' + square_to_file(uci_move.get_from()));
+                }
+
+                if (uci_move.is_capture()) {
+                    san_move << "x";
+                }
+
+                san_move << format_square(uci_move.get_to());
+
+                if (uci_move.is_promo()) {
+                    san_move << "=" << char_from_piece(Piece(uci_move.get_promo_type(), WHITE));
+                }
+            }
+
+            tmp.make_move(uci_move);
+
+            chess::Move buffer[200];
+            chess::Move *end_ptr = chess::gen_moves(tmp, buffer, false);
+            size_t move_count = end_ptr - buffer;
+
+            if (move_count == 0) {
+                if (tmp.is_check()) {
+                    san_move << "# ";
+                    if (tmp.get_stm() == WHITE) {
+                        san_move << "1-0";
+                    } else {
+                        san_move << "0-1";
+                    }
+                } else {
+                    san_move << " 1/2-1/2";
+                }
+            } else {
+                if (tmp.is_check()) {
+                    san_move << "+";
+                }
+                if (tmp.is_draw()) {
+                    san_move << " 1/2-1/2";
+                }
+            }
+
+
+            if (cnt % 20 == 0) {
+                res << ASCII_RESET_COLOR << "\n │         │           │                     │          │          │          │ " << line_color;
+            }
+
+            res << san_move.str() << " " << line_color;
         }
         return res.str();
     }
@@ -167,7 +229,7 @@ namespace search::report {
      * @param nps Nodes per second.
      * @param pv_line The principle variation line. A string of moves separated by spaces.
      */
-    void print_iteration(const int depth, const int seldepth, const uint64_t nodes, const Score score,
+    void print_iteration(const chess::Board &board, const int depth, const int seldepth, const uint64_t nodes, const Score score,
                          const uint64_t time, const uint64_t nps, const uint64_t hashfull, const std::string &pv_line) {
 
         if (pretty_output) {
@@ -177,12 +239,11 @@ namespace search::report {
             std::stringstream res;
             std::stringstream ss_depth;
 
-
             if (depth == 1) {
                 res << " ╭─────────┬───────────┬─────────────────────┬──────────┬──────────┬──────────┬─────────────────────────────────────────────────────────\n";
                 res << " │  Depth  │   Score   │         WDL         │   Nodes  │    NPS   │   Time   │ Principal variation                                     \n";
                 res << " ├─────────┼───────────┼─────────────────────┼──────────┼──────────┼──────────┼─────────────────────────────────────────────────────────\n";
-            }/* else {
+            } /* else {
                 res << " ├─────────┼───────────┼─────────────────────┼──────────┼──────────┼──────────┼─────────────────────────────────────────────────────────\n";
             }*/
 
@@ -195,7 +256,7 @@ namespace search::report {
                 << line_color << std::setw(7) << pretty_int(nodes) << ASCII_RESET_COLOR << "  │ "
                 << line_color << std::setw(7) << pretty_int(nps) << ASCII_RESET_COLOR << "  │ "
                 << line_color << std::setw(7) << pretty_milli(time) << ASCII_RESET_COLOR << "  │ "
-                << pretty_pv(pv_line, line_color) << ASCII_RESET_COLOR << "\n";
+                << pretty_pv(board, pv_line, line_color) << ASCII_RESET_COLOR << "\n";
 
             std::cout << "\r" << res.str() << std::flush;
 

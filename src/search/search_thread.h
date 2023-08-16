@@ -175,7 +175,7 @@ namespace search {
             if (shared.uci_mode) {
                 int64_t elapsed_time = shared.tm.get_elapsed_time();
 
-                report::print_iteration(depth, max_ply, shared.get_node_count(), score, elapsed_time,
+                report::print_iteration(board, depth, max_ply, shared.get_node_count(), score, elapsed_time,
                                         calculate_nps(elapsed_time, shared.get_node_count()), shared.tt.get_hash_full(), pv.get_line());
             }
         }
@@ -278,7 +278,7 @@ namespace search {
                 }
 
                 alpha = std::max(alpha, -MATE_VALUE + ss->ply);
-                beta = std::min(beta, MATE_VALUE - ss->ply - 1);
+                beta = std::min(beta, MATE_VALUE - ss->ply);
                 if (alpha >= beta)
                     return alpha;
             }

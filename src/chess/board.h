@@ -208,15 +208,7 @@ namespace chess {
             }
 
             if (move.is_promo()) {
-                if (move.eq_flag(Move::PROMO_BISHOP) || move.eq_flag(Move::PROMO_CAPTURE_BISHOP)) {
-                    piece_moved.type = BISHOP;
-                } else if (move.eq_flag(Move::PROMO_KNIGHT) || move.eq_flag(Move::PROMO_CAPTURE_KNIGHT)) {
-                    piece_moved.type = KNIGHT;
-                } else if (move.eq_flag(Move::PROMO_ROOK) || move.eq_flag(Move::PROMO_CAPTURE_ROOK)) {
-                    piece_moved.type = ROOK;
-                } else if (move.eq_flag(Move::PROMO_QUEEN) || move.eq_flag(Move::PROMO_CAPTURE_QUEEN)) {
-                    piece_moved.type = QUEEN;
-                }
+                piece_moved.type = move.get_promo_type();
             }
 
             move_piece(piece_moved, from, to, nnue);

@@ -92,6 +92,20 @@ namespace chess {
             return is_flag(PROMO_FLAG);
         }
 
+        // Returns the promoted piece type
+        [[nodiscard]] constexpr PieceType get_promo_type() const {
+            if (eq_flag(Move::PROMO_BISHOP) || eq_flag(Move::PROMO_CAPTURE_BISHOP)) {
+                return BISHOP;
+            } else if (eq_flag(Move::PROMO_KNIGHT) || eq_flag(Move::PROMO_CAPTURE_KNIGHT)) {
+                return KNIGHT;
+            } else if (eq_flag(Move::PROMO_ROOK) || eq_flag(Move::PROMO_CAPTURE_ROOK)) {
+                return ROOK;
+            } else if (eq_flag(Move::PROMO_QUEEN) || eq_flag(Move::PROMO_CAPTURE_QUEEN)) {
+                return QUEEN;
+            }
+            return PIECE_EMPTY;
+        }
+
         // Returns true if the move has the SPECIAL1_FLAG set
         [[nodiscard]] constexpr bool is_special_1() const {
             return is_flag(SPECIAL1_FLAG);

@@ -546,4 +546,15 @@ namespace chess {
         return bool(chess::get_attackers(*this, pieces<KING>(get_stm()).lsb()));
     }
 
+    chess::Move move_from_string(const chess::Board &board, const std::string &str) {
+        chess::Move moves[200];
+        chess::Move *moves_end = chess::gen_moves(board, moves, false);
+        for (chess::Move *it = moves; it != moves_end; it++) {
+            if (it->to_uci() == str) {
+                return *it;
+            }
+        }
+        return chess::NULL_MOVE;
+    }
+
 } // namespace chess
