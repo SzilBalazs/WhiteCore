@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "../chess/constants.h"
+#include "../utils/san.h"
 #include "wdl_model.h"
 
 #pragma once
@@ -136,64 +137,13 @@ namespace search::report {
                 throw std::runtime_error("Invalid PV");
             }
 
-            std::stringstream san_move;
-
-            if (uci_move.eq_flag(chess::Move::KING_CASTLE)) {
-                san_move << "O-O";
-            } else if (uci_move.eq_flag(chess::Move::QUEEN_CASTLE)) {
-                san_move << "O-O-O";
-            } else {
-                Piece piece = tmp.piece_at(uci_move.get_from());
-
-                if (piece.type != PAWN) {
-                    san_move << char_from_piece(Piece(piece.type, WHITE));
-                } else if (uci_move.is_capture()) {
-                    san_move << char('a' + square_to_file(uci_move.get_from()));
-                }
-
-                if (uci_move.is_capture()) {
-                    san_move << "x";
-                }
-
-                san_move << format_square(uci_move.get_to());
-
-                if (uci_move.is_promo()) {
-                    san_move << "=" << char_from_piece(Piece(uci_move.get_promo_type(), WHITE));
-                }
+            if (cnt % 20 == 0) {
+                res << ASCII_RESET_COLOR << "\n │         │           │          │          │          │ " << line_color;
             }
+
+            res << uci_to_san(uci_move, tmp) << " " << line_color;
 
             tmp.make_move(uci_move);
-
-            chess::Move buffer[200];
-            chess::Move *end_ptr = chess::gen_moves(tmp, buffer, false);
-            size_t move_count = end_ptr - buffer;
-
-            if (move_count == 0) {
-                if (tmp.is_check()) {
-                    san_move << "# ";
-                    if (tmp.get_stm() == WHITE) {
-                        san_move << "1-0";
-                    } else {
-                        san_move << "0-1";
-                    }
-                } else {
-                    san_move << " 1/2-1/2";
-                }
-            } else {
-                if (tmp.is_check()) {
-                    san_move << "+";
-                }
-                if (tmp.is_draw()) {
-                    san_move << " 1/2-1/2";
-                }
-            }
-
-
-            if (cnt % 20 == 0) {
-                res << ASCII_RESET_COLOR << "\n │         │           │                     │          │          │          │ " << line_color;
-            }
-
-            res << san_move.str() << " " << line_color;
         }
         return res.str();
     }
@@ -240,19 +190,16 @@ namespace search::report {
             std::stringstream ss_depth;
 
             if (depth == 1) {
-                res << " ╭─────────┬───────────┬─────────────────────┬──────────┬──────────┬──────────┬─────────────────────────────────────────────────────────\n";
-                res << " │  Depth  │   Score   │         WDL         │   Nodes  │    NPS   │   Time   │ Principal variation                                     \n";
-                res << " ├─────────┼───────────┼─────────────────────┼──────────┼──────────┼──────────┼─────────────────────────────────────────────────────────\n";
-            } /* else {
-                res << " ├─────────┼───────────┼─────────────────────┼──────────┼──────────┼──────────┼─────────────────────────────────────────────────────────\n";
-            }*/
+                res << " ╭─────────┬───────────┬──────────┬──────────┬──────────┬─────────────────────────────────────────────────────────\n";
+                res << " │  Depth  │   Score   │   Nodes  │    NPS   │   Time   │ Principal variation                                     \n";
+                res << " ├─────────┼───────────┼──────────┼──────────┼──────────┼─────────────────────────────────────────────────────────\n";
+            }
 
             ss_depth << depth << "/" << seldepth;
 
             res << ASCII_RESET_COLOR << " │ "
                 << line_color << std::setw(6) << ss_depth.str() << ASCII_RESET_COLOR << "  │"
                 << score_color(score) << std::setw(9) << pretty_score(score) << ASCII_RESET_COLOR << "  │ "
-                << line_color << std::setw(18) << pretty_wdl(score) << ASCII_RESET_COLOR << "  │ "
                 << line_color << std::setw(7) << pretty_int(nodes) << ASCII_RESET_COLOR << "  │ "
                 << line_color << std::setw(7) << pretty_int(nps) << ASCII_RESET_COLOR << "  │ "
                 << line_color << std::setw(7) << pretty_milli(time) << ASCII_RESET_COLOR << "  │ "
