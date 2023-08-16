@@ -190,7 +190,7 @@ namespace search::report {
                 << pretty_pv(pv_line, line_color)
                 << ASCII_RESET_COLOR << "\n";
 
-            std::cout << res.str() << std::flush;
+            std::cout << "\r" << res.str() << std::flush;
 
         } else {
 
