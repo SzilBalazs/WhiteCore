@@ -18,8 +18,8 @@
 #pragma once
 
 #include "../chess/constants.h"
-#include "../utils/utilities.h"
 #include "../external/incbin/incbin.h"
+#include "../utils/utilities.h"
 #include "activations/crelu.h"
 #include "layers/accumulator.h"
 #include "layers/dense_layer.h"

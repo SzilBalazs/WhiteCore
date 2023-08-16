@@ -19,14 +19,14 @@
 
 #include "../chess/constants.h"
 
-#include <sstream>
-#include <iostream>
 #include <chrono>
+#include <iostream>
+#include <sstream>
 
 void init_all();
 
 template<typename... Args>
-void print(std::stringstream& ss, Args... args) {
+void print(std::stringstream &ss, Args... args) {
     ((ss << args << ' '), ...);
 }
 

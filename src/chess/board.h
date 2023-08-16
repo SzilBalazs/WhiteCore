@@ -24,8 +24,8 @@
 #include "board_state.h"
 #include "move.h"
 
-#include <regex>
 #include <algorithm>
+#include <regex>
 #include <sstream>
 #include <vector>
 
@@ -484,13 +484,13 @@ namespace chess {
 
         static bool is_valid_fen(const std::string &fen) {
             const static std::regex fen_regex("^"
-                                 "([rnbqkpRNBQKP1-8]+\\/){7}"
-                                 "([rnbqkpRNBQKP1-8]+)"
-                                 " [bw]"
-                                 " ([-KQkq]+|)"
-                                 " (([a-h][36])|-)"
-                                 " \\d+"
-                                 ".*");
+                                              "([rnbqkpRNBQKP1-8]+\\/){7}"
+                                              "([rnbqkpRNBQKP1-8]+)"
+                                              " [bw]"
+                                              " ([-KQkq]+|)"
+                                              " (([a-h][36])|-)"
+                                              " \\d+"
+                                              ".*");
             return std::regex_match(fen, fen_regex);
         }
     };
