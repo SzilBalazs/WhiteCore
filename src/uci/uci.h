@@ -67,6 +67,14 @@ namespace uci {
 
         void parse_position(context tokens);
 
+        void parse_gen(context tokens);
+
+        void parse_split(context tokens);
+
+        void parse_quantize(context tokens);
+
+        void parse_train(context tokens);
+
         static std::vector<std::string> convert_to_tokens(const std::string &line);
 
         template<typename T>
@@ -97,36 +105,16 @@ namespace uci {
             print("Eval:", eval::evaluate(board, network));
         });
         commands.emplace_back("gen", [&](context tokens) {
-            search::Limits limits;
-            limits.max_nodes = find_element<int64_t>(tokens, "nodes");
-            limits.depth = find_element<int64_t>(tokens, "depth");
-            std::optional<size_t> thread_count = find_element<size_t>(tokens, "threads");
-            std::optional<int> games_to_play = find_element<int>(tokens, "games");
-            selfplay::start_generation(limits, games_to_play.value_or(100'000), thread_count.value_or(1));
+            parse_gen(tokens);
         });
         commands.emplace_back("split", [&](context tokens) {
-            std::optional<std::string> input_data = find_element<std::string>(tokens, "input");
-            std::optional<std::string> output_data1 = find_element<std::string>(tokens, "output1");
-            std::optional<std::string> output_data2 = find_element<std::string>(tokens, "output2");
-            std::optional<int> rate = find_element<int>(tokens, "rate");
-            split_data(input_data.value_or("data.plain"), output_data1.value_or("train.plain"), output_data2.value_or("validation.plain"), rate.value_or(10));
+            parse_split(tokens);
         });
         commands.emplace_back("quantize", [&](context tokens) {
-            std::optional<std::string> input = find_element<std::string>(tokens, "input");
-            std::optional<std::string> output = find_element<std::string>(tokens, "output");
-            nn::Network network_file(input.value_or("input.bin"));
-            network_file.quantize<int16_t, nn::NNUE::QSCALE>(output.value_or("output.bin"));
+            parse_quantize(tokens);
         });
         commands.emplace_back("train", [&](context tokens) {
-            std::optional<std::string> network_path = find_element<std::string>(tokens, "network");
-            std::optional<std::string> training_data = find_element<std::string>(tokens, "training_data");
-            std::optional<std::string> validation_data = find_element<std::string>(tokens, "validation_data");
-            std::optional<float> learning_rate = find_element<float>(tokens, "lr");
-            std::optional<size_t> epochs = find_element<size_t>(tokens, "epochs");
-            std::optional<size_t> batch_size = find_element<size_t>(tokens, "batch");
-            std::optional<size_t> threads = find_element<size_t>(tokens, "threads");
-            nn::Trainer trainer(training_data.value_or("train.plain"), validation_data.value_or("validation.plain"), network_path, learning_rate.value_or(0.001f),
-                                epochs.value_or(10), batch_size.value_or(16384), threads.value_or(4));
+            parse_train(tokens);
         });
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);
@@ -203,7 +191,6 @@ namespace uci {
                 break;
             }
 
-
             std::vector<std::string> tokens = convert_to_tokens(line);
 
             bool found_match = false;
@@ -268,6 +255,42 @@ namespace uci {
                 board.make_move(move);
             }
         }
+    }
+
+    void UCI::parse_gen(uci::UCI::context tokens) {
+        search::Limits limits;
+        limits.max_nodes = find_element<int64_t>(tokens, "nodes");
+        limits.depth = find_element<int64_t>(tokens, "depth");
+        std::optional<size_t> thread_count = find_element<size_t>(tokens, "threads");
+        std::optional<int> games_to_play = find_element<int>(tokens, "games");
+        selfplay::start_generation(limits, games_to_play.value_or(100'000), thread_count.value_or(1));
+    }
+
+    void UCI::parse_quantize(uci::UCI::context tokens) {
+        std::optional<std::string> input = find_element<std::string>(tokens, "input");
+        std::optional<std::string> output = find_element<std::string>(tokens, "output");
+        nn::Network network_file(input.value_or("input.bin"));
+        network_file.quantize<int16_t, nn::NNUE::QSCALE>(output.value_or("output.bin"));
+    }
+
+    void UCI::parse_split(uci::UCI::context tokens) {
+        std::optional<std::string> input_data = find_element<std::string>(tokens, "input");
+        std::optional<std::string> output_data1 = find_element<std::string>(tokens, "output1");
+        std::optional<std::string> output_data2 = find_element<std::string>(tokens, "output2");
+        std::optional<int> rate = find_element<int>(tokens, "rate");
+        split_data(input_data.value_or("data.plain"), output_data1.value_or("train.plain"), output_data2.value_or("validation.plain"), rate.value_or(10));
+    }
+
+    void UCI::parse_train(uci::UCI::context tokens) {
+        std::optional<std::string> network_path = find_element<std::string>(tokens, "network");
+        std::optional<std::string> training_data = find_element<std::string>(tokens, "training_data");
+        std::optional<std::string> validation_data = find_element<std::string>(tokens, "validation_data");
+        std::optional<float> learning_rate = find_element<float>(tokens, "lr");
+        std::optional<size_t> epochs = find_element<size_t>(tokens, "epochs");
+        std::optional<size_t> batch_size = find_element<size_t>(tokens, "batch");
+        std::optional<size_t> threads = find_element<size_t>(tokens, "threads");
+        nn::Trainer trainer(training_data.value_or("train.plain"), validation_data.value_or("validation.plain"), network_path, learning_rate.value_or(0.001f),
+                            epochs.value_or(10), batch_size.value_or(16384), threads.value_or(4));
     }
 
     std::vector<std::string> UCI::convert_to_tokens(const std::string &line) {
