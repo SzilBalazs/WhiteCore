@@ -63,6 +63,9 @@ def main():
             for i in range(12):
                 axs[7][i].set_xlabel(col_labels[i])
 
+            for i in range(8):
+                axs[i][0].set_ylabel(i + base * 8 + 1)
+
             plt.savefig(f'img/network_{base}.png')
 
 
