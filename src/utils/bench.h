@@ -65,18 +65,24 @@ void run_bench() {
     search::Limits limits = search::Limits::create_depth_limit(11);
 
     int64_t nodes = 0;
-    int64_t start_time = now();
+    int64_t total_time = 1;
 
     for (const std::string &fen : fens) {
         sm.tt_clear();
         board.load(fen, true);
         sm.set_limits(limits);
+
+        int64_t start_time = now();
+
         sm.search<true>(board);
+
+        int64_t end_time = now();
+        int64_t elapsed_time = end_time - start_time;
+        total_time += elapsed_time;
+
         nodes += sm.get_node_count();
     }
 
-    int64_t end_time = now();
-    int64_t elapsed_time = end_time - start_time + 1;
-    int64_t nps = calculate_nps(elapsed_time, nodes);
+    int64_t nps = calculate_nps(total_time, nodes);
     print(nodes, "nodes", nps, "nps");
 }
