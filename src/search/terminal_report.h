@@ -123,9 +123,15 @@ namespace search::report {
         std::stringstream res;
         res << get_ascii_color(87);
 
+        int cnt = 10;
         std::string move;
         while (getline(in, move, ' ')) {
+            if (cnt < 0) {
+                res << ASCII_RESET_COLOR << "\n │         │           │                     │          │          │          │ " << line_color;
+                cnt = 10;
+            }
             res << move << " " << line_color;
+            cnt--;
         }
         return res.str();
     }
@@ -173,10 +179,12 @@ namespace search::report {
 
 
             if (depth == 1) {
-                res << " ╭─────────┬───────────┬─────────────────────┬──────────┬──────────┬──────────┬───────────────────────────────────────────\n";
-                res << " │  Depth  │   Score   │         WDL         │   Nodes  │    NPS   │   Time   │ Principal variation                       \n";
-                res << " ├─────────┼───────────┼─────────────────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────\n";
-            }
+                res << " ╭─────────┬───────────┬─────────────────────┬──────────┬──────────┬──────────┬─────────────────────────────────────────────────────────\n";
+                res << " │  Depth  │   Score   │         WDL         │   Nodes  │    NPS   │   Time   │ Principal variation                                     \n";
+                res << " ├─────────┼───────────┼─────────────────────┼──────────┼──────────┼──────────┼─────────────────────────────────────────────────────────\n";
+            }/* else {
+                res << " ├─────────┼───────────┼─────────────────────┼──────────┼──────────┼──────────┼─────────────────────────────────────────────────────────\n";
+            }*/
 
             ss_depth << depth << "/" << seldepth;
 
@@ -187,8 +195,7 @@ namespace search::report {
                 << line_color << std::setw(7) << pretty_int(nodes) << ASCII_RESET_COLOR << "  │ "
                 << line_color << std::setw(7) << pretty_int(nps) << ASCII_RESET_COLOR << "  │ "
                 << line_color << std::setw(7) << pretty_milli(time) << ASCII_RESET_COLOR << "  │ "
-                << pretty_pv(pv_line, line_color)
-                << ASCII_RESET_COLOR << "\n";
+                << pretty_pv(pv_line, line_color) << ASCII_RESET_COLOR << "\n";
 
             std::cout << "\r" << res.str() << std::flush;
 
