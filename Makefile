@@ -60,13 +60,17 @@ endif
 # Native build with debug symbols
 ifeq ($(build), debug)
 	TARGET_FLAGS = -g3 -fno-omit-frame-pointer
-	ARCH_FLAGS   = -march=native
-	DEFINE_FLAGS = -DNATIVE
+else
+	DEFINE_FLAGS += -DNDEBUG
+endif
+
+ifeq ($(build), stats)
+	DEFINE_FLAGS += -DTRACK_STATS
 endif
 
 EVALFILE = weights/master.bin
 TMP_EVALFILE = tmp.bin
-DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -DNDEBUG -D_CRT_SECURE_NO_WARNINGS
+DEFINE_FLAGS += -DVERSION=\"v$(VERSION_MAJOR).$(VERSION_MINOR).$(HASH)\" -D_CRT_SECURE_NO_WARNINGS
 CXXFLAGS = $(DEFINE_FLAGS) $(ARCH_FLAGS) -std=c++20 -O3 -flto=auto -pthread -Wall
 EXE = $(NAME)
 OUTPUT_BINARY = $(EXE)$(SUFFIX)

@@ -19,6 +19,7 @@
 
 #include "../chess/constants.h"
 #include "../chess/move.h"
+#include "../utils/stats.h"
 
 #include <cstring>
 
@@ -94,8 +95,12 @@ namespace search {
         std::optional<TTEntry> probe(uint64_t hash) {
             TTEntry entry = *get_entry(hash);
 
-            if (entry.hash != hash)
+            if (entry.hash != hash) {
+                stat_tracker::record_fail("tt_hit");
                 return std::nullopt;
+            }
+
+            stat_tracker::record_success("tt_hit");
 
             return entry;
         }

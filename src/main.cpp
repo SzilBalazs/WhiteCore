@@ -41,6 +41,15 @@ void init_all() {
     chess::init_masks();
     chess::init_magic();
     search::init_lmr();
+
+    stat_tracker::add_stat("tt_hit");
+    stat_tracker::add_stat("tt_cutoff");
+    stat_tracker::add_stat("nmp");
+    stat_tracker::add_stat("rfp");
+    stat_tracker::add_stat("pvs_see_quiet");
+    stat_tracker::add_stat("pvs_see_capture");
+    stat_tracker::add_stat("qsearch_see");
+    stat_tracker::add_stat("skip_quiets");
 }
 
 int main(int argc, char *argv[]) {
@@ -67,6 +76,8 @@ int main(int argc, char *argv[]) {
         uci::UCI protocol;
         protocol.start();
     }
+
+    stat_tracker::print_stats();
 
     return 0;
 }
