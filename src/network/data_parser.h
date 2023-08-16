@@ -42,7 +42,7 @@ namespace nn {
             file.open(path, std::ios::in);
 
             if (!file.is_open()) {
-                Logger("Unable to open:", path);
+                print("Unable to open:", path);
                 throw std::runtime_error("Unable to open: " + path);
             }
         }

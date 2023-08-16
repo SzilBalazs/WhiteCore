@@ -69,7 +69,7 @@ void run_bench() {
 
     for (const std::string &fen : fens) {
         sm.tt_clear();
-        board.load(fen);
+        board.load(fen, true);
         sm.set_limits(limits);
         sm.search<true>(board);
         nodes += sm.get_node_count();
@@ -78,5 +78,5 @@ void run_bench() {
     int64_t end_time = now();
     int64_t elapsed_time = end_time - start_time + 1;
     int64_t nps = calculate_nps(elapsed_time, nodes);
-    Logger(nodes, "nodes", nps, "nps");
+    print(nodes, "nodes", nps, "nps");
 }

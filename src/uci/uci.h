@@ -22,7 +22,6 @@
 #include "../search/search_manager.h"
 #include "../selfplay/selfplay.h"
 #include "../tests/perft.h"
-#include "../utils/logger.h"
 #include "../utils/split.h"
 #include "../utils/utilities.h"
 #include "command.h"
@@ -84,7 +83,7 @@ namespace uci {
             search::report::set_pretty_output(true);
         });
         commands.emplace_back("isready", [&](context tokens) {
-            Logger("readyok");
+            print("readyok");
         });
         commands.emplace_back("position", [&](context tokens) {
             parse_position(tokens);
@@ -95,7 +94,7 @@ namespace uci {
         commands.emplace_back("eval", [&](context tokens) {
             nn::NNUE network{};
             network.refresh(board.to_features());
-            Logger("Eval:", eval::evaluate(board, network));
+            print("Eval:", eval::evaluate(board, network));
         });
         commands.emplace_back("gen", [&](context tokens) {
             search::Limits limits;
@@ -132,7 +131,7 @@ namespace uci {
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);
             uint64_t node_count = test::perft<true, false>(board, depth);
-            Logger("Total node count: ", node_count);
+            print("Total node count: ", node_count);
         });
         commands.emplace_back("go", [&](context tokens) {
             search::Limits limits = parse_limits(tokens);
@@ -171,7 +170,7 @@ namespace uci {
                 "Threads", "1", "spin", [&]() {
                     sm.allocate_threads(get_option<int>("Threads"));
                 },
-                1, 128);
+                1, 256);
 
         options.emplace_back(
                 "MoveOverhead", "30", "spin", [&]() {
@@ -204,23 +203,30 @@ namespace uci {
                 break;
             }
 
+
             std::vector<std::string> tokens = convert_to_tokens(line);
 
+            bool found_match = false;
             for (const Command &cmd : commands) {
                 if (cmd.is_match(tokens)) {
                     cmd.func(tokens);
+                    found_match = true;
                 }
+            }
+
+            if (!found_match && !tokens.empty() && !tokens[0].empty()) {
+                print("info", "error", "Invalid uci command:", tokens[0]);
             }
         }
     }
 
     void UCI::greetings() {
-        Logger("id", "name", "WhiteCore", VERSION);
-        Logger("id author Balazs Szilagyi");
+        print("id", "name", "WhiteCore", VERSION);
+        print("id author Balazs Szilagyi");
         for (const Option &opt : options) {
-            Logger(opt.to_string());
+            print(opt.to_string());
         }
-        Logger("uciok");
+        print("uciok");
     }
 
     search::Limits UCI::parse_limits(UCI::context tokens) {
@@ -250,12 +256,13 @@ namespace uci {
             for (; idx < tokens.size() && tokens[idx] != "moves"; idx++) {
                 fen += tokens[idx] + " ";
             }
-            board.load(fen);
+            board.load(fen, true);
         }
         if (idx < tokens.size() && tokens[idx] == "moves") idx++;
         for (; idx < tokens.size(); idx++) {
             chess::Move move = move_from_string(board, tokens[idx]);
             if (move == chess::NULL_MOVE) {
+                print("info", "error", "Invalid uci move:", tokens[idx]);
                 break;
             } else {
                 board.make_move(move);
