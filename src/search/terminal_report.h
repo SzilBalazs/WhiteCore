@@ -171,14 +171,22 @@ namespace search::report {
             std::stringstream res;
             std::stringstream ss_depth;
 
+
+            if (depth == 1) {
+                res << " ╭─────────┬───────────┬─────────────────────┬──────────┬──────────┬──────────┬───────────────────────────────────────────\n";
+                res << " │  Depth  │   Score   │         WDL         │   Nodes  │    NPS   │   Time   │ Principal variation                       \n";
+                res << " ├─────────┼───────────┼─────────────────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────\n";
+            }
+
             ss_depth << depth << "/" << seldepth;
 
-            res << line_color << std::setw(6) << ss_depth.str() << " "
-                << score_color(score) << std::setw(9) << pretty_score(score) << " "
-                << line_color << std::setw(18) << pretty_wdl(score) << " "
-                << line_color << std::setw(7) << pretty_int(nodes) << " "
-                << line_color << std::setw(7) << pretty_int(nps) << " "
-                << line_color << std::setw(7) << pretty_milli(time) << "    "
+            res << ASCII_RESET_COLOR << " │ "
+                << line_color << std::setw(6) << ss_depth.str() << ASCII_RESET_COLOR << "  │"
+                << score_color(score) << std::setw(9) << pretty_score(score) << ASCII_RESET_COLOR << "  │ "
+                << line_color << std::setw(18) << pretty_wdl(score) << ASCII_RESET_COLOR << "  │ "
+                << line_color << std::setw(7) << pretty_int(nodes) << ASCII_RESET_COLOR << "  │ "
+                << line_color << std::setw(7) << pretty_int(nps) << ASCII_RESET_COLOR << "  │ "
+                << line_color << std::setw(7) << pretty_milli(time) << ASCII_RESET_COLOR << "  │ "
                 << pretty_pv(pv_line, line_color)
                 << ASCII_RESET_COLOR << "\n";
 
