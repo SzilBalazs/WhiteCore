@@ -22,6 +22,8 @@
 namespace search {
     class TimeManager {
     public:
+        static int64_t MOVE_OVERHEAD;
+
         /**
          * Initializes time management with the given limits.
          *

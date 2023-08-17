@@ -19,6 +19,7 @@
 
 #include "../chess/constants.h"
 #include "../chess/move.h"
+#include "../utils/stats.h"
 
 #include <cstring>
 
@@ -72,6 +73,19 @@ namespace search {
             table = (TTEntry *) malloc(bucket_count * sizeof(TTEntry));
         }
 
+        uint64_t get_hash_full() {
+
+            if (bucket_count == 0) {
+                return 0;
+            }
+
+            uint64_t res = 0;
+            for (uint64_t i = 0; i < 1000; i++) {
+                res += i == (table[i].hash & mask);
+            }
+            return res;
+        }
+
         void clear() {
             for (uint64_t i = 0; i < bucket_count; i++) {
                 table[i] = TTEntry();
@@ -81,8 +95,12 @@ namespace search {
         std::optional<TTEntry> probe(uint64_t hash) {
             TTEntry entry = *get_entry(hash);
 
-            if (entry.hash != hash)
+            if (entry.hash != hash) {
+                stat_tracker::record_fail("tt_hit");
                 return std::nullopt;
+            }
+
+            stat_tracker::record_success("tt_hit");
 
             return entry;
         }

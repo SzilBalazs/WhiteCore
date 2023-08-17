@@ -1,5 +1,3 @@
-<h1 align="center">WhiteCore</h1>
-
 <p align="center">
 <a href="https://www.runpod.io/">
 <img
@@ -14,6 +12,15 @@
 
 WhiteCore stands as a strong C++ chess engine using efficiently-updatable neural networks for positional evaluation. 
 It's the successor of BlackCore reimagined with focus on originality.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Custom UCI Commands](#custom-uci-commands)
+- [Thanks to](#thanks-to)
+- [License](#license)
 
 ## Getting Started
 
@@ -33,17 +40,18 @@ WhiteCore in itself is a command line program, and requires a UCI compatible
 Chess GUI (like <a href="https://github.com/cutechess/cutechess">Cute Chess</a>
 or <a href="http://www.playwitharena.de/">Arena</a>) for the best user experience.
 
-## Files
+## Custom UCI Commands
 
-This project contains the following files:
-
-- **README.md** the file that you are reading.
-- **LICENSE** containing the license of this repository.
-- **src** folder contains the source code of WhiteCore
-- **scripts** folder contains scripts
-- **weights** folder contains neural networks
-- **train** is used for training NNUE
-- **.github** folder contains automated GitHub workflows like building this project.
+ | Command      | Description                                                                                                                                                                             |
+ |--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+ | `pretty`     | Enables the pretty output option for the console. This improves the readability of the search reports by adding indentation and colors. Can be disabled by sending the \"uci\" command. |
+ | `display`    | Displays the current board status.                                                                                                                                                      |
+ | `eval`       | Evaluates and displays the current board state using nnue.                                                                                                                              |
+ | `gen`        | Generates self-play games using specific parameters.                                                                                                                                    |
+ | `split`      | Splits input data into two output datasets in a particular proportion.                                                                                                                  |
+ | `quantize`   | Quantizes the neural network weights for performance reasons.                                                                                                                           |
+ | `train`      | Trains a neural network with specific parameters.                                                                                                                                       |
+ | `perft`      | Used for performance testing and validation of the move generator.                                                                                                                      |
 
 ## Thanks to...
 
@@ -58,5 +66,6 @@ FindingChess is a fork of the OpenBench framework, a platform that has played an
 in the development process. It allows us to test ideas easily 
 using a distributed computational framework.
 
+## License
 
-
+This project is licensed under GPL-3. For the full license, see LICENSE. 

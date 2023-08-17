@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "../chess/constants.h"
+#include "../utils/san.h"
 #include "wdl_model.h"
 
 #pragma once
@@ -27,7 +28,7 @@ namespace search::report {
 
     const std::string ASCII_RESET_COLOR = "\u001b[0m";
 
-    bool pretty_output = true;
+    bool pretty_output = false;
     bool show_wdl = false;
 
     /**
@@ -118,14 +119,31 @@ namespace search::report {
         return res.str();
     }
 
-    std::string pretty_pv(const std::string &pv, const std::string &line_color) {
+    std::string pretty_pv(const chess::Board &board, const std::string &pv, const std::string &line_color) {
         std::stringstream in(pv);
         std::stringstream res;
         res << get_ascii_color(87);
 
+        chess::Board tmp = board;
+
+        int cnt = 0;
         std::string move;
         while (getline(in, move, ' ')) {
-            res << move << " " << line_color;
+
+            cnt++;
+
+            chess::Move uci_move = chess::move_from_string(tmp, move);
+            if (!uci_move.is_ok()) {
+                throw std::runtime_error("Invalid PV");
+            }
+
+            if (cnt % 20 == 0) {
+                res << ASCII_RESET_COLOR << "\n │         │           │          │          │          │ " << line_color;
+            }
+
+            res << uci_to_san(uci_move, tmp) << " " << line_color;
+
+            tmp.make_move(uci_move);
         }
         return res.str();
     }
@@ -161,8 +179,8 @@ namespace search::report {
      * @param nps Nodes per second.
      * @param pv_line The principle variation line. A string of moves separated by spaces.
      */
-    void print_iteration(const int depth, const int seldepth, const uint64_t nodes, const Score score,
-                         const uint64_t time, const uint64_t nps, const std::string &pv_line) {
+    void print_iteration(const chess::Board &board, const int depth, const int seldepth, const uint64_t nodes, const Score score,
+                         const uint64_t time, const uint64_t nps, const uint64_t hashfull, const std::string &pv_line) {
 
         if (pretty_output) {
 
@@ -171,18 +189,23 @@ namespace search::report {
             std::stringstream res;
             std::stringstream ss_depth;
 
+            if (depth == 1) {
+                res << " ╭─────────┬───────────┬──────────┬──────────┬──────────┬─────────────────────────────────────────────────────────\n";
+                res << " │  Depth  │   Score   │   Nodes  │    NPS   │   Time   │ Principal variation                                     \n";
+                res << " ├─────────┼───────────┼──────────┼──────────┼──────────┼─────────────────────────────────────────────────────────\n";
+            }
+
             ss_depth << depth << "/" << seldepth;
 
-            res << line_color << std::setw(6) << ss_depth.str() << " "
-                << score_color(score) << std::setw(9) << pretty_score(score) << " "
-                << line_color << std::setw(18) << pretty_wdl(score) << " "
-                << line_color << std::setw(7) << pretty_int(nodes) << " "
-                << line_color << std::setw(7) << pretty_int(nps) << " "
-                << line_color << std::setw(7) << pretty_milli(time) << "    "
-                << pretty_pv(pv_line, line_color)
-                << ASCII_RESET_COLOR << "\n";
+            res << ASCII_RESET_COLOR << " │ "
+                << line_color << std::setw(6) << ss_depth.str() << ASCII_RESET_COLOR << "  │"
+                << score_color(score) << std::setw(9) << pretty_score(score) << ASCII_RESET_COLOR << "  │ "
+                << line_color << std::setw(7) << pretty_int(nodes) << ASCII_RESET_COLOR << "  │ "
+                << line_color << std::setw(7) << pretty_int(nps) << ASCII_RESET_COLOR << "  │ "
+                << line_color << std::setw(7) << pretty_milli(time) << ASCII_RESET_COLOR << "  │ "
+                << pretty_pv(board, pv_line, line_color) << ASCII_RESET_COLOR << "\n";
 
-            std::cout << res.str() << std::flush;
+            std::cout << "\r" << res.str() << std::flush;
 
         } else {
 
@@ -190,7 +213,7 @@ namespace search::report {
 
             ss << "info depth " << depth << " seldepth " << seldepth << " nodes " << nodes
                << " score " << score_to_string(score) << " time " << time << " nps " << nps
-               << " pv " << pv_line << "\n";
+               << " hashfull " << hashfull << " pv " << pv_line << "\n";
 
 
             std::cout << ss.str() << std::flush;

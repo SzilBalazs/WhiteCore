@@ -25,6 +25,7 @@
 #include "move.h"
 
 #include <algorithm>
+#include <regex>
 #include <sstream>
 #include <vector>
 
@@ -207,15 +208,7 @@ namespace chess {
             }
 
             if (move.is_promo()) {
-                if (move.eq_flag(Move::PROMO_BISHOP) || move.eq_flag(Move::PROMO_CAPTURE_BISHOP)) {
-                    piece_moved.type = BISHOP;
-                } else if (move.eq_flag(Move::PROMO_KNIGHT) || move.eq_flag(Move::PROMO_CAPTURE_KNIGHT)) {
-                    piece_moved.type = KNIGHT;
-                } else if (move.eq_flag(Move::PROMO_ROOK) || move.eq_flag(Move::PROMO_CAPTURE_ROOK)) {
-                    piece_moved.type = ROOK;
-                } else if (move.eq_flag(Move::PROMO_QUEEN) || move.eq_flag(Move::PROMO_CAPTURE_QUEEN)) {
-                    piece_moved.type = QUEEN;
-                }
+                piece_moved.type = move.get_promo_type();
             }
 
             move_piece(piece_moved, from, to, nnue);
@@ -292,7 +285,13 @@ namespace chess {
             states.pop_back();
         }
 
-        void load(const std::string &fen) {
+        void load(const std::string &fen, bool validate_fen = false) {
+
+            if (validate_fen && !is_valid_fen(fen)) {
+                print("info", "error", "Invalid fen:", fen);
+                return;
+            }
+
             board_clear();
 
             std::stringstream ss(fen);
@@ -322,6 +321,7 @@ namespace chess {
 
             state.rights = CastlingRights(rights);
             state.ep = square_from_string(ep);
+
             if (!move50.empty() && std::all_of(move50.begin(), move50.end(), ::isdigit)) {
                 state.move50 = std::stoi(move50);
             } else {
@@ -472,6 +472,18 @@ namespace chess {
 
             states.clear();
             states.emplace_back();
+        }
+
+        static bool is_valid_fen(const std::string &fen) {
+            const static std::regex fen_regex("^"
+                                              "([rnbqkpRNBQKP1-8]+\\/){7}"
+                                              "([rnbqkpRNBQKP1-8]+)"
+                                              " [bw]"
+                                              " ([-KQkq]+|)"
+                                              " (([a-h][36])|-)"
+                                              " \\d+"
+                                              ".*");
+            return std::regex_match(fen, fen_regex);
         }
     };
 

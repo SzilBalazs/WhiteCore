@@ -114,7 +114,7 @@ namespace selfplay {
 
     void combine_data(const std::string &path, const std::string &output_file) {
 
-        Logger("Combining files...");
+        print("Combining files...");
 
         std::ofstream file(output_file, std::ios::app | std::ios::out);
         for (const auto &entry : std::filesystem::directory_iterator(path)) {
@@ -127,7 +127,7 @@ namespace selfplay {
         }
         file.close();
 
-        Logger("Finished combining");
+        print("Finished combining");
     }
 
     void compress_data(const std::string &input_path, const std::string &output_file) {
@@ -136,11 +136,11 @@ namespace selfplay {
         ss << "zstd " << input_path << " -o " << output_file << " --rm #19";
 
         const std::string cmd = ss.str();
-        Logger(">", cmd);
+        print(">", cmd);
 
         system(cmd.c_str());
 
-        Logger("Finished compressing");
+        print("Finished compressing");
     }
 
     std::string get_run_name(const search::Limits &limits, const std::string &id) {

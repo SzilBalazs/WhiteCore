@@ -19,7 +19,7 @@
 
 #include "../chess/constants.h"
 #include "../external/incbin/incbin.h"
-#include "../utils/logger.h"
+#include "../utils/utilities.h"
 #include "activations/crelu.h"
 #include "layers/accumulator.h"
 #include "layers/dense_layer.h"
@@ -43,7 +43,7 @@ namespace nn {
             int offset = sizeof(int);
 
             if (magic != MAGIC) {
-                Logger("Invalid default network file with magic", magic);
+                print("Invalid default network file with magic", magic);
                 throw std::invalid_argument("Invalid default network file with magic" + std::to_string(magic));
             }
 

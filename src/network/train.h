@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "../utils/logger.h"
+#include "../utils/utilities.h"
 #include "adam.h"
 #include "data_parser.h"
 
@@ -217,7 +217,7 @@ namespace nn {
         }
 
         void index_training_data(const std::string &training_data) {
-            Logger("Indexing training data...");
+            print("Indexing training data...");
 
             std::string tmp;
             std::ifstream file(training_data, std::ios::in);
@@ -226,7 +226,7 @@ namespace nn {
             }
             file.close();
 
-            Logger("Found", entry_count, "positions");
+            print("Found", entry_count, "positions");
         }
     };
 } // namespace nn

@@ -18,11 +18,24 @@
 #pragma once
 
 #include "../chess/constants.h"
-#include "logger.h"
 
 #include <chrono>
+#include <iostream>
+#include <sstream>
 
 void init_all();
+
+template<typename... Args>
+void print(std::stringstream &ss, Args... args) {
+    ((ss << args << ' '), ...);
+}
+
+template<typename... Args>
+void print(Args... args) {
+    std::stringstream ss;
+    print(ss, args...);
+    std::cout << ss.str() << std::endl;
+}
 
 template<Color color>
 constexpr Color color_enemy() {

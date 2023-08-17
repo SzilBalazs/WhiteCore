@@ -52,7 +52,7 @@ namespace nn {
         Network(const std::string &network_path) {
             std::ifstream file(network_path, std::ios::in | std::ios::binary);
             if (!file.is_open()) {
-                Logger("Unable to open: ", network_path);
+                print("Unable to open: ", network_path);
                 randomize();
                 return;
             }
@@ -61,14 +61,14 @@ namespace nn {
             file.read(reinterpret_cast<char *>(&magic), sizeof(magic));
 
             if (magic != MAGIC) {
-                Logger("Invalid network file: ", network_path, " with magic: ", magic);
+                print("Invalid network file: ", network_path, " with magic: ", magic);
                 throw std::invalid_argument("Invalid network file with magic: " + std::to_string(magic));
             }
 
             l0.load_from_file(file);
             l1.load_from_file(file);
 
-            Logger("Loaded network file: ", network_path);
+            print("Loaded network file: ", network_path);
         }
 
         Network() {
@@ -90,7 +90,7 @@ namespace nn {
         void write_to_file(const std::string &output_path) {
             std::ofstream file(output_path, std::ios::out | std::ios::binary);
             if (!file.is_open()) {
-                Logger("Unable to open:", output_path);
+                print("Unable to open:", output_path);
                 throw std::runtime_error("Unable to open: " + output_path);
             }
 
@@ -107,7 +107,7 @@ namespace nn {
         void quantize(const std::string &output_path) {
             std::ofstream file(output_path, std::ios::out | std::ios::binary);
             if (!file.is_open()) {
-                Logger("Unable to open:", output_path);
+                print("Unable to open:", output_path);
                 throw std::runtime_error("Unable to open: " + output_path);
             }
 

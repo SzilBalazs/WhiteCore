@@ -22,24 +22,12 @@
 #include "../search/search_manager.h"
 #include "../selfplay/selfplay.h"
 #include "../tests/perft.h"
-#include "../utils/logger.h"
 #include "../utils/split.h"
 #include "../utils/utilities.h"
 #include "command.h"
 #include "option.h"
 
 namespace uci {
-
-    chess::Move move_from_string(chess::Board &board, const std::string &str) {
-        chess::Move moves[200];
-        chess::Move *moves_end = chess::gen_moves(board, moves, false);
-        for (chess::Move *it = moves; it != moves_end; it++) {
-            if (it->to_uci() == str) {
-                return *it;
-            }
-        }
-        return chess::NULL_MOVE;
-    }
 
     class UCI {
 
@@ -68,6 +56,14 @@ namespace uci {
 
         void parse_position(context tokens);
 
+        void parse_gen(context tokens);
+
+        void parse_split(context tokens);
+
+        void parse_quantize(context tokens);
+
+        void parse_train(context tokens);
+
         static std::vector<std::string> convert_to_tokens(const std::string &line);
 
         template<typename T>
@@ -84,7 +80,7 @@ namespace uci {
             search::report::set_pretty_output(true);
         });
         commands.emplace_back("isready", [&](context tokens) {
-            Logger("readyok");
+            print("readyok");
         });
         commands.emplace_back("position", [&](context tokens) {
             parse_position(tokens);
@@ -95,44 +91,24 @@ namespace uci {
         commands.emplace_back("eval", [&](context tokens) {
             nn::NNUE network{};
             network.refresh(board.to_features());
-            Logger("Eval:", eval::evaluate(board, network));
+            print("Eval:", eval::evaluate(board, network));
         });
         commands.emplace_back("gen", [&](context tokens) {
-            search::Limits limits;
-            limits.max_nodes = find_element<int64_t>(tokens, "nodes");
-            limits.depth = find_element<int64_t>(tokens, "depth");
-            std::optional<size_t> thread_count = find_element<size_t>(tokens, "threads");
-            std::optional<int> games_to_play = find_element<int>(tokens, "games");
-            selfplay::start_generation(limits, games_to_play.value_or(100'000), thread_count.value_or(1));
+            parse_gen(tokens);
         });
         commands.emplace_back("split", [&](context tokens) {
-            std::optional<std::string> input_data = find_element<std::string>(tokens, "input");
-            std::optional<std::string> output_data1 = find_element<std::string>(tokens, "output1");
-            std::optional<std::string> output_data2 = find_element<std::string>(tokens, "output2");
-            std::optional<int> rate = find_element<int>(tokens, "rate");
-            split_data(input_data.value_or("data.plain"), output_data1.value_or("train.plain"), output_data2.value_or("validation.plain"), rate.value_or(10));
+            parse_split(tokens);
         });
         commands.emplace_back("quantize", [&](context tokens) {
-            std::optional<std::string> input = find_element<std::string>(tokens, "input");
-            std::optional<std::string> output = find_element<std::string>(tokens, "output");
-            nn::Network network_file(input.value_or("input.bin"));
-            network_file.quantize<int16_t, nn::NNUE::QSCALE>(output.value_or("output.bin"));
+            parse_quantize(tokens);
         });
         commands.emplace_back("train", [&](context tokens) {
-            std::optional<std::string> network_path = find_element<std::string>(tokens, "network");
-            std::optional<std::string> training_data = find_element<std::string>(tokens, "training_data");
-            std::optional<std::string> validation_data = find_element<std::string>(tokens, "validation_data");
-            std::optional<float> learning_rate = find_element<float>(tokens, "lr");
-            std::optional<size_t> epochs = find_element<size_t>(tokens, "epochs");
-            std::optional<size_t> batch_size = find_element<size_t>(tokens, "batch");
-            std::optional<size_t> threads = find_element<size_t>(tokens, "threads");
-            nn::Trainer trainer(training_data.value_or("train.plain"), validation_data.value_or("validation.plain"), network_path, learning_rate.value_or(0.001f),
-                                epochs.value_or(10), batch_size.value_or(16384), threads.value_or(4));
+            parse_train(tokens);
         });
         commands.emplace_back("perft", [&](context tokens) {
             int depth = find_element<int>(tokens, "perft").value_or(5);
             uint64_t node_count = test::perft<true, false>(board, depth);
-            Logger("Total node count: ", node_count);
+            print("Total node count: ", node_count);
         });
         commands.emplace_back("go", [&](context tokens) {
             search::Limits limits = parse_limits(tokens);
@@ -171,7 +147,13 @@ namespace uci {
                 "Threads", "1", "spin", [&]() {
                     sm.allocate_threads(get_option<int>("Threads"));
                 },
-                1, 128);
+                1, 256);
+
+        options.emplace_back(
+                "MoveOverhead", "30", "spin", [&]() {
+                    search::TimeManager::MOVE_OVERHEAD = get_option<int>("MoveOverhead");
+                },
+                0, 1000);
 
         options.emplace_back(
                 "UCI_ShowWDL", "false", "check", [&]() {
@@ -200,21 +182,27 @@ namespace uci {
 
             std::vector<std::string> tokens = convert_to_tokens(line);
 
+            bool found_match = false;
             for (const Command &cmd : commands) {
                 if (cmd.is_match(tokens)) {
                     cmd.func(tokens);
+                    found_match = true;
                 }
+            }
+
+            if (!found_match && !tokens.empty() && !tokens[0].empty()) {
+                print("info", "error", "Invalid uci command:", tokens[0]);
             }
         }
     }
 
     void UCI::greetings() {
-        Logger("id", "name", "WhiteCore", VERSION);
-        Logger("id author Balazs Szilagyi");
+        print("id", "name", "WhiteCore", VERSION);
+        print("id author Balazs Szilagyi");
         for (const Option &opt : options) {
-            Logger(opt.to_string());
+            print(opt.to_string());
         }
-        Logger("uciok");
+        print("uciok");
     }
 
     search::Limits UCI::parse_limits(UCI::context tokens) {
@@ -244,17 +232,54 @@ namespace uci {
             for (; idx < tokens.size() && tokens[idx] != "moves"; idx++) {
                 fen += tokens[idx] + " ";
             }
-            board.load(fen);
+            board.load(fen, true);
         }
         if (idx < tokens.size() && tokens[idx] == "moves") idx++;
         for (; idx < tokens.size(); idx++) {
             chess::Move move = move_from_string(board, tokens[idx]);
             if (move == chess::NULL_MOVE) {
+                print("info", "error", "Invalid uci move:", tokens[idx]);
                 break;
             } else {
                 board.make_move(move);
             }
         }
+    }
+
+    void UCI::parse_gen(uci::UCI::context tokens) {
+        search::Limits limits;
+        limits.max_nodes = find_element<int64_t>(tokens, "nodes");
+        limits.depth = find_element<int64_t>(tokens, "depth");
+        std::optional<size_t> thread_count = find_element<size_t>(tokens, "threads");
+        std::optional<int> games_to_play = find_element<int>(tokens, "games");
+        selfplay::start_generation(limits, games_to_play.value_or(100'000), thread_count.value_or(1));
+    }
+
+    void UCI::parse_quantize(uci::UCI::context tokens) {
+        std::optional<std::string> input = find_element<std::string>(tokens, "input");
+        std::optional<std::string> output = find_element<std::string>(tokens, "output");
+        nn::Network network_file(input.value_or("input.bin"));
+        network_file.quantize<int16_t, nn::NNUE::QSCALE>(output.value_or("output.bin"));
+    }
+
+    void UCI::parse_split(uci::UCI::context tokens) {
+        std::optional<std::string> input_data = find_element<std::string>(tokens, "input");
+        std::optional<std::string> output_data1 = find_element<std::string>(tokens, "output1");
+        std::optional<std::string> output_data2 = find_element<std::string>(tokens, "output2");
+        std::optional<int> rate = find_element<int>(tokens, "rate");
+        split_data(input_data.value_or("data.plain"), output_data1.value_or("train.plain"), output_data2.value_or("validation.plain"), rate.value_or(10));
+    }
+
+    void UCI::parse_train(uci::UCI::context tokens) {
+        std::optional<std::string> network_path = find_element<std::string>(tokens, "network");
+        std::optional<std::string> training_data = find_element<std::string>(tokens, "training_data");
+        std::optional<std::string> validation_data = find_element<std::string>(tokens, "validation_data");
+        std::optional<float> learning_rate = find_element<float>(tokens, "lr");
+        std::optional<size_t> epochs = find_element<size_t>(tokens, "epochs");
+        std::optional<size_t> batch_size = find_element<size_t>(tokens, "batch");
+        std::optional<size_t> threads = find_element<size_t>(tokens, "threads");
+        nn::Trainer trainer(training_data.value_or("train.plain"), validation_data.value_or("validation.plain"), network_path, learning_rate.value_or(0.001f),
+                            epochs.value_or(10), batch_size.value_or(16384), threads.value_or(4));
     }
 
     std::vector<std::string> UCI::convert_to_tokens(const std::string &line) {

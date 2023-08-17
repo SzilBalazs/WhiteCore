@@ -175,8 +175,8 @@ namespace search {
             if (shared.uci_mode) {
                 int64_t elapsed_time = shared.tm.get_elapsed_time();
 
-                report::print_iteration(depth, max_ply, shared.get_node_count(), score, elapsed_time,
-                                        calculate_nps(elapsed_time, shared.get_node_count()), pv.get_line());
+                report::print_iteration(board, depth, max_ply, shared.get_node_count(), score, elapsed_time,
+                                        calculate_nps(elapsed_time, shared.get_node_count()), shared.tt.get_hash_full(), pv.get_line());
             }
         }
 
@@ -278,7 +278,7 @@ namespace search {
                 }
 
                 alpha = std::max(alpha, -MATE_VALUE + ss->ply);
-                beta = std::min(beta, MATE_VALUE - ss->ply - 1);
+                beta = std::min(beta, MATE_VALUE - ss->ply);
                 if (alpha >= beta)
                     return alpha;
             }
@@ -294,7 +294,10 @@ namespace search {
 
             if (entry && non_pv_node && entry->depth >= depth && board.get_move50() < 90 &&
                 (entry->flag == TT_EXACT || (entry->flag == TT_ALPHA && tt_score <= alpha) || (entry->flag == TT_BETA && tt_score >= beta))) {
+                stat_tracker::record_success("tt_cutoff");
                 return tt_score;
+            } else {
+                stat_tracker::record_fail("tt_cutoff");
             }
 
             if (depth <= 0)
@@ -315,8 +318,12 @@ namespace search {
                     return score;
             }
 
-            if (non_pv_node && depth <= 8 && static_eval - (depth - improving) * 70 >= beta && std::abs(beta) < WORST_MATE)
+            if (non_pv_node && depth <= 8 && static_eval - (depth - improving) * 70 >= beta && std::abs(beta) < WORST_MATE) {
+                stat_tracker::record_success("rfp");
                 return static_eval;
+            } else {
+                stat_tracker::record_fail("rfp");
+            }
 
             if (non_pv_node && depth >= 3 && static_eval >= beta && board.has_non_pawn()) {
                 Depth R = 3 + depth / 3 + std::min(3, (static_eval - beta) / 256);
@@ -327,9 +334,12 @@ namespace search {
                 board.undo_null_move();
 
                 if (score >= beta) {
+                    stat_tracker::record_success("nmp");
                     if (std::abs(score) > WORST_MATE)
                         return beta;
                     return score;
+                } else {
+                    stat_tracker::record_fail("nmp");
                 }
             }
 
@@ -356,11 +366,17 @@ namespace search {
 
                     if (move.is_quiet()) {
                         if (depth <= 6 && !see(board, move, -depth * 100)) {
+                            stat_tracker::record_success("pvs_see_quiet");
                             continue;
+                        } else {
+                            stat_tracker::record_fail("pvs_see_quiet");
                         }
                     } else {
                         if (depth <= 5 && !see(board, move, -depth * 150)) {
+                            stat_tracker::record_success("pvs_see_capture");
                             continue;
+                        } else {
+                            stat_tracker::record_fail("pvs_see_capture");
                         }
                     }
 
@@ -445,6 +461,12 @@ namespace search {
                 if (move.is_quiet()) *next_quiet_move++ = move;
             }
 
+            if (skip_quiets) {
+                stat_tracker::record_success("skip_quiets");
+            } else {
+                stat_tracker::record_fail("skip_quiets");
+            }
+
             shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(best_score, ss->ply), flag, best_move);
             return alpha;
         }
@@ -458,17 +480,24 @@ namespace search {
 
             Score static_eval = eval::evaluate(board, nnue);
 
-            if (static_eval >= beta)
+            if (static_eval >= beta) {
                 return beta;
-            if (static_eval > alpha)
+            }
+            if (static_eval > alpha) {
                 alpha = static_eval;
+            }
 
             MoveList<true> move_list(board, chess::NULL_MOVE, chess::NULL_MOVE, history, 0);
 
             while (!move_list.empty()) {
                 chess::Move move = move_list.next_move();
 
-                if (alpha > -WORST_MATE && !see(board, move, 0)) continue;
+                if (alpha > -WORST_MATE && !see(board, move, 0)) {
+                    stat_tracker::record_success("qsearch_see");
+                    continue;
+                } else {
+                    stat_tracker::record_fail("qsearch_see");
+                }
 
                 shared.node_count[id]++;
                 board.make_move(move, &nnue);

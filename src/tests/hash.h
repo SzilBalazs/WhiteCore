@@ -51,7 +51,7 @@ namespace test {
         for (const Test &test : tests) {
             board.load(test.fen);
             for (std::string str : test.moves) {
-                chess::Move move = uci::move_from_string(board, str);
+                chess::Move move = chess::move_from_string(board, str);
                 board.make_move(move);
             }
             if (board.get_hash() != test.hash) {
