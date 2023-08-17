@@ -36,7 +36,8 @@ jobs:
       - name: Run tests
         run: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} test
 
-      - name: Run bench
+      - name: Run bench on Windows
+        if: matrix.os == 'windows-latest'
         run: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} bench
 
       - name: Run bench on Linux
