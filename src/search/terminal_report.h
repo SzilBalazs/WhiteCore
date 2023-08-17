@@ -147,7 +147,7 @@ namespace search::report {
 
         chess::Board tmp = board;
 
-        size_t width = 58;
+        size_t width = 60;
         std::string move;
         while (getline(in, move, ' ')) {
 
@@ -159,9 +159,9 @@ namespace search::report {
             std::string addition = uci_to_san(uci_move, tmp) + " ";
             width += addition.size();
 
-            if (width > terminal_width) {
+            if (width >= terminal_width) {
                 res << ASCII_RESET_COLOR << "\n │         │           │          │          │          │ " << line_color;
-                width = 58;
+                width = 60;
             }
 
             res << addition << line_color;
