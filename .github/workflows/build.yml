@@ -5,7 +5,7 @@ on: [push]
 jobs:
   WhiteCore:
     runs-on: ${{matrix.os}}
-    name: WhiteCore ${{matrix.arch}} ${{matrix.os}} ${{matrix.compiler}}}
+    name: WhiteCore ${{matrix.compiler}} ${{matrix.arch}} ${{matrix.os}}
 
     strategy:
       fail-fast: false
@@ -18,7 +18,7 @@ jobs:
             suffix: "-linux"
             packages: |
               sudo apt-get update
-              sudo apt-get install valgrind clang-15 g++
+              sudo apt-get install valgrind clang-15 g++-multilib
           - os: windows-latest
             suffix: "-win"
             exe-suffix: ".exe"
