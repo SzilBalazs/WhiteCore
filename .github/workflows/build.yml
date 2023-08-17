@@ -59,7 +59,7 @@ jobs:
       - name: Run Valgrind
         if: runner.os == 'Linux'
         run: |
-          valgrind --error-exitcode=1 --errors-for-leak-kinds=all --leak-check=full ./WhiteCore bench
+          valgrind --error-exitcode=1 --errors-for-leak-kinds=all --leak-check=full ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} bench
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
