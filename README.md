@@ -1,3 +1,7 @@
+<div align="center">
+<img src="img/logo1.jpg" alt="WhiteCore logo">
+</div>
+
 <p align="center">
 <a href="https://www.runpod.io/">
 <img
@@ -10,7 +14,7 @@
 
 # Overview
 
-WhiteCore stands as a strong C++ chess engine using efficiently-updatable neural networks for positional evaluation. 
+WhiteCore stands as a strong C++ chess engine using efficiently-updatable neural networks for positional evaluation.
 It's the successor of BlackCore reimagined with focus on originality.
 
 ## Table of Contents
@@ -42,16 +46,16 @@ or <a href="http://www.playwitharena.de/">Arena</a>) for the best user experienc
 
 ## Custom UCI Commands
 
- | Command      | Description                                                                                                                                                                             |
+| Command      | Description                                                                                                                                                                             |
  |--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
- | `pretty`     | Enables the pretty output option for the console. This improves the readability of the search reports by adding indentation and colors. Can be disabled by sending the \"uci\" command. |
- | `display`    | Displays the current board status.                                                                                                                                                      |
- | `eval`       | Evaluates and displays the current board state using nnue.                                                                                                                              |
- | `gen`        | Generates self-play games using specific parameters.                                                                                                                                    |
- | `split`      | Splits input data into two output datasets in a particular proportion.                                                                                                                  |
- | `quantize`   | Quantizes the neural network weights for performance reasons.                                                                                                                           |
- | `train`      | Trains a neural network with specific parameters.                                                                                                                                       |
- | `perft`      | Used for performance testing and validation of the move generator.                                                                                                                      |
+| `pretty`     | Enables the pretty output option for the console. This improves the readability of the search reports by adding indentation and colors. Can be disabled by sending the \"uci\" command. |
+| `display`    | Displays the current board status.                                                                                                                                                      |
+| `eval`       | Evaluates and displays the current board state using nnue.                                                                                                                              |
+| `gen`        | Generates self-play games using specific parameters.                                                                                                                                    |
+| `split`      | Splits input data into two output datasets in a particular proportion.                                                                                                                  |
+| `quantize`   | Quantizes the neural network weights for performance reasons.                                                                                                                           |
+| `train`      | Trains a neural network with specific parameters.                                                                                                                                       |
+| `perft`      | Used for performance testing and validation of the move generator.                                                                                                                      |
 
 ## Thanks to...
 
@@ -62,8 +66,8 @@ Their donation of hardware is essential for the development of WhiteCore.
 
 ### <a href="https://github.com/AndyGrant/OpenBench">OpenBench</a> by Andrew Grant
 
-FindingChess is a fork of the OpenBench framework, a platform that has played an important role 
-in the development process. It allows us to test ideas easily 
+FindingChess is a fork of the OpenBench framework, a platform that has played an important role
+in the development process. It allows us to test ideas easily
 using a distributed computational framework.
 
 ## License
