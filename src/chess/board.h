@@ -36,23 +36,23 @@ namespace chess {
     class Board {
 
     public:
-        [[nodiscard]] constexpr Color get_stm() const {
+        [[nodiscard]] inline Color get_stm() const {
             return state.stm;
         }
 
-        [[nodiscard]] constexpr Square get_ep() const {
+        [[nodiscard]] inline Square get_ep() const {
             return state.ep;
         }
 
-        [[nodiscard]] constexpr Zobrist get_hash() const {
+        [[nodiscard]] inline Zobrist get_hash() const {
             return state.hash;
         }
 
-        [[nodiscard]] constexpr unsigned int get_move50() const {
+        [[nodiscard]] inline unsigned int get_move50() const {
             return state.move50;
         }
 
-        [[nodiscard]] constexpr CastlingRights get_rights() const {
+        [[nodiscard]] inline CastlingRights get_rights() const {
             return state.rights;
         }
 

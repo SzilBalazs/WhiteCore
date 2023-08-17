@@ -28,8 +28,13 @@ else
 endif
 
 ifeq ($(uname_S), Windows)
-	SUFFIX = .exe
+
+ifeq ($(CXX), clang++)
+	USE_INCBIN_TOOL = true
 	CPP_FILES += src/corenet.cpp
+endif
+
+	SUFFIX = .exe
 	CP = powershell cp
 else
 	CP = cp
@@ -97,13 +102,13 @@ $(TMP_EVALFILE):
 	@$(CP) $(EVALFILE) $(TMP_EVALFILE)
 
 $(INCBIN_TOOL): $(TMP_EVALFILE)
-ifeq ($(uname_S), Windows)
+ifeq ($(USE_INCBIN_TOOL), true)
 	@echo -e "$(C_CYAN)Compiling $(C_RED)$(INCBIN_TOOL)$(C_CYAN)...$(C_DEFAULT)"
 	@clang -o $@ src/external/incbin/incbin.c
 endif
 
 $(OUTPUT_BINARY): $(HEADERS) $(SOURCES) $(INCBIN_TOOL)
-ifeq ($(uname_S), Windows)
+ifeq ($(USE_INCBIN_TOOL), true)
 	@./$(INCBIN_TOOL) src/network/nnue.h -o src/corenet.cpp
 endif
 	@echo -e "$(C_CYAN)Compiling $(C_WHITE)$(NAME)$(C_CYAN)...$(C_DEFAULT)"
