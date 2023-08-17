@@ -23,6 +23,7 @@
 #include "wdl_model.h"
 
 #if defined(_WIN32)
+#define NOMINMAX
 #include <windows.h>
 #elif defined(__linux__)
 #include <sys/ioctl.h>
