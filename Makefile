@@ -31,10 +31,10 @@ ifeq ($(uname_S), Windows)
 
 ifeq ($(CXX), clang++)
 	USE_INCBIN_TOOL = true
+	CPP_FILES += src/corenet.cpp
 endif
 
 	SUFFIX = .exe
-	CPP_FILES += src/corenet.cpp
 	CP = powershell cp
 else
 	CP = cp
