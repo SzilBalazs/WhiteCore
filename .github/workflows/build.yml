@@ -31,7 +31,7 @@ jobs:
       - name: Build WhiteCore
         run: |
           clang++ --version
-          make EXE=WhiteCore-${{matrix.arch}}${{matrix.suffix}} ARCH=${{matrix.arch}} build=debug
+          make EXE=WhiteCore-${{matrix.arch}}${{matrix.suffix}} ARCH=${{matrix.arch}}
 
       - name: Run tests
         run: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} test
