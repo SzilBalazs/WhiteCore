@@ -55,8 +55,8 @@ jobs:
           echo "::error::The commit bench ${{steps.obtain_bench.outputs.COMMIT_BENCH}} is not equal to the actual bench ${{steps.obtain_bench.outputs.BENCH}}!"
           exit 1
 
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: WhiteCore-Executables
+          name: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}}${{matrix.exe-suffix}}
           path: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}}${{matrix.exe-suffix}}
