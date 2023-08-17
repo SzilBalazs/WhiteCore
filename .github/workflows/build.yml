@@ -16,7 +16,7 @@ jobs:
             suffix: "-linux"
             packages: |
               sudo apt-get update
-              sudo apt-get install clang-15 valgrind
+              sudo apt-get install valgrind
           - os: windows-latest
             suffix: "-win"
             exe-suffix: ".exe"
@@ -30,8 +30,8 @@ jobs:
 
       - name: Build WhiteCore
         run: |
-          clang++ --version
-          make EXE=WhiteCore-${{matrix.arch}}${{matrix.suffix}} ARCH=${{matrix.arch}}
+          clang --version
+          make EXE=WhiteCore-${{matrix.arch}}${{matrix.suffix}} ARCH=${{matrix.arch}} CXX=clang build=debug
 
       - name: Run tests
         run: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} test
@@ -56,10 +56,10 @@ jobs:
           echo "::error::The commit bench ${{steps.obtain_bench.outputs.COMMIT_BENCH}} is not equal to the actual bench ${{steps.obtain_bench.outputs.BENCH}}!"
           exit 1
 
-      #- name: Run Valgrind
-      #  if: runner.os == 'Linux'
-      #  run: |
-      #    valgrind --error-exitcode=1 --errors-for-leak-kinds=all --leak-check=full ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} bench
+      - name: Run Valgrind
+        if: runner.os == 'Linux'
+        run: |
+          valgrind --error-exitcode=1 --errors-for-leak-kinds=all --leak-check=full ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} bench
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
