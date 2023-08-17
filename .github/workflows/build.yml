@@ -34,7 +34,7 @@ jobs:
       - name: Build WhiteCore
         run: |
           ${{matrix.compiler}} --version
-          make EXE=WhiteCore-${{matrix.arch}}${{matrix.suffix}} ARCH=${{matrix.arch}} CXX=${{matrix.compiler}} ${{matrix.debug-build}}}
+          make EXE=WhiteCore-${{matrix.arch}}${{matrix.suffix}} ARCH=${{matrix.arch}} CXX=${{matrix.compiler}} ${{matrix.debug-build}}
 
       - name: Run tests
         run: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} test
