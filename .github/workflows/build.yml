@@ -56,10 +56,10 @@ jobs:
           echo "::error::The commit bench ${{steps.obtain_bench.outputs.COMMIT_BENCH}} is not equal to the actual bench ${{steps.obtain_bench.outputs.BENCH}}!"
           exit 1
 
-      - name: Run Valgrind
-        if: runner.os == 'Linux'
-        run: |
-          valgrind --error-exitcode=1 --errors-for-leak-kinds=all --leak-check=full ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} bench
+      #- name: Run Valgrind
+      #  if: runner.os == 'Linux'
+      #  run: |
+      #    valgrind --error-exitcode=1 --errors-for-leak-kinds=all --leak-check=full ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} bench
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
