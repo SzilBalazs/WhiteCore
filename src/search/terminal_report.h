@@ -41,11 +41,11 @@ namespace search::report {
 #if defined(_WIN32)
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        return (size_t)(csbi.srWindow.Right-csbi.srWindow.Left+1);
+        return (size_t) (csbi.srWindow.Right - csbi.srWindow.Left + 1);
 #elif defined(__linux__)
         struct winsize w;
         ioctl(fileno(stdout), TIOCGWINSZ, &w);
-        return (size_t)(w.ws_col);
+        return (size_t) (w.ws_col);
 #else
 #error "Unsupported OS"
 #endif

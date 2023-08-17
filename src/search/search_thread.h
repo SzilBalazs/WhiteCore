@@ -15,6 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
+#include <atomic>
+#include <thread>
+
 #include "../chess/board.h"
 #include "../network/eval.h"
 #include "history.h"
@@ -23,9 +27,6 @@
 #include "terminal_report.h"
 #include "time_manager.h"
 #include "transposition_table.h"
-
-#include <atomic>
-#include <thread>
 
 namespace search {
 
