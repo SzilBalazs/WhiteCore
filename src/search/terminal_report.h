@@ -22,14 +22,34 @@
 #include "../utils/san.h"
 #include "wdl_model.h"
 
+#if defined(_WIN32)
+#include <windows.h>
+#elif defined(__linux__)
+#include <sys/ioctl.h>
+#endif
+
 #pragma once
 
 namespace search::report {
 
     const std::string ASCII_RESET_COLOR = "\u001b[0m";
 
-    bool pretty_output = false;
+    bool pretty_output = true;
     bool show_wdl = false;
+
+    size_t get_terminal_width() {
+#if defined(_WIN32)
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+        return (size_t)(csbi.srWindow.Right-csbi.srWindow.Left+1);
+#elif defined(__linux__)
+        struct winsize w;
+        ioctl(fileno(stdout), TIOCGWINSZ, &w);
+        return (size_t)(w.ws_col);
+#else
+#error "Unsupported OS"
+#endif
+    }
 
     /**
      * @brief Switches the output mode of the search results.
@@ -119,29 +139,31 @@ namespace search::report {
         return res.str();
     }
 
-    std::string pretty_pv(const chess::Board &board, const std::string &pv, const std::string &line_color) {
+    std::string pretty_pv(const chess::Board &board, const std::string &pv, const std::string &line_color, size_t terminal_width) {
         std::stringstream in(pv);
         std::stringstream res;
         res << get_ascii_color(87);
 
         chess::Board tmp = board;
 
-        int cnt = 0;
+        size_t width = 58;
         std::string move;
         while (getline(in, move, ' ')) {
-
-            cnt++;
 
             chess::Move uci_move = chess::move_from_string(tmp, move);
             if (!uci_move.is_ok()) {
                 throw std::runtime_error("Invalid PV");
             }
 
-            if (cnt % 20 == 0) {
+            std::string addition = uci_to_san(uci_move, tmp) + " ";
+            width += addition.size();
+
+            if (width > terminal_width) {
                 res << ASCII_RESET_COLOR << "\n │         │           │          │          │          │ " << line_color;
+                width = 58;
             }
 
-            res << uci_to_san(uci_move, tmp) << " " << line_color;
+            res << addition << line_color;
 
             tmp.make_move(uci_move);
         }
@@ -168,6 +190,28 @@ namespace search::report {
         return res.str();
     }
 
+    std::string close_table(const std::string &line, size_t width, const std::string &fill = " ", const std::string &end = "│") {
+        const static std::regex color_re("(\\u001b.*?m)");
+        const static std::regex special_re("([╭─┬╮├─╰─╯┼│])");
+
+        const std::string clean_line = std::regex_replace(line, color_re, "");
+
+        std::sregex_iterator it(clean_line.begin(), clean_line.end(), special_re);
+        std::sregex_iterator end_it;
+        const size_t matches = std::distance(it, end_it);
+
+        // Every special character counts as 3 chars instead of 1
+        const size_t len = clean_line.size() - matches * 2 / 3;
+
+        std::string res = line;
+
+        for (size_t i = len; i <= width; i++) {
+            res += fill;
+        }
+        res += end + "\n";
+        return res;
+    }
+
     /**
      * Prints the information for the current iteration.
      *
@@ -182,6 +226,13 @@ namespace search::report {
     void print_iteration(const chess::Board &board, const int depth, const int seldepth, const uint64_t nodes, const Score score,
                          const uint64_t time, const uint64_t nps, const uint64_t hashfull, const std::string &pv_line) {
 
+        const size_t terminal_width = get_terminal_width() - 10;
+
+        if (pretty_output && terminal_width < 100u) {
+            pretty_output = false;
+            print("info", "error", "Terminal is too small, pretty print was turned off");
+        }
+
         if (pretty_output) {
 
             const std::string line_color = depth & 1 ? get_ascii_color(247) : get_ascii_color(251);
@@ -190,9 +241,13 @@ namespace search::report {
             std::stringstream ss_depth;
 
             if (depth == 1) {
-                res << " ╭─────────┬───────────┬──────────┬──────────┬──────────┬─────────────────────────────────────────────────────────\n";
-                res << " │  Depth  │   Score   │   Nodes  │    NPS   │   Time   │ Principal variation                                     \n";
-                res << " ├─────────┼───────────┼──────────┼──────────┼──────────┼─────────────────────────────────────────────────────────\n";
+                const std::string header1 = " ╭─────────┬───────────┬──────────┬──────────┬──────────┬──────────────────────";
+                const std::string header2 = " │  Depth  │   Score   │   Nodes  │    NPS   │   Time   │ Principal variation  ";
+                const std::string header3 = " ├─────────┼───────────┼──────────┼──────────┼──────────┼──────────────────────";
+
+                std::cout << close_table(header1, terminal_width, "─", "╮");
+                std::cout << close_table(header2, terminal_width);
+                std::cout << close_table(header3, terminal_width, "─", "┤");
             }
 
             ss_depth << depth << "/" << seldepth;
@@ -203,9 +258,15 @@ namespace search::report {
                 << line_color << std::setw(7) << pretty_int(nodes) << ASCII_RESET_COLOR << "  │ "
                 << line_color << std::setw(7) << pretty_int(nps) << ASCII_RESET_COLOR << "  │ "
                 << line_color << std::setw(7) << pretty_milli(time) << ASCII_RESET_COLOR << "  │ "
-                << pretty_pv(board, pv_line, line_color) << ASCII_RESET_COLOR << "\n";
+                << pretty_pv(board, pv_line, line_color, terminal_width) << ASCII_RESET_COLOR << "\n";
 
-            std::cout << "\r" << res.str() << std::flush;
+            std::cout << "\r";
+            std::string line;
+            while (std::getline(res, line)) {
+                std::cout << close_table(line, terminal_width, " ");
+            }
+
+            std::cout << std::flush;
 
         } else {
 
