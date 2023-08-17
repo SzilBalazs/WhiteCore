@@ -1,6 +1,6 @@
-name: Check Bench & Run Tests
+name: Validate Bench & Run Tests
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   WhiteCore:
@@ -58,5 +58,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}}${{matrix.exe-suffix}}
+          name: WhiteCore-${{matrix.arch}}${{matrix.suffix}}${{matrix.exe-suffix}}
           path: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}}${{matrix.exe-suffix}}
