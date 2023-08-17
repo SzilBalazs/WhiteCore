@@ -5,21 +5,21 @@ on: [push]
 jobs:
   WhiteCore:
     runs-on: ${{matrix.os}}
-    name: WhiteCore ${{matrix.arch}} ${{matrix.os}}
+    name: WhiteCore ${{matrix.arch}} ${{matrix.os}} ${{matrix.compiler}}}
 
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         arch: [popcnt, avx2, bmi2]
+        compiler: [g++, clang++]
         include:
           - os: ubuntu-latest
-            compiler: [g++, clang++]
             suffix: "-linux"
             packages: |
               sudo apt-get update
               sudo apt-get install valgrind clang-15 g++
           - os: windows-latest
-            compiler: [g++, clang-cl]
             suffix: "-win"
             exe-suffix: ".exe"
 
@@ -66,5 +66,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: WhiteCore-${{matrix.arch}}${{matrix.suffix}}${{matrix.exe-suffix}}
+          name: WhiteCore-${{matrix.arch}}-${{matrix.compiler}}${{matrix.suffix}}${{matrix.exe-suffix}}
           path: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}}${{matrix.exe-suffix}}
