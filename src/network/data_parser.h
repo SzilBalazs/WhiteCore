@@ -33,7 +33,53 @@ namespace nn {
         std::vector<unsigned int> features;
         float wdl;
         float eval;
-        float phase;
+
+        explicit TrainingEntry(const std::string &entry) {
+            std::stringstream ss(entry);
+            unsigned int sq = 56, idx = 0;
+
+            std::string s_fen, s_ply, s_bm, s_eval, s_wdl;
+            std::getline(ss, s_fen, ';');
+            std::getline(ss, s_ply, ';');
+            std::getline(ss, s_bm, ';');
+            std::getline(ss, s_eval, ';');
+            std::getline(ss, s_wdl, ';');
+
+            if (s_wdl == "1") {
+                wdl = 1.0f;
+            } else if (s_wdl == "0") {
+                wdl = 0.5f;
+            } else {
+                wdl = 0.0f;
+            }
+
+            for (; idx < s_fen.size() && s_fen[idx] != ' '; idx++) {
+                char c = s_fen[idx];
+                if ('1' <= c && c <= '8') {
+                    sq += c - '0';
+                } else if (c == '/') {
+                    sq -= 16;
+                } else {
+                    Piece p = piece_from_char(c);
+                    features.emplace_back(Network::get_feature_index(p, sq));
+                    sq++;
+                }
+            }
+
+            Color stm;
+            idx++;
+            if (s_fen[idx] == 'w')
+                stm = WHITE;
+            else if (s_fen[idx] == 'b')
+                stm = BLACK;
+            else {
+                throw std::runtime_error("Invalid color specified in FEN " + entry + ".");
+            }
+
+            int eval_int = std::stoi(s_eval);
+            if (stm == BLACK) eval_int *= -1;
+            eval = activations::sigmoid::forward(float(eval_int) / 400.0f);
+        }
     };
 
     class DataParser {
@@ -47,11 +93,11 @@ namespace nn {
             }
         }
 
-        void read_batch(size_t batch_size, TrainingEntry *entries, bool &is_new_epoch) {
+        void read_batch(size_t batch_size, std::string *lines, bool &is_new_epoch) {
             std::string line;
             for (size_t i = 0; i < batch_size; i++) {
                 if (std::getline(file, line)) {
-                    entries[i] = parse_entry(line);
+                    lines[i] = line;
                 } else {
                     i--;
                     file.clear();
@@ -63,57 +109,5 @@ namespace nn {
 
     private:
         std::ifstream file;
-
-        [[nodiscard]] static TrainingEntry parse_entry(const std::string &entry) {
-            TrainingEntry res;
-            res.phase = 0.0f;
-            std::stringstream ss(entry);
-            unsigned int sq = 56, idx = 0;
-
-            std::string fen, ply, bm, eval, wdl;
-            std::getline(ss, fen, ';');
-            std::getline(ss, ply, ';');
-            std::getline(ss, bm, ';');
-            std::getline(ss, eval, ';');
-            std::getline(ss, wdl, ';');
-
-            if (wdl == "1") {
-                res.wdl = 1.0f;
-            } else if (wdl == "0") {
-                res.wdl = 0.5f;
-            } else {
-                res.wdl = 0.0f;
-            }
-
-            for (; idx < fen.size() && fen[idx] != ' '; idx++) {
-                char c = fen[idx];
-                if ('1' <= c && c <= '8') {
-                    sq += c - '0';
-                } else if (c == '/') {
-                    sq -= 16;
-                } else {
-                    Piece p = piece_from_char(c);
-                    res.phase += PIECE_TO_PHASE[p.type];
-                    res.features.emplace_back(Network::get_feature_index(p, sq));
-                    sq++;
-                }
-            }
-
-            Color stm;
-            idx++;
-            if (fen[idx] == 'w')
-                stm = WHITE;
-            else if (fen[idx] == 'b')
-                stm = BLACK;
-            else {
-                throw std::runtime_error("Invalid color specified in FEN " + entry + ".");
-            }
-
-            int eval_int = std::stoi(eval);
-            if (stm == BLACK) eval_int *= -1;
-            res.eval = activations::sigmoid::forward(float(eval_int) / 400.0f);
-
-            return res;
-        }
     };
 } // namespace nn

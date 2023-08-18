@@ -82,7 +82,7 @@ namespace nn {
             l1.randomize(mt);
         }
 
-        void forward(const std::vector<unsigned int> &features, std::array<float, L1_SIZE> &l0_output, std::array<float, 1> &l1_output, float phase) const {
+        void forward(const std::vector<unsigned int> &features, std::array<float, L1_SIZE> &l0_output, std::array<float, 1> &l1_output) const {
             l0.forward(features, l0_output);
             l1.forward(l0_output, l1_output);
         }

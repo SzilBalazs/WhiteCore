@@ -48,8 +48,8 @@ namespace nn {
                 network = Network();
             }
 
-            entries = new TrainingEntry[batch_size];
-            entries_next = new TrainingEntry[batch_size];
+            entries = new std::string[batch_size];
+            entries_next = new std::string[batch_size];
 
             bool _;
             training_parser.read_batch(batch_size, entries_next, _);
@@ -74,7 +74,7 @@ namespace nn {
 
                     delete[] entries;
                     entries = entries_next;
-                    entries_next = new TrainingEntry[batch_size];
+                    entries_next = new std::string[batch_size];
 
                     gradients.assign(thread_count, Gradient());
                     errors.assign(thread_count, 0.0f);
@@ -100,7 +100,7 @@ namespace nn {
 
                     if (th_loading.joinable()) th_loading.join();
 
-                    if (iter % 100 == 0) {
+                    if (iter % 10 == 0) {
                         float average_error = checkpoint_error / float(batch_size * checkpoint_iter);
                         float average_accuracy = float(checkpoint_accuracy) / float(batch_size * checkpoint_iter);
                         auto [val_loss, val_acc] = test_validation();
@@ -154,12 +154,12 @@ namespace nn {
         std::vector<Gradient> gradients;
         std::vector<float> errors;
         std::vector<int> accuracy;
-        TrainingEntry *entries, *entries_next;
+        std::string *entries, *entries_next;
 
         std::pair<float, float> test_validation() {
             bool _;
             delete[] entries;
-            entries = new TrainingEntry[batch_size];
+            entries = new std::string[batch_size];
             validation_parser.read_batch(batch_size, entries, _);
 
             errors.assign(thread_count, 0.0f);
@@ -193,13 +193,13 @@ namespace nn {
             Gradient &g = gradients[id];
 
             for (size_t i = id; i < batch_size; i += thread_count) {
-                TrainingEntry &entry = entries[i];
+                TrainingEntry entry(entries[i]);
 
                 std::array<float, L1_SIZE> l0_output;
                 std::array<float, L1_SIZE> l0_loss;
                 std::array<float, 1> l1_output;
 
-                network.forward(entry.features, l0_output, l1_output, entry.phase);
+                network.forward(entry.features, l0_output, l1_output);
                 float prediction = l1_output[0];
 
                 float error = (1.0f - EVAL_INFLUENCE) * (prediction - entry.wdl) * (prediction - entry.wdl) +
