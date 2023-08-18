@@ -494,7 +494,7 @@ namespace search {
 
                 if (alpha > -WORST_MATE && !see(board, move, 0)) {
                     stat_tracker::record_success("qsearch_see");
-                    continue;
+                    break;
                 } else {
                     stat_tracker::record_fail("qsearch_see");
                 }
