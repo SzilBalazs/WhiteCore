@@ -30,7 +30,7 @@ wandb.init(
     config={
         "learning_rate": 0.001,
         "architecture": 4,
-        "epochs": 30,
+        "epochs": 20,
         "batch_size": 16384,
         "thread_count": 4
     }
