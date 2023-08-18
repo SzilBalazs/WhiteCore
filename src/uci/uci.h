@@ -275,11 +275,12 @@ namespace uci {
         std::optional<std::string> training_data = find_element<std::string>(tokens, "training_data");
         std::optional<std::string> validation_data = find_element<std::string>(tokens, "validation_data");
         std::optional<float> learning_rate = find_element<float>(tokens, "lr");
+        std::optional<float> eval_influence = find_element<float>(tokens, "eval_influence");
         std::optional<size_t> epochs = find_element<size_t>(tokens, "epochs");
         std::optional<size_t> batch_size = find_element<size_t>(tokens, "batch");
         std::optional<size_t> threads = find_element<size_t>(tokens, "threads");
         nn::Trainer trainer(training_data.value_or("train.plain"), validation_data.value_or("validation.plain"), network_path, learning_rate.value_or(0.001f),
-                            epochs.value_or(10), batch_size.value_or(16384), threads.value_or(4));
+                            eval_influence.value_or(0.9f), epochs.value_or(20), batch_size.value_or(16384), threads.value_or(4));
     }
 
     std::vector<std::string> UCI::convert_to_tokens(const std::string &line) {

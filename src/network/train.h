@@ -28,11 +28,10 @@
 namespace nn {
 
     constexpr unsigned int PROGRESS_BAR_WIDTH = 25;
-    constexpr float EVAL_INFLUENCE = 0.9;
 
     class Trainer {
     public:
-        Trainer(const std::string &training_data, const std::string &validation_data, const std::optional<std::string> &network_path, float learning_rate, size_t epochs, size_t batch_size, size_t thread_count) : adam(learning_rate), training_parser(training_data), validation_parser(validation_data), entry_count(0), batch_size(batch_size), thread_count(thread_count) {
+        Trainer(const std::string &training_data, const std::string &validation_data, const std::optional<std::string> &network_path, float learning_rate, float eval_influence, size_t epochs, size_t batch_size, size_t thread_count) : adam(learning_rate), training_parser(training_data), validation_parser(validation_data), entry_count(0), batch_size(batch_size), thread_count(thread_count), eval_influence(eval_influence) {
 
             if (!std::filesystem::exists("networks")) {
                 std::filesystem::create_directory("networks");
@@ -151,6 +150,7 @@ namespace nn {
         DataParser validation_parser;
         size_t entry_count;
         size_t batch_size, thread_count;
+        float eval_influence;
         std::vector<Gradient> gradients;
         std::vector<float> errors;
         std::vector<int> accuracy;
@@ -202,13 +202,13 @@ namespace nn {
                 network.forward(entry.features, l0_output, l1_output);
                 float prediction = l1_output[0];
 
-                float error = (1.0f - EVAL_INFLUENCE) * (prediction - entry.wdl) * (prediction - entry.wdl) +
-                              EVAL_INFLUENCE * (prediction - entry.eval) * (prediction - entry.eval);
+                float error = (1.0f - eval_influence) * (prediction - entry.wdl) * (prediction - entry.wdl) +
+                              eval_influence * (prediction - entry.eval) * (prediction - entry.eval);
                 errors[id] += error;
                 accuracy[id] += ((entry.wdl - 0.5f) * (prediction - 0.5f) > 0.0f) || std::abs(entry.wdl - prediction) < 0.05f;
 
                 if constexpr (train) {
-                    std::array<float, 1> l1_loss = {(1 - EVAL_INFLUENCE) * 2.0f * (prediction - entry.wdl) + EVAL_INFLUENCE * 2.0f * (prediction - entry.eval)};
+                    std::array<float, 1> l1_loss = {(1 - eval_influence) * 2.0f * (prediction - entry.wdl) + eval_influence * 2.0f * (prediction - entry.eval)};
 
                     network.l1.backward(l1_loss, l0_output, l1_output, l0_loss, g.l1);
                     network.l0.backward(l0_loss, entry.features, l0_output, g.l0);

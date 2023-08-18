@@ -19,6 +19,7 @@ import sys
 import time
 import wandb
 import subprocess
+import glob
 from datetime import datetime
 
 os.system("rm -rf networks")
@@ -30,6 +31,8 @@ wandb.init(
     config={
         "learning_rate": 0.001,
         "architecture": 4,
+        "eval_influence": 0.9,
+        "dataset": glob.glob(f'data/*.plain'),
         "epochs": 20,
         "batch_size": 16384,
         "thread_count": 4
@@ -42,6 +45,7 @@ wandb.run.name = f"exp-{commit_hash}-{current_time}"
 
 command_string = f"train lr {wandb.run.config['learning_rate']} " \
                  f"epochs {wandb.run.config['epochs']} batch {wandb.run.config['batch_size']} " \
+                 f"eval_influence {wandb.run.config['eval_influence']}" \
                  f"threads {wandb.run.config['thread_count']}\n"
 
 p = subprocess.Popen("./WhiteCore", stdout=sys.stdout, stdin=subprocess.PIPE)
