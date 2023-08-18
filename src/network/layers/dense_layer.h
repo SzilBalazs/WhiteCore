@@ -23,6 +23,8 @@
 #include <random>
 #include <thread>
 #include <vector>
+#include <immintrin.h>
+
 
 #include "../activations/none.h"
 
@@ -30,8 +32,8 @@ namespace nn::layers {
 
     template<size_t IN, size_t OUT>
     struct DenseLayerGradient {
-        std::array<float, OUT> biases;
-        std::array<float, IN * OUT> weights;
+        alignas(64) std::array<float, OUT> biases;
+        alignas(64) std::array<float, IN * OUT> weights;
 
         DenseLayerGradient() {
             std::fill(biases.begin(), biases.end(), 0);
@@ -39,11 +41,17 @@ namespace nn::layers {
         }
 
         void operator+=(const DenseLayerGradient &g) {
-            for (size_t i = 0; i < OUT; i++) {
-                biases[i] += g.biases[i];
+            for (size_t i = 0; i < OUT; i += 8) {
+                __m256 l = _mm256_load_ps(&biases[i]);
+                __m256 r = _mm256_load_ps(&g.biases[i]);
+                __m256 res = _mm256_add_ps(l, r);
+                _mm256_store_ps(&biases[i], res);
             }
-            for (size_t i = 0; i < IN * OUT; i++) {
-                weights[i] += g.weights[i];
+            for (size_t i = 0; i < IN * OUT; i += 8) {
+                __m256 l = _mm256_load_ps(&weights[i]);
+                __m256 r = _mm256_load_ps(&g.weights[i]);
+                __m256 res = _mm256_add_ps(l, r);
+                _mm256_store_ps(&weights[i], res);
             }
         }
     };

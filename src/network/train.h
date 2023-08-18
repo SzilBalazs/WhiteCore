@@ -100,7 +100,7 @@ namespace nn {
 
                     if (th_loading.joinable()) th_loading.join();
 
-                    if (iter % 20 == 0) {
+                    if (iter % 100 == 0) {
                         float average_error = checkpoint_error / float(batch_size * checkpoint_iter);
                         float average_accuracy = float(checkpoint_accuracy) / float(batch_size * checkpoint_iter);
                         auto [val_loss, val_acc] = test_validation();
