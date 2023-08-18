@@ -9,6 +9,8 @@ fi
 git clone https://github.com/SzilBalazs/WhiteCore
 make EXE=Binary -C WhiteCore
 cp WhiteCore/Binary Binary
+./Binary test || exit 1
+./Binary bench
 rm -rf WhiteCore
 
 while true
