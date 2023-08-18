@@ -492,9 +492,9 @@ namespace search {
             while (!move_list.empty()) {
                 chess::Move move = move_list.next_move();
 
-                if (alpha > -WORST_MATE && !see(board, move, 0)) {
+                if (alpha > -WORST_MATE && !see(board, move, std::max(0, alpha - static_eval - 200))) {
                     stat_tracker::record_success("qsearch_see");
-                    break;
+                    continue;
                 } else {
                     stat_tracker::record_fail("qsearch_see");
                 }
