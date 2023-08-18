@@ -20,10 +20,10 @@
 #include <array>
 #include <cstring>
 #include <functional>
+#include <immintrin.h>
 #include <random>
 #include <thread>
 #include <vector>
-#include <immintrin.h>
 
 
 #include "../activations/none.h"
@@ -41,6 +41,7 @@ namespace nn::layers {
         }
 
         void operator+=(const DenseLayerGradient &g) {
+#ifdef AVX2
             for (size_t i = 0; i < OUT; i += 8) {
                 __m256 l = _mm256_load_ps(&biases[i]);
                 __m256 r = _mm256_load_ps(&g.biases[i]);
@@ -53,6 +54,14 @@ namespace nn::layers {
                 __m256 res = _mm256_add_ps(l, r);
                 _mm256_store_ps(&weights[i], res);
             }
+#else
+            for (size_t i = 0; i < OUT; i++) {
+                biases[i] += g.biases[i];
+            }
+            for (size_t i = 0; i < IN * OUT; i++) {
+                weights[i] += g.weights[i];
+            }
+#endif
         }
     };
 
