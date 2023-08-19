@@ -30,7 +30,8 @@
 namespace nn {
 
     struct TrainingEntry {
-        std::vector<unsigned int> features;
+        std::vector<unsigned int> white_features;
+        std::vector<unsigned int> black_features;
         float wdl;
         float eval;
 
@@ -61,7 +62,10 @@ namespace nn {
                     sq -= 16;
                 } else {
                     Piece p = piece_from_char(c);
-                    features.emplace_back(Network::get_feature_index(p, sq));
+                    white_features.emplace_back(Network::get_feature_index(p, sq));
+                    p.color = color_enemy(p.color);
+                    black_features.emplace_back(Network::get_feature_index(p, sq ^ 56));
+
                     sq++;
                 }
             }
