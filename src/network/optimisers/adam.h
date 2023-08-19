@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "network.h"
+#include "../network.h"
 
 namespace nn {
 
@@ -38,8 +38,8 @@ namespace nn {
             update(network.l1.biases, m_gradient.l1.biases, v_gradient.l1.biases, total.l1.biases);
         }
 
-        void reduce_learning_rate(float rate) {
-            LR *= rate;
+        void update_learning_rate(size_t epoch) {
+            LR *= std::pow(epoch + 1.0f, -0.5);
         }
 
     private:

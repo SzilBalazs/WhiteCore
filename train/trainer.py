@@ -29,7 +29,7 @@ wandb.init(
     project="white-core",
 
     config={
-        "learning_rate": 0.001,
+        "learning_rate": 0.01,
         "architecture": 4,
         "eval_influence": 0.9,
         "dataset": glob.glob(f'data/*.plain'),

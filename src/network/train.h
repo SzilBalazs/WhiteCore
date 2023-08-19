@@ -18,8 +18,8 @@
 #pragma once
 
 #include "../utils/utilities.h"
-#include "adam.h"
 #include "data_parser.h"
+#include "optimisers/adam.h"
 
 #include <filesystem>
 #include <optional>
@@ -62,9 +62,7 @@ namespace nn {
                 int64_t epoch_iter = 0;
                 int64_t checkpoint_iter = 0;
 
-                if (epoch == 15) {
-                    adam.reduce_learning_rate(0.1);
-                }
+                adam.update_learning_rate(epoch);
 
                 while (!is_new_epoch) {
                     iter++;
