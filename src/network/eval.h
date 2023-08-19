@@ -35,6 +35,6 @@ namespace eval {
             }
         }
 
-        return nnue.evaluate(board.get_stm());
+        return nnue.evaluate(board.get_stm()) + 5 * (piece_count >= 7);
     }
 } // namespace eval
