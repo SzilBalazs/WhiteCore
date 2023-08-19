@@ -33,18 +33,18 @@ def main():
     with open(args.input_file, 'rb') as f:
         magic_raw = f.read(4)
         magic = struct.unpack('i', magic_raw)[0]
-        assert magic == -4
+        assert magic == -5
 
         data = f.read(256 * 2)
         biases = struct.unpack('256h', data)
 
-        data = f.read(768 * 256 * 2)
-        weights = struct.unpack('196608h', data)
+        data = f.read(768 * 512 * 2)
+        weights = struct.unpack('393216h', data)
         weights = np.array(weights)
-        weights = weights.reshape((768, 256))
+        weights = weights.reshape((768, 512))
         fig, axs = plt.subplots(8, 12, figsize=(6, 4))
         plt.subplots_adjust(hspace=0.1, wspace=0.1)
-        for base in range(32):
+        for base in range(64):
             for neuron in range(8):
                 numbers = weights[:, neuron + base * 8]
                 numbers = np.array(numbers).reshape((96, 8))
