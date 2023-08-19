@@ -14,6 +14,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
 import os
 import sys
 import time
@@ -33,7 +34,7 @@ wandb.init(
         "architecture": 5,
         "eval_influence": 0.9,
         "dataset": glob.glob(f'data/*.plain'),
-        "epochs": 20,
+        "epochs": 30,
         "batch_size": 16384,
         "thread_count": 4
     }
