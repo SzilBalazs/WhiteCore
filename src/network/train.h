@@ -100,8 +100,8 @@ namespace nn {
                     if (th_loading.joinable()) th_loading.join();
 
                     if (iter % 10 == 0) {
-                        float average_error = checkpoint_error / float(batch_size * checkpoint_iter);
-                        float average_accuracy = float(checkpoint_accuracy) / float(batch_size * checkpoint_iter);
+                        float average_error = checkpoint_error / float(batch_size * checkpoint_iter * 2);
+                        float average_accuracy = float(checkpoint_accuracy) / float(batch_size * checkpoint_iter * 2);
                         auto [val_loss, val_acc] = test_validation();
 
                         int64_t current_time = now();
@@ -182,37 +182,42 @@ namespace nn {
                 correct += accuracy[id];
             }
 
-            val_loss /= batch_size;
+            val_loss /= batch_size * 2;
 
-            float val_acc = float(correct) / float(batch_size);
+            float val_acc = float(correct) / float(batch_size * 2);
             return {val_loss, val_acc};
         }
 
         template<bool train>
         void process_batch(int id) {
-            Gradient &g = gradients[id];
 
             for (size_t i = id; i < batch_size; i += thread_count) {
                 TrainingEntry entry(entries[i]);
 
-                std::array<float, L1_SIZE> l0_output;
-                std::array<float, L1_SIZE> l0_loss;
-                std::array<float, 1> l1_output;
+                process_entry<train>(id, entry.white_features, entry.wdl, entry.eval);
+                process_entry<train>(id, entry.black_features, 1.0f - entry.wdl, 1.0f - entry.eval);
+            }
+        }
 
-                network.forward(entry.features, l0_output, l1_output);
-                float prediction = l1_output[0];
+        template<bool train>
+        void process_entry(int id, const std::vector<unsigned int> &features, float wdl, float eval) {
+            std::array<float, L1_SIZE> l0_output;
+            std::array<float, L1_SIZE> l0_loss;
+            std::array<float, 1> l1_output;
 
-                float error = (1.0f - eval_influence) * (prediction - entry.wdl) * (prediction - entry.wdl) +
-                              eval_influence * (prediction - entry.eval) * (prediction - entry.eval);
-                errors[id] += error;
-                accuracy[id] += ((entry.wdl - 0.5f) * (prediction - 0.5f) > 0.0f) || std::abs(entry.wdl - prediction) < 0.05f;
+            network.forward(features, l0_output, l1_output);
+            float prediction = l1_output[0];
 
-                if constexpr (train) {
-                    std::array<float, 1> l1_loss = {(1 - eval_influence) * 2.0f * (prediction - entry.wdl) + eval_influence * 2.0f * (prediction - entry.eval)};
+            float error = (1.0f - eval_influence) * (prediction - wdl) * (prediction - wdl) +
+                          eval_influence * (prediction - eval) * (prediction - eval);
+            errors[id] += error;
+            accuracy[id] += ((wdl - 0.5f) * (prediction - 0.5f) > 0.0f) || std::abs(wdl - prediction) < 0.05f;
 
-                    network.l1.backward(l1_loss, l0_output, l1_output, l0_loss, g.l1);
-                    network.l0.backward(l0_loss, entry.features, l0_output, g.l0);
-                }
+            if constexpr (train) {
+                std::array<float, 1> l1_loss = {(1 - eval_influence) * 2.0f * (prediction - wdl) + eval_influence * 2.0f * (prediction - eval)};
+
+                network.l1.backward(l1_loss, l0_output, l1_output, l0_loss, gradients[id].l1);
+                network.l0.backward(l0_loss, features, l0_output, gradients[id].l0);
             }
         }
 

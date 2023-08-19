@@ -74,41 +74,29 @@ Square square_from_string(const std::string &s) {
     }
 }
 
-Piece piece_from_char(char c) {
-    Piece piece;
+// clang-format off
+static constexpr Piece PIECE_LOOKUP[128] = {
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {BISHOP, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {KING, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {KNIGHT, WHITE}, {PIECE_EMPTY, WHITE},
+        {PAWN, WHITE}, {QUEEN, WHITE}, {ROOK, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+        {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, BLACK}, {BISHOP, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK},
+        {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK}, {KING, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK}, {KNIGHT, BLACK}, {PIECE_EMPTY, BLACK},
+        {PAWN, BLACK}, {QUEEN, BLACK}, {ROOK, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK},
+        {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, BLACK}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE}, {PIECE_EMPTY, WHITE},
+};
+// clang-format on
 
-    if ('a' <= c && c <= 'z') {
-        piece.color = BLACK;
-    } else if ('A' <= c && c <= 'Z') {
-        piece.color = WHITE;
-        c += 32;
-    } else {
-        throw std::runtime_error("Invalid piece char: " + std::string(c, 1));
-    }
-
-    switch (c) {
-        case 'p':
-            piece.type = PAWN;
-            break;
-        case 'r':
-            piece.type = ROOK;
-            break;
-        case 'n':
-            piece.type = KNIGHT;
-            break;
-        case 'b':
-            piece.type = BISHOP;
-            break;
-        case 'q':
-            piece.type = QUEEN;
-            break;
-        case 'k':
-            piece.type = KING;
-            break;
-        default:
-            throw std::runtime_error("Invalid piece char: " + std::string(c, 1));
-    }
-    return piece;
+constexpr Piece piece_from_char(char c) {
+    return PIECE_LOOKUP[int(c)];
 }
 
 char char_from_piece(Piece piece) {
