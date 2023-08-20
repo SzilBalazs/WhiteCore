@@ -306,7 +306,12 @@ namespace search {
             if (depth <= 0)
                 return qsearch<node_type>(alpha, beta);
 
-            Score static_eval = ss->eval = eval::evaluate(board, nnue);
+            Score static_eval;
+            if (is_singular_check) {
+                static_eval = ss->eval;
+            } else {
+                static_eval = ss->eval = eval::evaluate(board, nnue);
+            }
             bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
 
             if (root_node || in_check || is_singular_check)
@@ -410,6 +415,9 @@ namespace search {
 
                     if (score < singular_beta) {
                         extension = 1;
+                        stat_tracker::record_success("se");
+                    } else {
+                        stat_tracker::record_fail("se");
                     }
                 }
 
@@ -464,7 +472,9 @@ namespace search {
                         }
                     }
 
-                    shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(beta, ss->ply), TT_BETA, move);
+                    if (!is_singular_check) {
+                        shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(beta, ss->ply), TT_BETA, move);
+                    }
                     return beta;
                 }
 
@@ -492,7 +502,10 @@ namespace search {
                 stat_tracker::record_fail("skip_quiets");
             }
 
-            shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(best_score, ss->ply), flag, best_move);
+            if (!is_singular_check) {
+                shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(best_score, ss->ply), flag, best_move);
+            }
+
             return alpha;
         }
 

@@ -50,6 +50,7 @@ void init_all() {
     stat_tracker::add_stat("pvs_see_capture");
     stat_tracker::add_stat("qsearch_see");
     stat_tracker::add_stat("skip_quiets");
+    stat_tracker::add_stat("se");
 }
 
 int main(int argc, char *argv[]) {
