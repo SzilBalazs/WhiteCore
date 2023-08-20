@@ -36,7 +36,7 @@ namespace search {
             for (Depth depth = 0; depth < MAX_PLY + 1; depth++) {
                 double moves_log = made_moves == 0 ? 0 : std::log(made_moves);
                 double depth_log = depth == 0 ? 0 : std::log(depth);
-                lmr_reductions[made_moves][depth] = 1.0 + moves_log * depth_log / 1.75;
+                lmr_reductions[made_moves][depth] = 1.0 + moves_log * depth_log / 2.0;
             }
         }
     }
