@@ -406,6 +406,7 @@ namespace search {
                     ss->skip_move = move;
                     Score score = search<NON_PV_NODE>(singular_depth, singular_beta - 1, singular_beta, ss);
                     ss->skip_move = chess::NULL_MOVE;
+                    ss->move = move;
 
                     if (score < singular_beta) {
                         extension = 1;
