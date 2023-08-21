@@ -273,7 +273,7 @@ namespace search {
             }
 
             if (non_root_node) {
-                if (board.is_draw()) {
+                if (board.is_draw<pv_node>()) {
                     return 0;
                 }
 

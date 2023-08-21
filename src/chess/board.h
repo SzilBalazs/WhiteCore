@@ -101,15 +101,16 @@ namespace chess {
             return ~occupied();
         }
 
+        template<bool is_pv = false>
         [[nodiscard]] bool is_draw() const {
             if (get_move50() >= 100) return true;
-            unsigned int cnt = 0;
+            size_t cnt = 0;
             for (const BoardState &st : states) {
                 if (st.hash == states.back().hash) {
                     cnt++;
                 }
             }
-            return cnt >= 2;
+            return cnt >= 2 + is_pv;
         }
 
         [[nodiscard]] bool is_check() const;
