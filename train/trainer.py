@@ -33,7 +33,7 @@ wandb.init(
         "architecture": 5,
         "eval_influence": 0.9,
         "dataset": glob.glob(f'data/*.plain'),
-        "epochs": 20,
+        "epochs": 30,
         "batch_size": 16384,
         "thread_count": 4
     }
@@ -72,7 +72,9 @@ while is_running:
                            "training accuracy": float(data[3]),
                            "validation loss": float(data[4]),
                            "validation accuracy": float(data[5]),
-                           "positions per second": int(data[2])})
+                           "positions per second": int(data[2]),
+                           "epoch": int(data[6]),
+                           "learning rate": float(data[7])})
         f.close()
     except Exception as e:
         print("Failed to sync data with child process", e)

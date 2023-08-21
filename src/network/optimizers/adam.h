@@ -17,9 +17,9 @@
 
 #pragma once
 
-#include "network.h"
+#include "../network.h"
 
-namespace nn {
+namespace nn::optimizers {
 
     class Adam {
     public:
@@ -38,8 +38,12 @@ namespace nn {
             update(network.l1.biases, m_gradient.l1.biases, v_gradient.l1.biases, total.l1.biases);
         }
 
-        void reduce_learning_rate(float rate) {
-            LR *= rate;
+        float get_learning_rate() {
+            return LR;
+        }
+
+        void update_learning_rate(float lr) {
+            LR = lr;
         }
 
     private:

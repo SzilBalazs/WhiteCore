@@ -18,8 +18,9 @@
 #pragma once
 
 #include "../utils/utilities.h"
-#include "adam.h"
 #include "data_parser.h"
+#include "schedulers/cosine.h"
+#include "optimizers/adam.h"
 
 #include <filesystem>
 #include <optional>
@@ -31,7 +32,10 @@ namespace nn {
 
     class Trainer {
     public:
-        Trainer(const std::string &training_data, const std::string &validation_data, const std::optional<std::string> &network_path, float learning_rate, float eval_influence, size_t epochs, size_t batch_size, size_t thread_count) : adam(learning_rate), training_parser(training_data), validation_parser(validation_data), entry_count(0), batch_size(batch_size), thread_count(thread_count), eval_influence(eval_influence) {
+        Trainer(const std::string &training_data, const std::string &validation_data, const std::optional<std::string> &network_path,
+                float learning_rate, float eval_influence, size_t epochs, size_t batch_size, size_t thread_count) :
+                                                                                                                    adam(learning_rate), lr_scheduler(5, 20, learning_rate, learning_rate / 20), training_parser(training_data), validation_parser(validation_data),
+                                                                                                                    entry_count(0), batch_size(batch_size), thread_count(thread_count), eval_influence(eval_influence) {
 
             if (!std::filesystem::exists("networks")) {
                 std::filesystem::create_directory("networks");
@@ -62,9 +66,7 @@ namespace nn {
                 int64_t epoch_iter = 0;
                 int64_t checkpoint_iter = 0;
 
-                if (epoch == 15) {
-                    adam.reduce_learning_rate(0.1);
-                }
+                adam.update_learning_rate(lr_scheduler(epoch));
 
                 while (!is_new_epoch) {
                     iter++;
@@ -99,7 +101,7 @@ namespace nn {
 
                     if (th_loading.joinable()) th_loading.join();
 
-                    if (iter % 10 == 0) {
+                    if (iter % 100 == 0) {
                         float average_error = checkpoint_error / float(batch_size * checkpoint_iter * 2);
                         float average_accuracy = float(checkpoint_accuracy) / float(batch_size * checkpoint_iter * 2);
                         auto [val_loss, val_acc] = test_validation();
@@ -128,7 +130,9 @@ namespace nn {
                         std::cout << "] - Epoch " << epoch << " - Iteration " << iter << " - Error " << average_error << " - ETA " << (eta / 1000) << "s - " << pos_per_s << " pos/s \r" << std::flush;
 
 
-                        log_file << iter << " " << average_error << " " << pos_per_s << " " << average_accuracy << " " << val_loss << " " << val_acc << "\n";
+                        log_file << iter << " " << average_error << " " << pos_per_s << " "
+                                 << average_accuracy << " " << val_loss << " " << val_acc << " "
+                                 << epoch << " " << adam.get_learning_rate() << "\n";
                         log_file.flush();
                         checkpoint_error = 0.0f;
                         checkpoint_accuracy = 0;
@@ -145,7 +149,8 @@ namespace nn {
 
     private:
         Network network;
-        Adam adam;
+        optimizers::Adam adam;
+        schedulers::CosineScheduler lr_scheduler;
         DataParser training_parser;
         DataParser validation_parser;
         size_t entry_count;
