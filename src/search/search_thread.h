@@ -303,8 +303,13 @@ namespace search {
             if (depth <= 0)
                 return qsearch<node_type>(alpha, beta);
 
-            Score static_eval = ss->eval = eval::evaluate(board, nnue);
-            bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
+            const Color stm = board.get_stm();
+            const Color xstm = color_enemy(stm);
+            const chess::Bitboard threats = threats::get_threats(board);
+            const bool threats_us = bool(threats & board.sides(stm));
+            const bool threats_them = bool(threats & board.sides(xstm));
+            const Score static_eval = ss->eval = eval::evaluate(board, nnue);
+            const bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
 
             if (root_node || in_check)
                 goto search_moves;
@@ -312,7 +317,7 @@ namespace search {
             if (!entry && non_pv_node && depth >= 4)
                 depth--;
 
-            if (depth <= 3 && static_eval + 150 * depth <= alpha) {
+            if (depth <= 3 && static_eval + 150 * depth <= alpha && !threats_them) {
                 Score score = qsearch<NON_PV_NODE>(alpha, beta);
                 if (score <= alpha)
                     return score;
