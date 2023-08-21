@@ -390,6 +390,7 @@ namespace search {
                 }
 
                 shared.tt.prefetch(board.hash_after_move(move));
+                const Depth new_depth = depth - 1;
                 const int64_t nodes_before = shared.node_count[id];
 
                 shared.node_count[id]++;
@@ -403,18 +404,18 @@ namespace search {
                     R += !improving;
                     R -= std::clamp(history.butterfly[move.get_from()][move.get_to()] / 8192, -2, 2);
 
-                    Depth D = std::clamp(depth - R, 1, depth - 1);
+                    Depth D = std::clamp(new_depth - R, 1, depth - 1);
                     score = -search<NON_PV_NODE>(D, -alpha - 1, -alpha, ss + 1);
 
                     if (score > alpha && R > 1) {
-                        score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ss + 1);
+                        score = -search<NON_PV_NODE>(new_depth, -alpha - 1, -alpha, ss + 1);
                     }
                 } else if (non_pv_node || made_moves != 0) {
-                    score = -search<NON_PV_NODE>(depth - 1, -alpha - 1, -alpha, ss + 1);
+                    score = -search<NON_PV_NODE>(new_depth, -alpha - 1, -alpha, ss + 1);
                 }
 
                 if (pv_node && (made_moves == 0 || (alpha < score && score < beta))) {
-                    score = -search<PV_NODE>(depth - 1, -beta, -alpha, ss + 1);
+                    score = -search<PV_NODE>(new_depth, -beta, -alpha, ss + 1);
                 }
 
                 board.undo_move(move, &nnue);
