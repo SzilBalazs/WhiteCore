@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "../chess/bitboard.h"
 #include "../chess/constants.h"
 #include "../external/incbin/incbin.h"
 #include "../utils/utilities.h"
@@ -90,8 +91,14 @@ namespace nn {
             accumulator.remove_feature(get_feature_index(piece, sq));
         }
 
-        Score evaluate(Color stm) {
+        Score evaluate(Color stm, chess::Bitboard threats) {
             accumulator.push(l0_output);
+
+            while (threats) {
+                int sq = threats.pop_lsb();
+                accumulator.add_feature(l0_output, 768 + sq);
+            }
+
             l1.forward(l0_output, l1_output);
             int32_t score = l1_output[0];
             if (stm == BLACK) score *= -1;
@@ -103,13 +110,13 @@ namespace nn {
         }
 
     private:
-        static constexpr int MAGIC = -5;
+        static constexpr int MAGIC = -6;
         static constexpr size_t L1_SIZE = 512;
 
         alignas(64) std::array<int16_t, L1_SIZE> l0_output;
         alignas(64) std::array<int32_t, 1> l1_output;
 
-        layers::Accumulator<768, L1_SIZE, int16_t, activations::crelu<int16_t, QSCALE>> accumulator;
+        layers::Accumulator<832, L1_SIZE, int16_t, activations::crelu<int16_t, QSCALE>> accumulator;
         layers::DenseLayer<L1_SIZE, 1, int16_t, int32_t, activations::none<int16_t>> l1;
     };
 

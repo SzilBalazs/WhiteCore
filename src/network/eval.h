@@ -35,6 +35,6 @@ namespace eval {
             }
         }
 
-        return nnue.evaluate(board.get_stm()) + 20 * (piece_count >= 7);
+        return nnue.evaluate(board.get_stm(), threats::get_threats(board)) + 20 * (piece_count >= 7);
     }
 } // namespace eval

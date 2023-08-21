@@ -78,6 +78,21 @@ namespace nn::layers {
 #endif
         }
 
+        void add_feature(std::array<T, OUT> &output, unsigned int feature) {
+#ifdef AVX2
+            for (size_t i = 0; i < chunk_count; i++) {
+                const unsigned int offset = i * register_width;
+                __m256i base = _mm256_load_si256((__m256i *) &output[offset]);
+                __m256i weight = _mm256_load_si256((__m256i *) &weights[feature * OUT + offset]);
+                _mm256_store_si256((__m256i *) &output[offset], _mm256_add_epi16(base, weight));
+            }
+#else
+            for (size_t j = 0; j < OUT; j++) {
+                output[j] += weights[feature * OUT + j];
+            }
+#endif
+        }
+
         void remove_feature(unsigned int feature) {
 #ifdef AVX2
             for (size_t i = 0; i < chunk_count; i++) {
