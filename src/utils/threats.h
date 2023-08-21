@@ -81,4 +81,4 @@ namespace threats {
         return threats;
     }
 
-}
+} // namespace threats

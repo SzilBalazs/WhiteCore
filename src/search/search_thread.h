@@ -303,8 +303,10 @@ namespace search {
             if (depth <= 0)
                 return qsearch<node_type>(alpha, beta);
 
-            Score static_eval = ss->eval = eval::evaluate(board, nnue);
-            bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
+            const chess::Bitboard threats = threats::get_threats(board);
+            const bool threats_them = bool(threats & board.sides(color_enemy(board.get_stm())));
+            const Score static_eval = ss->eval = eval::evaluate(board, nnue);
+            const bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
 
             if (root_node || in_check)
                 goto search_moves;
@@ -318,7 +320,7 @@ namespace search {
                     return score;
             }
 
-            if (non_pv_node && depth <= 8 && static_eval - (depth - improving) * 70 >= beta && std::abs(beta) < WORST_MATE) {
+            if (non_pv_node && depth <= 8 && static_eval - (depth - improving) * 70 + bool(threats_them) * 100 >= beta && std::abs(beta) < WORST_MATE) {
                 stat_tracker::record_success("rfp");
                 return static_eval;
             } else {
