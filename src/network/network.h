@@ -21,6 +21,7 @@
 #include "activations/relu.h"
 #include "activations/sigmoid.h"
 #include "layers/dense_layer.h"
+#include "../utils/threats.h"
 
 namespace nn {
 

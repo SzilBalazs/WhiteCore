@@ -134,6 +134,9 @@ namespace uci {
                 }
             }
         });
+        commands.emplace_back("threats", [&](context tokens) {
+            print(threats::get_threats(board).bb);
+        });
     }
 
     void UCI::register_options() {
