@@ -51,6 +51,10 @@ namespace threats {
         return attacks & opponent_queens;
     }
 
+    Bitboard get_threats(Bitboard occupied, Bitboard white_pawns, Bitboard black_pawns, Bitboard white_knights, Bitboard black_knights,
+                         Bitboard white_bishops, Bitboard black_bishops, Bitboard white_rooks, Bitboard black_rooks,
+                         Bitboard white_queens, Bitboard black_queens);
+
     Bitboard get_threats(const Board &board) {
 
         Bitboard occ = board.occupied();
@@ -106,4 +110,4 @@ namespace threats {
         return threats;
     }
 
-}
+} // namespace threats

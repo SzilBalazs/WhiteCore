@@ -34,7 +34,7 @@ namespace eval {
                 return 0;
             }
         }
-
-        return nnue.evaluate(board.get_stm(), threats::get_threats(board)) + 20 * (piece_count >= 7);
+        chess::Bitboard x = threats::get_threats(board) & board.sides(color_enemy(board.get_stm()));
+        return nnue.evaluate(board.get_stm(), x) + 20 * (piece_count >= 7);
     }
 } // namespace eval
