@@ -20,6 +20,7 @@
 #include "activations/crelu.h"
 #include "activations/relu.h"
 #include "activations/sigmoid.h"
+#include "layers/dense_layer_bucket.h"
 #include "layers/dense_layer.h"
 
 namespace nn {
@@ -28,7 +29,7 @@ namespace nn {
 
     struct Gradient {
         layers::DenseLayerGradient<768, L1_SIZE> l0;
-        layers::DenseLayerGradient<L1_SIZE, 1> l1;
+        layers::DenseLayerBucketGradient<2, L1_SIZE, 1> l1;
 
         Gradient() = default;
 
@@ -40,14 +41,14 @@ namespace nn {
 
     struct Network {
 
-        static constexpr int MAGIC = 5;
+        static constexpr int MAGIC = 6;
 
         static constexpr unsigned int get_feature_index(Piece piece, unsigned int sq) {
             return (piece.color == WHITE) * 384 + piece.type * 64 + sq;
         }
 
         layers::DenseLayer<768, L1_SIZE, float, float, activations::crelu<float, 1>> l0;
-        layers::DenseLayer<L1_SIZE, 1, float, float, activations::sigmoid> l1;
+        layers::DenseLayerBucket<2, L1_SIZE, 1, float, float, activations::sigmoid> l1;
 
         Network(const std::string &network_path) {
             std::ifstream file(network_path, std::ios::in | std::ios::binary);
@@ -82,9 +83,9 @@ namespace nn {
             l1.randomize(mt);
         }
 
-        void forward(const std::vector<unsigned int> &features, std::array<float, L1_SIZE> &l0_output, std::array<float, 1> &l1_output) const {
+        void forward(const std::vector<unsigned int> &features, std::array<float, L1_SIZE> &l0_output, std::array<float, 1> &l1_output, Color stm) const {
             l0.forward(features, l0_output);
-            l1.forward(l0_output, l1_output);
+            l1.forward(stm, l0_output, l1_output);
         }
 
         void write_to_file(const std::string &output_path) {

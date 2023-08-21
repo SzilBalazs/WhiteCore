@@ -34,6 +34,7 @@ namespace nn {
         std::vector<unsigned int> black_features;
         float wdl;
         float eval;
+        Color stm;
 
         explicit TrainingEntry(const std::string &entry) {
             std::stringstream ss(entry);
@@ -70,7 +71,6 @@ namespace nn {
                 }
             }
 
-            Color stm;
             idx++;
             if (s_fen[idx] == 'w')
                 stm = WHITE;

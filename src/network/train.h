@@ -194,18 +194,18 @@ namespace nn {
             for (size_t i = id; i < batch_size; i += thread_count) {
                 TrainingEntry entry(entries[i]);
 
-                process_entry<train>(id, entry.white_features, entry.wdl, entry.eval);
-                process_entry<train>(id, entry.black_features, 1.0f - entry.wdl, 1.0f - entry.eval);
+                process_entry<train>(id, entry.white_features, entry.wdl, entry.eval, entry.stm);
+                process_entry<train>(id, entry.black_features, 1.0f - entry.wdl, 1.0f - entry.eval, color_enemy(entry.stm));
             }
         }
 
         template<bool train>
-        void process_entry(int id, const std::vector<unsigned int> &features, float wdl, float eval) {
+        void process_entry(int id, const std::vector<unsigned int> &features, float wdl, float eval, Color stm) {
             std::array<float, L1_SIZE> l0_output;
             std::array<float, L1_SIZE> l0_loss;
             std::array<float, 1> l1_output;
 
-            network.forward(features, l0_output, l1_output);
+            network.forward(features, l0_output, l1_output, stm);
             float prediction = l1_output[0];
 
             float error = (1.0f - eval_influence) * (prediction - wdl) * (prediction - wdl) +
@@ -216,7 +216,7 @@ namespace nn {
             if constexpr (train) {
                 std::array<float, 1> l1_loss = {(1 - eval_influence) * 2.0f * (prediction - wdl) + eval_influence * 2.0f * (prediction - eval)};
 
-                network.l1.backward(l1_loss, l0_output, l1_output, l0_loss, gradients[id].l1);
+                network.l1.backward(stm, l1_loss, l0_output, l1_output, l0_loss, gradients[id].l1);
                 network.l0.backward(l0_loss, features, l0_output, gradients[id].l0);
             }
         }

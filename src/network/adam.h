@@ -34,8 +34,11 @@ namespace nn {
             update(network.l0.weights, m_gradient.l0.weights, v_gradient.l0.weights, total.l0.weights);
             update(network.l0.biases, m_gradient.l0.biases, v_gradient.l0.biases, total.l0.biases);
 
-            update(network.l1.weights, m_gradient.l1.weights, v_gradient.l1.weights, total.l1.weights);
-            update(network.l1.biases, m_gradient.l1.biases, v_gradient.l1.biases, total.l1.biases);
+            for (size_t i = 0; i < 2; i++) {
+                update(network.l1.layers[i].weights, m_gradient.l1.gradients[i].weights, v_gradient.l1.gradients[i].weights, total.l1.gradients[i].weights);
+                update(network.l1.layers[i].biases, m_gradient.l1.gradients[i].biases, v_gradient.l1.gradients[i].biases, total.l1.gradients[i].biases);
+            }
+
         }
 
         void reduce_learning_rate(float rate) {
