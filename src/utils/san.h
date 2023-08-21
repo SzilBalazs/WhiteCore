@@ -99,7 +99,7 @@ std::string uci_to_san(const chess::Move &move, const chess::Board &x) {
         if (board.is_check()) {
             san_move << "+";
         }
-        if (board.is_draw()) {
+        if (board.is_draw<true>()) {
             san_move << " 1/2-1/2";
         }
     }
