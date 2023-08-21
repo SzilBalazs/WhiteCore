@@ -22,7 +22,7 @@
 #include "../utils/utilities.h"
 #include "activations/crelu.h"
 #include "layers/accumulator.h"
-#include "layers/dense_layer.h"
+#include "layers/dense_layer_bucket.h"
 
 #include <cassert>
 
@@ -92,7 +92,7 @@ namespace nn {
 
         Score evaluate(Color stm) {
             accumulator.push(l0_output);
-            l1.forward(l0_output, l1_output);
+            l1.forward(stm, l0_output, l1_output);
             int32_t score = l1_output[0];
             if (stm == BLACK) score *= -1;
             return (score * 400) / (QSCALE * QSCALE);
@@ -103,14 +103,14 @@ namespace nn {
         }
 
     private:
-        static constexpr int MAGIC = -5;
+        static constexpr int MAGIC = -6;
         static constexpr size_t L1_SIZE = 512;
 
         alignas(64) std::array<int16_t, L1_SIZE> l0_output;
         alignas(64) std::array<int32_t, 1> l1_output;
 
         layers::Accumulator<768, L1_SIZE, int16_t, activations::crelu<int16_t, QSCALE>> accumulator;
-        layers::DenseLayer<L1_SIZE, 1, int16_t, int32_t, activations::none<int16_t>> l1;
+        layers::DenseLayerBucket<2, L1_SIZE, 1, int16_t, int32_t, activations::none<int16_t>> l1;
     };
 
 } // namespace nn

@@ -50,7 +50,7 @@ namespace nn::layers {
 
         int load_from_pointer(const unsigned char *ptr, int offset) {
             for (size_t i = 0; i < BUCKETS; i++) {
-                offset = load_from_pointer(ptr, offset);
+                offset = layers[i].load_from_pointer(ptr, offset);
             }
 
             return offset;
