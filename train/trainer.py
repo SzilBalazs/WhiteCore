@@ -33,7 +33,7 @@ wandb.init(
         "architecture": 5,
         "eval_influence": 0.9,
         "dataset": glob.glob(f'data/*.plain'),
-        "epochs": 30,
+        "epochs": 20,
         "batch_size": 16384,
         "thread_count": 4
     }
