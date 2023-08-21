@@ -46,6 +46,9 @@ namespace nn {
             std::getline(ss, s_eval, ';');
             std::getline(ss, s_wdl, ';');
 
+            chess::Bitboard pieces[2][6]{};
+            chess::Bitboard occupied{};
+
             if (s_wdl == "1") {
                 wdl = 1.0f;
             } else if (s_wdl == "0") {
@@ -63,11 +66,28 @@ namespace nn {
                 } else {
                     Piece p = piece_from_char(c);
                     white_features.emplace_back(Network::get_feature_index(p, sq));
+
+                    pieces[p.color][p.type].set(static_cast<Square>(sq));
+                    occupied.set(static_cast<Square>(sq));
+
                     p.color = color_enemy(p.color);
                     black_features.emplace_back(Network::get_feature_index(p, sq ^ 56));
 
                     sq++;
                 }
+            }
+
+            chess::Bitboard threats = threats::get_threats(occupied,
+                                                           pieces[WHITE][PAWN], pieces[BLACK][PAWN],
+                                                           pieces[WHITE][KNIGHT], pieces[BLACK][KNIGHT],
+                                                           pieces[WHITE][BISHOP], pieces[BLACK][BISHOP],
+                                                           pieces[WHITE][ROOK], pieces[BLACK][ROOK],
+                                                           pieces[WHITE][QUEEN], pieces[BLACK][QUEEN]);
+
+            while (threats) {
+                unsigned int threat_sq = threats.pop_lsb();
+                white_features.emplace_back(768 + (threat_sq));
+                black_features.emplace_back(768 + (threat_sq ^ 56));
             }
 
             Color stm;

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+// Huge inspiration from BlackMarlin's implementation
 namespace threats {
 
     using namespace chess;
@@ -50,7 +51,6 @@ namespace threats {
         return attacks & opponent_queens;
     }
 
-    // Huge inspiration from BlackMarlin's implementation
     Bitboard get_threats(const Board &board) {
 
         Bitboard occ = board.occupied();
@@ -77,6 +77,31 @@ namespace threats {
 
         threats |= get_rook_threats(occ, rooks & white, queens & black);
         threats |= get_rook_threats(occ, rooks & black, queens & white);
+
+        return threats;
+    }
+
+    Bitboard get_threats(Bitboard occupied, Bitboard white_pawns, Bitboard black_pawns, Bitboard white_knights, Bitboard black_knights,
+                         Bitboard white_bishops, Bitboard black_bishops, Bitboard white_rooks, Bitboard black_rooks,
+                         Bitboard white_queens, Bitboard black_queens) {
+
+        Bitboard white_minors = white_knights | white_bishops;
+        Bitboard black_minors = black_knights | black_bishops;
+        Bitboard white_majors = white_rooks | white_queens;
+        Bitboard black_majors = black_rooks | black_queens;
+        Bitboard white_pieces = white_minors | white_majors;
+        Bitboard black_pieces = black_minors | black_majors;
+
+        Bitboard threats = 0;
+
+        threats |= get_pawn_threats<WHITE>(white_pawns, black_pieces);
+        threats |= get_pawn_threats<BLACK>(black_pawns, white_pieces);
+
+        threats |= get_minor_threats(occupied, white_knights, white_bishops, black_majors);
+        threats |= get_minor_threats(occupied, black_knights, black_bishops, white_majors);
+
+        threats |= get_rook_threats(occupied, white_rooks, black_queens);
+        threats |= get_rook_threats(occupied, black_rooks, white_queens);
 
         return threats;
     }

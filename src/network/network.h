@@ -28,7 +28,7 @@ namespace nn {
     constexpr size_t L1_SIZE = 512;
 
     struct Gradient {
-        layers::DenseLayerGradient<768, L1_SIZE> l0;
+        layers::DenseLayerGradient<832, L1_SIZE> l0;
         layers::DenseLayerGradient<L1_SIZE, 1> l1;
 
         Gradient() = default;
@@ -41,13 +41,13 @@ namespace nn {
 
     struct Network {
 
-        static constexpr int MAGIC = 5;
+        static constexpr int MAGIC = 6;
 
         static constexpr unsigned int get_feature_index(Piece piece, unsigned int sq) {
             return (piece.color == WHITE) * 384 + piece.type * 64 + sq;
         }
 
-        layers::DenseLayer<768, L1_SIZE, float, float, activations::crelu<float, 1>> l0;
+        layers::DenseLayer<832, L1_SIZE, float, float, activations::crelu<float, 1>> l0;
         layers::DenseLayer<L1_SIZE, 1, float, float, activations::sigmoid> l1;
 
         Network(const std::string &network_path) {
