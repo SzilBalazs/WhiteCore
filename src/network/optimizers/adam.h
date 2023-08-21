@@ -70,4 +70,4 @@ namespace nn::optimizers {
         }
     };
 
-} // namespace nn
+} // namespace nn::optimizers

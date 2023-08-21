@@ -15,6 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include <cmath>
+#include <numbers>
+
 namespace nn::schedulers {
 
     class CosineScheduler {
@@ -30,12 +33,11 @@ namespace nn::schedulers {
                 return final_lr;
             }
 
-            return final_lr + (base_lr - final_lr) * (1 + std::cos(M_PI * float(epoch - start) / float(end - start))) / 2;
+            return final_lr + (base_lr - final_lr) * (1 + std::cos(std::numbers::pi_v<float> * float(epoch - start) / float(end - start))) / 2;
         }
 
     private:
         int start, end;
         float base_lr, final_lr;
-
     };
-}
+} // namespace nn::schedulers
