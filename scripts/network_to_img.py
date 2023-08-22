@@ -33,10 +33,10 @@ def main():
     with open(args.input_file, 'rb') as f:
         magic_raw = f.read(4)
         magic = struct.unpack('i', magic_raw)[0]
-        assert magic == -5
+        assert magic == -6
 
-        data = f.read(256 * 2)
-        biases = struct.unpack('256h', data)
+        data = f.read(512 * 2)
+        biases = struct.unpack('512h', data)
 
         data = f.read(768 * 512 * 2)
         weights = struct.unpack('393216h', data)

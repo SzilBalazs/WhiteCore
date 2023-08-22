@@ -30,7 +30,7 @@ wandb.init(
 
     config={
         "learning_rate": 0.001,
-        "architecture": 5,
+        "architecture": 6,
         "eval_influence": 0.9,
         "dataset": glob.glob(f'data/*.plain'),
         "epochs": 20,

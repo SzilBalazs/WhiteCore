@@ -25,7 +25,6 @@
 #include <thread>
 #include <vector>
 
-
 #include "../activations/none.h"
 
 namespace nn::layers {
@@ -86,7 +85,7 @@ namespace nn::layers {
             file.read(reinterpret_cast<char *>(weights.data()), sizeof(weights));
         }
 
-        int load_from_pointer(const unsigned char *ptr, int offset) {
+        [[nodiscard]] int load_from_pointer(const unsigned char *ptr, int offset) {
             std::memcpy(biases.data(), ptr + offset, sizeof(T) * OUT);
             offset += sizeof(T) * OUT;
             std::memcpy(weights.data(), ptr + offset, sizeof(T) * IN * OUT);
