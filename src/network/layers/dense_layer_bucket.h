@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include <cassert>
 #include <array>
+#include <cassert>
 
 #include "dense_layer.h"
 
@@ -98,4 +98,4 @@ namespace nn::layers {
         }
     };
 
-}
+} // namespace nn::layers

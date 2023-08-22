@@ -38,7 +38,6 @@ namespace nn {
                 update(network.l1.layers[i].weights, m_gradient.l1.gradients[i].weights, v_gradient.l1.gradients[i].weights, total.l1.gradients[i].weights);
                 update(network.l1.layers[i].biases, m_gradient.l1.gradients[i].biases, v_gradient.l1.gradients[i].biases, total.l1.gradients[i].biases);
             }
-
         }
 
         void reduce_learning_rate(float rate) {

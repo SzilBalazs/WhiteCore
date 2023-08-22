@@ -20,8 +20,8 @@
 #include "activations/crelu.h"
 #include "activations/relu.h"
 #include "activations/sigmoid.h"
-#include "layers/dense_layer_bucket.h"
 #include "layers/dense_layer.h"
+#include "layers/dense_layer_bucket.h"
 
 namespace nn {
 
