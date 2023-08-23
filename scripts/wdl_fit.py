@@ -46,16 +46,32 @@ with open("out.txt", "r") as f:
         counts[score] += 1
 
 
+def normalize(values, w):
+    x = np.array(values)
+    y = np.array(w)
+    pol = np.polyfit(x, y, 4)
+    pol[-1] -= 0.5
+    solutions = np.roots(pol)
+    real_solutions = [solution for solution in solutions if np.isreal(solution)]
+    real_solutions = np.real(real_solutions)
+    solution_closest_to_zero = real_solutions[np.abs(real_solutions).argmin()]
+
+    return solution_closest_to_zero
+
+
 def calc(raw_x, raw_y):
     x = np.array(raw_x)
     y = np.array(raw_y)
     pol = np.polyfit(x, y, 4)
     model = np.poly1d(pol)
 
-    print(pol)
-
     plt.scatter(x, y)
     plt.scatter(x, model(x))
+
+    print("[", end="")
+    for i in pol:
+        print(i, end=", ")
+    print("]")
 
 
 scores = []
@@ -69,5 +85,6 @@ for score in wins:
 
 calc(scores, w_y)
 calc(scores, l_y)
+scale = normalize(scores, w_y)
+print("Pawn scale:", scale)
 plt.show()
-

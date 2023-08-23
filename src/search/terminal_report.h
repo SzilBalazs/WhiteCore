@@ -122,7 +122,7 @@ namespace search::report {
         if (mate_depth <= MAX_PLY) {
             res << "M" << mate_depth;
         } else {
-            float pawn_score = float(std::abs(score)) / 100.0f;
+            float pawn_score = float(std::abs(score)) / wdl_model::pawn_scale;
 
             res << std::fixed << std::setprecision(2) << pawn_score;
         }
@@ -179,7 +179,8 @@ namespace search::report {
             int mate_ply = score > 0 ? mate_depth / 2 + 1 : -(mate_depth / 2);
             res << "mate " << mate_ply;
         } else {
-            res << "cp " << score;
+            Score scaled_score = float(score) * 100.f / wdl_model::pawn_scale;
+            res << "cp " << scaled_score;
         }
 
         if (show_wdl) {
