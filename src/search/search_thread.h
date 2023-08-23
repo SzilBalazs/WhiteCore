@@ -114,13 +114,17 @@ namespace search {
         }
 
         void init_search() {
+
+            if (id == 0) {
+                shared.best_move = chess::NULL_MOVE;
+            }
+
             history.clear();
             for (auto &i : nodes_searched) {
                 for (int64_t &j : i) {
                     j = 0;
                 }
             }
-            shared.best_move = chess::NULL_MOVE;
             max_ply = 0;
         }
 
