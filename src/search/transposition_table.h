@@ -24,28 +24,26 @@
 #include <cstring>
 
 namespace search {
-    enum TTFlag : uint8_t {
-        TT_NONE = 0,
-        TT_EXACT = 1,
-
+    enum class TTFlag : uint8_t {
+        NONE = 0,
+        EXACT = 1,
         // UPPERBOUND
-        TT_ALPHA = 2,
-
+        ALPHA = 2,
         // LOWERBOUND
-        TT_BETA = 3
+        BETA = 3
     };
 
     struct TTEntry {                              // Total: 16 bytes
-        uint64_t hash = 0;                        // 8 bytes
-        Score eval = 0;                           // 4 bytes
+        uint16_t hash = 0;                        // 2 bytes
+        int16_t eval = 0;                         // 2 bytes
         chess::Move hash_move = chess::NULL_MOVE; // 2 bytes
         Depth depth = 0;                          // 1 byte
-        TTFlag flag = TT_NONE;                    // 1 byte
+        TTFlag flag = TTFlag::NONE;               // 1 byte
 
         constexpr TTEntry() = default;
     };
 
-    static_assert(sizeof(TTEntry) == 16);
+    static_assert(sizeof(TTEntry) == 8);
 
     class TT {
     public:
@@ -92,10 +90,11 @@ namespace search {
             }
         }
 
-        std::optional<TTEntry> probe(uint64_t hash) {
-            TTEntry entry = *get_entry(hash);
+        std::optional<TTEntry> probe(uint64_t hash64) {
+            TTEntry entry = *get_entry(hash64);
+            auto hash16 = static_cast<uint16_t>(hash64 >> 48);
 
-            if (entry.hash != hash) {
+            if (entry.hash != hash16) {
                 stat_tracker::record_fail("tt_hit");
                 return std::nullopt;
             }
@@ -105,21 +104,22 @@ namespace search {
             return entry;
         }
 
-        void save(uint64_t hash, Depth depth, Score eval, TTFlag flag, chess::Move best_move) {
-            TTEntry *entry = get_entry(hash);
+        void save(uint64_t hash64, Depth depth, Score eval, TTFlag flag, chess::Move best_move) {
+            TTEntry *entry = get_entry(hash64);
+            auto hash16 = static_cast<uint16_t>(hash64 >> 48);
 
-            if (flag == TT_ALPHA && entry->hash == hash) {
+            if (flag == TTFlag::ALPHA && entry->hash == hash16) {
                 best_move = chess::NULL_MOVE;
             }
 
-            if (entry->hash != hash || best_move.is_ok()) {
+            if (entry->hash != hash16 || best_move.is_ok()) {
                 entry->hash_move = best_move;
             }
 
-            if (entry->hash != hash || flag == TT_EXACT || entry->depth <= depth + 4) {
-                entry->hash = hash;
+            if (entry->hash != hash16 || flag == TTFlag::EXACT || entry->depth <= depth + 4) {
+                entry->hash = hash16;
                 entry->depth = depth;
-                entry->eval = eval;
+                entry->eval = static_cast<int16_t>(eval);
                 entry->flag = flag;
             }
         }

@@ -25,13 +25,13 @@ namespace search {
     template<bool captures_only>
     class MoveList {
 
-        static constexpr unsigned int MOVE_SCORE_HASH = 10'000'000;
-        static constexpr unsigned int MOVE_SCORE_PROMO = 9'000'000;
-        static constexpr unsigned int MOVE_SCORE_GOOD_CAPTURE = 8'000'000;
-        static constexpr unsigned int MOVE_SCORE_FIRST_KILLER = 7'000'000;
-        static constexpr unsigned int MOVE_SCORE_SECOND_KILLER = 6'000'000;
-        static constexpr unsigned int MOVE_SCORE_COUNTER = 5'000'000;
-        static constexpr unsigned int MOVE_SCORE_BAD_CAPTURE = 4'000'000;
+        static constexpr int MOVE_SCORE_HASH = 10'000'000;
+        static constexpr int MOVE_SCORE_PROMO = 9'000'000;
+        static constexpr int MOVE_SCORE_GOOD_CAPTURE = 8'000'000;
+        static constexpr int MOVE_SCORE_FIRST_KILLER = 7'000'000;
+        static constexpr int MOVE_SCORE_SECOND_KILLER = 6'000'000;
+        static constexpr int MOVE_SCORE_COUNTER = 5'000'000;
+        static constexpr int MOVE_SCORE_BAD_CAPTURE = 4'000'000;
 
     public:
         /**
@@ -77,20 +77,20 @@ namespace search {
     private:
         chess::Move moves[200];
         unsigned int size, current;
-        Score scores[200];
+        int scores[200];
         const chess::Board &board;
         const chess::Move &hash_move;
         const chess::Move &last_move;
         const History &history;
         const Ply &ply;
 
-        [[nodiscard]] Score get_mvv_lva(const chess::Move &move) const {
+        [[nodiscard]] int get_mvv_lva(const chess::Move &move) const {
             return move.eq_flag(chess::Move::EP_CAPTURE)
                            ? MVVLVA[PAWN][PAWN]
                            : MVVLVA[board.piece_at(move.get_to()).type][board.piece_at(move.get_from()).type];
         }
 
-        [[nodiscard]] Score score_move(const chess::Move &move) const {
+        [[nodiscard]] int score_move(const chess::Move &move) const {
             if (move == hash_move) {
                 return MOVE_SCORE_HASH;
             } else if (move.is_promo()) {

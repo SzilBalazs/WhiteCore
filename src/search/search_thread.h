@@ -292,12 +292,12 @@ namespace search {
             }
 
             std::optional<TTEntry> entry = shared.tt.probe(board.get_hash());
-            TTFlag flag = TT_ALPHA;
+            TTFlag flag = TTFlag::ALPHA;
             Score tt_score = entry ? convert_tt_score<false>(entry->eval, ss->ply) : UNKNOWN_SCORE;
             chess::Move hash_move = entry ? entry->hash_move : chess::NULL_MOVE;
 
             if (entry && non_pv_node && entry->depth >= depth && board.get_move50() < 90 &&
-                (entry->flag == TT_EXACT || (entry->flag == TT_ALPHA && tt_score <= alpha) || (entry->flag == TT_BETA && tt_score >= beta))) {
+                (entry->flag == TTFlag::EXACT || (entry->flag == TTFlag::ALPHA && tt_score <= alpha) || (entry->flag == TTFlag::BETA && tt_score >= beta))) {
                 stat_tracker::record_success("tt_cutoff");
                 return tt_score;
             } else {
@@ -444,7 +444,7 @@ namespace search {
                         }
                     }
 
-                    shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(beta, ss->ply), TT_BETA, move);
+                    shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(beta, ss->ply), TTFlag::BETA, move);
                     return beta;
                 }
 
@@ -457,7 +457,7 @@ namespace search {
                     }
 
                     if (score > alpha) {
-                        flag = TT_EXACT;
+                        flag = TTFlag::EXACT;
                         alpha = score;
                     }
                 }
