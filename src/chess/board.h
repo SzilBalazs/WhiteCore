@@ -103,7 +103,7 @@ namespace chess {
 
         template<bool is_pv = false>
         [[nodiscard]] bool is_draw() const {
-            if (get_move50() >= 100) return true;
+            if (get_move50() > 100) return true;
             size_t cnt = 0;
             for (const BoardState &st : states) {
                 if (st.hash == states.back().hash) {
