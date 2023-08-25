@@ -24,21 +24,21 @@
 #include <cstring>
 
 namespace search {
-    enum class TTFlag : uint8_t {
-        NONE = 0,
-        EXACT = 1,
+    enum TTFlag : uint8_t {
+        TT_NONE = 0,
+        TT_EXACT = 1,
         // UPPERBOUND
-        ALPHA = 2,
+        TT_ALPHA = 2,
         // LOWERBOUND
-        BETA = 3
+        TT_BETA = 3
     };
 
-    struct TTEntry {                              // Total: 16 bytes
+    struct TTEntry {                              // Total: 8 bytes
         uint16_t hash = 0;                        // 2 bytes
         int16_t eval = 0;                         // 2 bytes
         chess::Move hash_move = chess::NULL_MOVE; // 2 bytes
         Depth depth = 0;                          // 1 byte
-        TTFlag flag = TTFlag::NONE;               // 1 byte
+        TTFlag flag = TT_NONE;                    // 1 byte
 
         constexpr TTEntry() = default;
     };
@@ -108,7 +108,7 @@ namespace search {
             TTEntry *entry = get_entry(hash64);
             auto hash16 = static_cast<uint16_t>(hash64 >> 48);
 
-            if (flag == TTFlag::ALPHA && entry->hash == hash16) {
+            if (flag == TT_ALPHA && entry->hash == hash16) {
                 best_move = chess::NULL_MOVE;
             }
 
@@ -116,7 +116,7 @@ namespace search {
                 entry->hash_move = best_move;
             }
 
-            if (entry->hash != hash16 || flag == TTFlag::EXACT || entry->depth <= depth + 4) {
+            if (entry->hash != hash16 || flag == TT_EXACT || entry->depth <= depth + 4) {
                 entry->hash = hash16;
                 entry->depth = depth;
                 entry->eval = static_cast<int16_t>(eval);
@@ -126,13 +126,6 @@ namespace search {
 
         void prefetch(uint64_t hash) {
             __builtin_prefetch(get_entry(hash), 0);
-        }
-
-        chess::Move get_hash_move(uint64_t hash) {
-            TTEntry *entry = get_entry(hash);
-            if (entry->hash == hash)
-                return entry->hash_move;
-            return chess::NULL_MOVE;
         }
 
     private:
