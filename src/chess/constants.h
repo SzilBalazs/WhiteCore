@@ -38,13 +38,9 @@ using Ply = int8_t;
 
 constexpr int64_t INF_TIME = 1'000'000'000'000'000;
 constexpr int64_t INF_NODES = 1'000'000'000'000'000;
-constexpr Score UNKNOWN_SCORE = 300000;
-constexpr Score INF_SCORE = 200000;
-constexpr Score MATE_VALUE = 100000;
-constexpr Score TB_WIN_SCORE = 50000;
-constexpr Score TB_WORST_WIN = 49000;
-constexpr Score TB_BEST_LOSS = -49000;
-constexpr Score TB_LOSS_SCORE = -50000;
+constexpr Score UNKNOWN_SCORE = 30000;
+constexpr Score INF_SCORE = 20000;
+constexpr Score MATE_VALUE = 10000;
 constexpr Score WORST_MATE = MATE_VALUE - 100;
 
 constexpr Score PIECE_VALUES[7] = {
