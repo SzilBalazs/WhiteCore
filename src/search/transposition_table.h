@@ -30,7 +30,34 @@ namespace search {
         // UPPERBOUND
         TT_ALPHA = 2,
         // LOWERBOUND
-        TT_BETA = 3
+        TT_BETA = 4
+    };
+
+    struct TTInfo {
+
+        static constexpr uint8_t WAS_PV = 1 << 3;
+
+        constexpr TTInfo() = default;
+
+        void set_flag(TTFlag flag) {
+            data &= ~(0b111);
+            data |= flag;
+        }
+
+        void set_pv(bool was_pv) {
+            data &= ~WAS_PV;
+            data |= static_cast<uint8_t>(was_pv);
+        }
+
+        [[nodiscard]] bool is_flag(TTFlag flag) const {
+            return data & flag;
+        }
+
+        [[nodiscard]] bool was_pv() const {
+            return data & WAS_PV;
+        }
+
+        uint8_t data;
     };
 
     struct TTEntry {                              // Total: 8 bytes
@@ -38,7 +65,7 @@ namespace search {
         int16_t eval = 0;                         // 2 bytes
         chess::Move hash_move = chess::NULL_MOVE; // 2 bytes
         Depth depth = 0;                          // 1 byte
-        TTFlag flag = TT_NONE;                    // 1 byte
+        TTInfo info{};                            // 1 byte
 
         constexpr TTEntry() = default;
     };
@@ -104,7 +131,7 @@ namespace search {
             return entry;
         }
 
-        void save(uint64_t hash64, Depth depth, Score eval, TTFlag flag, chess::Move best_move) {
+        void save(uint64_t hash64, Depth depth, Score eval, TTFlag flag, chess::Move best_move, bool was_pv) {
             TTEntry *entry = get_entry(hash64);
             auto hash16 = static_cast<uint16_t>(hash64 >> 48);
 
@@ -120,7 +147,8 @@ namespace search {
                 entry->hash = hash16;
                 entry->depth = depth;
                 entry->eval = static_cast<int16_t>(eval);
-                entry->flag = flag;
+                entry->info.set_flag(flag);
+                entry->info.set_pv(was_pv);
             }
         }
 

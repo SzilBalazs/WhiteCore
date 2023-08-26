@@ -295,9 +295,10 @@ namespace search {
             TTFlag flag = TT_ALPHA;
             Score tt_score = entry ? convert_tt_score<false>(entry->eval, ss->ply) : UNKNOWN_SCORE;
             chess::Move hash_move = entry ? entry->hash_move : chess::NULL_MOVE;
+            const bool was_pv = pv_node || (entry && entry->info.was_pv());
 
             if (entry && non_pv_node && entry->depth >= depth && board.get_move50() < 90 &&
-                (entry->flag == TT_EXACT || (entry->flag == TT_ALPHA && tt_score <= alpha) || (entry->flag == TT_BETA && tt_score >= beta))) {
+                (entry->info.is_flag(TT_EXACT) || (entry->info.is_flag(TT_ALPHA) && tt_score <= alpha) || (entry->info.is_flag(TT_BETA) && tt_score >= beta))) {
                 stat_tracker::record_success("tt_cutoff");
                 return tt_score;
             } else {
@@ -404,7 +405,7 @@ namespace search {
                 if (!in_check && depth >= 3 && made_moves >= 4 && !move.is_promo() && move.is_quiet()) {
                     Depth R = lmr_reductions[depth][made_moves];
 
-                    R -= pv_node;
+                    R -= was_pv;
                     R += !improving;
                     R -= std::clamp(history.butterfly[move.get_from()][move.get_to()] / 8192, -2, 2);
 
@@ -444,7 +445,7 @@ namespace search {
                         }
                     }
 
-                    shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(beta, ss->ply), TT_BETA, move);
+                    shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(beta, ss->ply), TT_BETA, move, was_pv);
                     return beta;
                 }
 
@@ -472,7 +473,7 @@ namespace search {
                 stat_tracker::record_fail("skip_quiets");
             }
 
-            shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(best_score, ss->ply), flag, best_move);
+            shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(best_score, ss->ply), flag, best_move, was_pv);
             return alpha;
         }
 
