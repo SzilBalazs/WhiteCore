@@ -174,10 +174,9 @@ namespace uci {
 
         while (should_continue) {
             std::string line;
-            getline(std::cin, line);
 
-            if (std::cin.eof()) {
-                break;
+            if (!getline(std::cin, line) && std::cin.eof()) {
+                line = "quit";
             }
 
             std::vector<std::string> tokens = convert_to_tokens(line);
