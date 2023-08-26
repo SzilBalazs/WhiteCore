@@ -406,7 +406,7 @@ namespace search {
 
                     R -= pv_node;
                     R += !improving;
-                    R -= std::clamp(history.butterfly[move.get_from()][move.get_to()] / 8192, -2, 2);
+                    R -= std::clamp(history.butterfly[move.get_from()][move.get_to()] / 4096, -2, 2);
 
                     Depth D = std::clamp(new_depth - R, 1, depth - 1);
                     score = -search<NON_PV_NODE>(D, -alpha - 1, -alpha, ss + 1);
