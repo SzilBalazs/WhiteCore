@@ -25,7 +25,7 @@
 #include "transposition_table.h"
 
 #include <atomic>
-#include <thread>
+#include <future>
 
 namespace search {
 
@@ -72,19 +72,18 @@ namespace search {
         }
 
         void join() {
-            if (th.joinable())
-                th.join();
+            th.wait();
         }
 
         void start() {
-            th = std::thread([this]() { search(); });
+            th = std::async([this]() { search(); });
         }
 
     private:
         chess::Board board;
         nn::NNUE nnue;
         SharedMemory &shared;
-        std::thread th;
+        std::future<void> th;
         unsigned int id;
         Ply max_ply;
         PVArray pv;
