@@ -26,7 +26,7 @@ namespace eval {
         for (const PieceType pt : PIECE_TYPES_BY_VALUE) {
             material_value += PIECE_VALUES[pt] * board.pieces(pt).pop_count();
         }
-        return 700 + material_value / 32 - static_cast<int>(board.get_move50()) * 10;
+        return 700 + material_value / 32 - static_cast<int>(board.get_move50()) * 5;
     }
 
     Score evaluate(const chess::Board &board, nn::NNUE &nnue) {
