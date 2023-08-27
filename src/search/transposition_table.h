@@ -79,7 +79,7 @@ namespace search {
 
             uint64_t res = 0;
             for (uint64_t i = 0; i < 1000; i++) {
-                res += i == (table[i].hash & mask);
+                res += table[i].hash != 0;
             }
             return res;
         }
