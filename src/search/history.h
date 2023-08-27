@@ -61,6 +61,7 @@ namespace search {
             for (int i = 0; i < 64; i++) {
                 for (int j = 0; j < 64; j++) {
                     butterfly[i][j] = 0;
+                    counter_moves[i][j] = chess::NULL_MOVE;
                 }
             }
         }

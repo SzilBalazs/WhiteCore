@@ -25,6 +25,11 @@
 namespace search {
     class SearchManager {
     public:
+        ~SearchManager() {
+            join<false>();
+            threads.clear();
+        }
+
         /**
          * Sets the number of threads to use for searching.
          *
@@ -32,6 +37,7 @@ namespace search {
          */
         void allocate_threads(size_t thread_count) {
             allocated_threads = thread_count;
+            threads.clear();
         }
 
         /**
@@ -85,8 +91,6 @@ namespace search {
             for (SearchThread &thread : threads) {
                 thread.join();
             }
-
-            threads.clear();
         }
 
         /**
@@ -98,16 +102,23 @@ namespace search {
         template<bool block>
         void search(const chess::Board &board) {
             join<false>();
-            for (size_t thread_id = 0; thread_id < allocated_threads; thread_id++) {
-                threads.emplace_back(shared, thread_id);
-                threads.back().load_board(board);
+
+            while (threads.size() < allocated_threads) {
+                threads.emplace_back(shared, threads.size());
             }
+
+            for (SearchThread &sth : threads) {
+                sth.load_board(board);
+            }
+
             shared.node_count.assign(allocated_threads, 0);
             shared.best_move = chess::NULL_MOVE;
             shared.is_searching = true;
+
             for (SearchThread &thread : threads) {
                 thread.start();
             }
+
             if (block) join<true>();
         }
 
