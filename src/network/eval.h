@@ -21,12 +21,12 @@
 
 namespace eval {
 
-    Score get_material_scale(const chess::Board &board) {
+    Score get_eval_scale(const chess::Board &board) {
         Score material_value = 0;
         for (const PieceType pt : PIECE_TYPES_BY_VALUE) {
             material_value += PIECE_VALUES[pt] * board.pieces(pt).pop_count();
         }
-        return 700 + material_value / 32;
+        return 700 + material_value / 32 - static_cast<int>(board.get_move50()) * 20;
     }
 
     Score evaluate(const chess::Board &board, nn::NNUE &nnue) {
@@ -44,7 +44,7 @@ namespace eval {
         }
 
         Score nnue_eval = nnue.evaluate(board.get_stm());
-        Score scaled_eval = (nnue_eval * get_material_scale(board)) / 1024;
+        Score scaled_eval = (nnue_eval * get_eval_scale(board)) / 1024;
 
         return scaled_eval;
     }
