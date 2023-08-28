@@ -369,14 +369,14 @@ namespace search {
                 if (non_root_node && non_pv_node && !in_check && std::abs(best_score) < WORST_MATE) {
 
                     if (move.is_quiet()) {
-                        if (depth <= 6 && !see(board, move, -depth * 100)) {
+                        if (depth <= 7 && !see(board, move, -depth * 100)) {
                             stat_tracker::record_success("pvs_see_quiet");
                             continue;
                         } else {
                             stat_tracker::record_fail("pvs_see_quiet");
                         }
                     } else {
-                        if (depth <= 5 && !see(board, move, -depth * 150)) {
+                        if (depth <= 6 && !see(board, move, -depth * 150)) {
                             stat_tracker::record_success("pvs_see_capture");
                             continue;
                         } else {
