@@ -77,6 +77,7 @@ namespace search {
         }
 
         void update_butterfly_history(chess::Move move, int bonus) {
+            bonus = std::clamp(bonus, -1000, 1000);
             int scaled = bonus - butterfly[move.get_from()][move.get_to()] * std::abs(bonus) / 32768;
             butterfly[move.get_from()][move.get_to()] += scaled;
         }
