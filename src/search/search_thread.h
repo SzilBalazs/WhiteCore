@@ -363,6 +363,7 @@ namespace search {
             int made_moves = 0;
             while (!move_list.empty()) {
                 chess::Move move = ss->move = move_list.next_move();
+                Score main_history = move.is_quiet() ? history.main_history[board.get_stm()][move.get_from()][move.get_to()] : 0;
 
                 if (skip_quiets && move.is_quiet() && !move.is_promo()) continue;
 
@@ -406,7 +407,7 @@ namespace search {
 
                     R -= pv_node;
                     R += !improving;
-                    R -= std::clamp(history.main_history[board.get_stm()][move.get_from()][move.get_to()] / 4096, -2, 2);
+                    R -= std::clamp(main_history / 4096, -2, 2);
 
                     Depth D = std::clamp(new_depth - R, 1, depth - 1);
                     score = -search<NON_PV_NODE>(D, -alpha - 1, -alpha, ss + 1);
