@@ -25,7 +25,7 @@ namespace search {
     public:
         chess::Move killer_moves[MAX_PLY + 10][2];
         chess::Move counter_moves[64][64];
-        Score butterfly[64][64];
+        Score main_history[2][64][64];
 
         /**
          * Adds a beta-cutoff to the History.
@@ -35,10 +35,10 @@ namespace search {
          * @param depth Search depth
          * @param ply Distance from root
          */
-        void add_cutoff(chess::Move move, chess::Move last_move, Depth depth, Ply ply) {
+        void add_cutoff(const chess::Board &board, chess::Move move, chess::Move last_move, Depth depth, Ply ply) {
             update_killer_moves(move, ply);
             update_counter_moves(move, last_move);
-            update_butterfly_history(move, depth * 100);
+            update_history(main_history[board.get_stm()][move.get_from()][move.get_to()], depth * 100);
         }
 
         /**
@@ -47,8 +47,8 @@ namespace search {
          * @param move The weak move
          * @param depth Search depth
          */
-        void decrease_history(chess::Move move, Depth depth) {
-            update_butterfly_history(move, -depth * 100);
+        void decrease_history(const chess::Board &board, chess::Move move, Depth depth) {
+            update_history(main_history[board.get_stm()][move.get_from()][move.get_to()], -depth * 100);
         }
 
         /**
@@ -60,7 +60,7 @@ namespace search {
             }
             for (int i = 0; i < 64; i++) {
                 for (int j = 0; j < 64; j++) {
-                    butterfly[i][j] = 0;
+                    main_history[0][i][j] = main_history[1][i][j] = 0;
                     counter_moves[i][j] = chess::NULL_MOVE;
                 }
             }
@@ -76,9 +76,9 @@ namespace search {
             counter_moves[last_move.get_from()][last_move.get_to()] = move;
         }
 
-        void update_butterfly_history(chess::Move move, int bonus) {
-            int scaled = bonus - butterfly[move.get_from()][move.get_to()] * std::abs(bonus) / 32768;
-            butterfly[move.get_from()][move.get_to()] += scaled;
+        static void update_history(Score &entry, int bonus) {
+            int scaled = bonus - entry * std::abs(bonus) / 32768;
+            entry += scaled;
         }
     };
 } // namespace search

@@ -406,7 +406,7 @@ namespace search {
 
                     R -= pv_node;
                     R += !improving;
-                    R -= std::clamp(history.butterfly[move.get_from()][move.get_to()] / 4096, -2, 2);
+                    R -= std::clamp(history.main_history[board.get_stm()][move.get_from()][move.get_to()] / 4096, -2, 2);
 
                     Depth D = std::clamp(new_depth - R, 1, depth - 1);
                     score = -search<NON_PV_NODE>(D, -alpha - 1, -alpha, ss + 1);
@@ -438,9 +438,9 @@ namespace search {
                 if (score >= beta) {
 
                     if (move.is_quiet()) {
-                        history.add_cutoff(move, last_move, depth, ss->ply);
+                        history.add_cutoff(board, move, last_move, depth, ss->ply);
                         for (chess::Move *current_move = quiet_moves; current_move != next_quiet_move; current_move++) {
-                            history.decrease_history(*current_move, depth);
+                            history.decrease_history(board, *current_move, depth);
                         }
                     }
 
