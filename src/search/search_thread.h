@@ -329,7 +329,7 @@ namespace search {
                 stat_tracker::record_fail("rfp");
             }
 
-            if (non_pv_node && depth >= 3 && static_eval >= beta && board.has_non_pawn()) {
+            if (non_pv_node && depth >= 3 && static_eval >= beta && board.has_non_pawn() && (ss - 1)->move.is_ok()) {
                 Depth R = 3 + depth / 3 + std::min(3, (static_eval - beta) / 256);
                 ss->move = chess::NULL_MOVE;
 
