@@ -84,7 +84,7 @@ namespace search {
          */
         bool handle_iteration(int bm_stability, double bm_effort) {
             const double bm_scale = 1.2 - std::min(bm_stability, 10) * 0.04;
-            const double effort_scale = 1.5 - bm_effort;
+            const double effort_scale = 1.25 - bm_effort * 0.5;
 
             const double scale = bm_scale * effort_scale;
 
