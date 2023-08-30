@@ -237,7 +237,7 @@ namespace search {
                     return score;
                 }
 
-                delta += delta / 2;
+                delta += delta / 3;
             }
 
             return UNKNOWN_SCORE;
