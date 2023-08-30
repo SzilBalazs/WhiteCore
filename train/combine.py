@@ -16,26 +16,28 @@
 #
 
 import glob
-import random
+import os
 import argparse
 
 
-def combine_and_shuffle(directory, output):
+def combine_data(directory, output):
+    if not os.path.exists(directory):
+        print(f"Directory {directory} does not exist.")
+        return
 
     files = glob.glob(f'{directory}/*.plain')
-    lines = []
 
-    for filename in files:
-        print("Reading", filename)
-        with open(filename, 'r') as file:
-            lines.extend(file.readlines())
+    if not files:
+        print("No .plain files found in the given directory.")
+        return
 
-    print("Shuffling...")
-    random.shuffle(lines)
+    with open(output, 'w') as outfile:
+        for file in files:
+            with open(file, 'r') as infile:
+                for line in infile:
+                    outfile.write(line)
 
-    print("Writing to", output)
-    with open(output, 'w') as file:
-        file.writelines(lines)
+    print(f"Data from {len(files)} files has been successfully combined into {output}.")
 
 
 if __name__ == "__main__":
@@ -44,4 +46,4 @@ if __name__ == "__main__":
     parser.add_argument('output', type=str, help='the output file')
     args = parser.parse_args()
 
-    combine_and_shuffle(args.directory, args.output)
+    combine_data(args.directory, args.output)
