@@ -385,7 +385,7 @@ namespace search {
                         }
                     }
 
-                    if (depth <= 6 && made_moves >= (5 + depth * depth) / (2 - improving)) {
+                    if (depth <= 6 && made_moves >= (5 + depth * depth) / (2 - improving) - 2 * (history.cutoffs[ss->ply + 1] > 5)) {
                         skip_quiets = true;
                     }
 
@@ -407,7 +407,6 @@ namespace search {
 
                     R -= pv_node;
                     R += !improving;
-                    R += history.cutoffs[ss->ply + 1] > 4;
                     R -= std::clamp(history.butterfly[move.get_from()][move.get_to()] / 4096, -2, 2);
 
                     Depth D = std::clamp(new_depth - R, 1, depth - 1);
