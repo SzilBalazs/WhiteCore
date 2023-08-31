@@ -31,13 +31,23 @@ def combine_data(directory, output):
         print("No .plain files found in the given directory.")
         return
 
+    stats = [0, 0, 0]
+
     with open(output, 'w') as outfile:
         for file in files:
             with open(file, 'r') as infile:
+                print(f"Reading {file}...")
                 for line in infile:
                     outfile.write(line)
+                    tokens = line.split(";")
+                    wdl = int(tokens[4]) + 1
+                    stats[wdl] += 1
 
-    print(f"Data from {len(files)} files has been successfully combined into {output}.")
+    total = sum(stats)
+    print(f"Black wins {stats[0] / total * 100}% - "
+          f"Draws {stats[1] / total * 100}% - "
+          f"Wins wins {stats[2] / total * 100}%")
+    print(f"Data from {len(files)} files has been successfully combined into {output}")
 
 
 if __name__ == "__main__":
