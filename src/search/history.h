@@ -24,6 +24,7 @@ namespace search {
 
     public:
         chess::Move killer_moves[MAX_PLY + 10][2];
+        Score cutoffs[MAX_PLY + 10];
         chess::Move counter_moves[64][64];
         Score butterfly[64][64];
 

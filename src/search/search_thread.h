@@ -355,6 +355,7 @@ namespace search {
             }
 
             history.killer_moves[ss->ply + 1][0] = history.killer_moves[ss->ply + 1][1] = chess::NULL_MOVE;
+            history.cutoffs[ss->ply + 1] = 0;
 
             chess::Move quiet_moves[200];
             chess::Move *next_quiet_move = quiet_moves;
@@ -406,6 +407,7 @@ namespace search {
 
                     R -= pv_node;
                     R += !improving;
+                    R += history.cutoffs[ss->ply + 1] > 4;
                     R -= std::clamp(history.butterfly[move.get_from()][move.get_to()] / 4096, -2, 2);
 
                     Depth D = std::clamp(new_depth - R, 1, depth - 1);
@@ -436,6 +438,7 @@ namespace search {
                 }
 
                 if (score >= beta) {
+                    history.cutoffs[ss->ply]++;
 
                     if (move.is_quiet()) {
                         history.add_cutoff(move, last_move, depth, ss->ply);
