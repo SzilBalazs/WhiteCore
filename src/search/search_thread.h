@@ -466,7 +466,9 @@ namespace search {
                         }
                     }
 
-                    shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(beta, ss->ply), TT_BETA, move);
+                    if (!is_singular_search) {
+                        shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(beta, ss->ply), TT_BETA, move);
+                    }
                     return beta;
                 }
 
@@ -494,7 +496,9 @@ namespace search {
                 stat_tracker::record_fail("skip_quiets");
             }
 
-            shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(best_score, ss->ply), flag, best_move);
+            if (!is_singular_search) {
+                shared.tt.save(board.get_hash(), depth, convert_tt_score<true>(best_score, ss->ply), flag, best_move);
+            }
             return alpha;
         }
 
