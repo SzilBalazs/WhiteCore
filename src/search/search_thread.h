@@ -60,6 +60,7 @@ namespace search {
     struct SearchStack {
         Ply ply;
         chess::Move move;
+        chess::Move skip_move;
         Score eval;
     };
 
@@ -213,6 +214,7 @@ namespace search {
             SearchStack *ss = stack + 7;
             for (Ply i = -7; i <= MAX_PLY + 2; i++) {
                 (ss + i)->move = chess::NULL_MOVE;
+                (ss + i)->skip_move = chess::NULL_MOVE;
                 (ss + i)->eval = UNKNOWN_SCORE;
                 (ss + i)->ply = i;
             }
@@ -258,6 +260,7 @@ namespace search {
 
             const chess::Move last_move = ss->ply >= 1 ? (ss - 1)->move : chess::NULL_MOVE;
             const Score mate_ply = -MATE_VALUE + ss->ply;
+            const bool is_singular_search = ss->skip_move.is_ok();
             const bool in_check = board.is_check();
 
             chess::Move best_move = chess::NULL_MOVE;
@@ -291,7 +294,7 @@ namespace search {
                 depth++;
             }
 
-            std::optional<TTEntry> entry = shared.tt.probe(board.get_hash());
+            auto entry = is_singular_search ? std::nullopt : shared.tt.probe(board.get_hash());
             TTFlag flag = TT_ALPHA;
             Score tt_score = entry ? convert_tt_score<false>(entry->eval, ss->ply) : UNKNOWN_SCORE;
             chess::Move hash_move = entry ? entry->hash_move : chess::NULL_MOVE;
@@ -310,7 +313,7 @@ namespace search {
             Score static_eval = ss->eval = eval::evaluate(board, nnue);
             bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
 
-            if (root_node || in_check)
+            if (root_node || in_check || is_singular_search)
                 goto search_moves;
 
             if (!entry && non_pv_node && depth >= 4)
@@ -351,7 +354,11 @@ namespace search {
             MoveList<false> move_list(board, hash_move, last_move, history, ss->ply);
 
             if (move_list.empty()) {
-                return in_check ? mate_ply : 0;
+                if (is_singular_search) {
+                    return alpha;
+                } else {
+                    return in_check ? mate_ply : 0;
+                }
             }
 
             history.killer_moves[ss->ply + 1][0] = history.killer_moves[ss->ply + 1][1] = chess::NULL_MOVE;
@@ -365,6 +372,7 @@ namespace search {
                 chess::Move move = ss->move = move_list.next_move();
 
                 if (skip_quiets && move.is_quiet() && !move.is_promo()) continue;
+                if (ss->skip_move == move) continue;
 
                 if (non_root_node && non_pv_node && !in_check && std::abs(best_score) < WORST_MATE) {
 
@@ -393,8 +401,22 @@ namespace search {
                     }
                 }
 
+                Depth extension = 0;
+                if (non_root_node && depth >= 8 && entry && hash_move == move && std::abs(tt_score) < WORST_MATE && entry->flag == TT_BETA &&
+                    entry->depth >= depth - 3) {
+                    const Score singular_beta = tt_score - depth;
+                    const Depth singular_depth = (depth - 1) / 2;
+                    ss->skip_move = move;
+                    const Score singular_score = search<NON_PV_NODE>(singular_depth, singular_beta - 1, singular_beta, ss);
+                    ss->skip_move = chess::NULL_MOVE;
+
+                    if (singular_score < singular_beta) {
+                        extension = 1;
+                    }
+                }
+
                 shared.tt.prefetch(board.hash_after_move(move));
-                const Depth new_depth = depth - 1;
+                const Depth new_depth = depth - 1 + extension;
                 const int64_t nodes_before = shared.node_count[id];
 
                 shared.node_count[id]++;
