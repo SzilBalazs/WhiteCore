@@ -307,8 +307,12 @@ namespace search {
             if (depth <= 0)
                 return qsearch<node_type>(alpha, beta);
 
-            Score static_eval = ss->eval = eval::evaluate(board, nnue);
             bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
+            Score static_eval = ss->eval = eval::evaluate(board, nnue);
+
+            if (entry) {
+                static_eval = tt_score;
+            }
 
             if (root_node || in_check)
                 goto search_moves;
