@@ -405,9 +405,16 @@ namespace search {
                 if (!in_check && depth >= 3 && made_moves >= 3 + 2 * pv_node && !move.is_promo() && move.is_quiet()) {
                     Depth R = lmr_reductions[depth][made_moves];
 
-                    R -= pv_node;
-                    R += !improving;
-                    R += (move == history.killer_moves[ss->ply][0] || move == history.killer_moves[ss->ply][1]) && history.cutoffs[ss->ply] > 4;
+                    if (pv_node)
+                        R--;
+
+                    if (!improving)
+                        R++;
+
+                    if ((move == history.killer_moves[ss->ply][0] || move == history.killer_moves[ss->ply][1]) && history.cutoffs[ss->ply] >= 3) {
+                        R += 2;
+                    }
+
                     R -= std::clamp(history.butterfly[move.get_from()][move.get_to()] / 4096, -2, 2);
 
                     Depth D = std::clamp(new_depth - R, 1, depth - 1);
