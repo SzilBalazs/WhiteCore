@@ -31,7 +31,7 @@ wandb.init(
     config={
         "learning_rate": 0.001,
         "architecture": 6,
-        "eval_influence": 0.9,
+        "eval_influence": 0.7,
         "dataset": glob.glob(f'data/*.plain'),
         "epochs": 20,
         "batch_size": 16384,
@@ -54,6 +54,7 @@ p.stdin.flush()
 
 last_iteration = 0
 is_running = True
+time.sleep(20)
 
 while is_running:
     time.sleep(5)
