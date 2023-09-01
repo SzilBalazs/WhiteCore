@@ -1,6 +1,6 @@
 name: Validate Bench & Run Tests
 
-on: [push]
+on: [ push ]
 
 jobs:
   WhiteCore:
@@ -10,9 +10,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        arch: [popcnt, avx2, bmi2]
-        compiler: [g++, clang++]
+        os: [ ubuntu-latest, windows-latest ]
+        arch: [ popcnt, avx2, bmi2 ]
+        compiler: [ g++, clang++ ]
         include:
           - os: ubuntu-latest
             suffix: "-linux"
@@ -51,6 +51,8 @@ jobs:
           COMMIT_BENCH=$(git log -1 --pretty=%B | grep -Eo '^Bench: *[0-9]+' | grep -o '[0-9]*')
           echo "BENCH=$BENCH" >> $GITHUB_ENV
           echo "COMMIT_BENCH=$COMMIT_BENCH" >> $GITHUB_ENV
+          echo "Bench = $BENCH"
+          echo "Commit bench = $COMMIT_BENCH"
 
       - name: Invalid bench
         if: steps.obtain_bench.outputs.BENCH != steps.obtain_bench.outputs.COMMIT_BENCH &&
