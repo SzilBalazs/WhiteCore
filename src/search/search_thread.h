@@ -401,7 +401,7 @@ namespace search {
                 board.make_move(move, &nnue);
                 Score score;
 
-                if (!in_check && depth >= 3 && made_moves >= 3 + 2 * pv_node && !move.is_promo() && move.is_quiet()) {
+                if (!in_check && depth >= 3 && made_moves >= 3 + 2 * pv_node && move.is_quiet()) {
                     Depth R = lmr_reductions[depth][made_moves];
 
                     R -= pv_node;
