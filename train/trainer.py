@@ -55,6 +55,9 @@ p.stdin.flush()
 last_iteration = 0
 is_running = True
 
+os.remove("log.txt")
+time.sleep(20)
+
 while is_running:
     time.sleep(5)
     try:

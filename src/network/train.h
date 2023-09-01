@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "../search/wdl_model.h"
 #include "../utils/utilities.h"
 #include "adam.h"
 #include "data_parser.h"
@@ -107,7 +108,7 @@ namespace nn {
                         int64_t current_time = now();
                         int64_t elapsed_time = current_time - start_time;
 
-                        int64_t pos_per_s = (epoch_iter * batch_size * 1000) / elapsed_time;
+                        int64_t pos_per_s = (epoch_iter * batch_size * 2000) / elapsed_time;
 
                         float progress = float(epoch_iter) / float(entry_count / batch_size);
                         unsigned int progress_position = PROGRESS_BAR_WIDTH * progress;
@@ -210,8 +211,17 @@ namespace nn {
 
             float error = (1.0f - eval_influence) * (prediction - wdl) * (prediction - wdl) +
                           eval_influence * (prediction - eval) * (prediction - eval);
+
+            auto accurate = [](int A, int B, int C, float wdl, float result) -> bool {
+                return A >= B && A >= C && std::abs(wdl - result) < 1e-7;
+            };
+
+            Score centipawn_prediction = std::log(prediction / (1 - prediction)) * 400.0f;
+            auto [W, L] = search::wdl_model::cp_to_wl(centipawn_prediction);
+            int D = 1000 - W - L;
+
+            accuracy[id] += accurate(W, D, L, wdl, 1.0) || accurate(D, W, L, wdl, 0.5) || accurate(L, W, D, wdl, 0.0);
             errors[id] += error;
-            accuracy[id] += ((wdl - 0.5f) * (prediction - 0.5f) > 0.0f) || std::abs(wdl - prediction) < 0.05f;
 
             if constexpr (train) {
                 std::array<float, 1> l1_loss = {(1 - eval_influence) * 2.0f * (prediction - wdl) + eval_influence * 2.0f * (prediction - eval)};
