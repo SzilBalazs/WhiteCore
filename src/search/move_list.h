@@ -22,7 +22,6 @@
 #include "see.h"
 
 namespace search {
-    template<bool captures_only>
     class MoveList {
 
         static constexpr int MOVE_SCORE_HASH = 10'000'000;
@@ -43,8 +42,8 @@ namespace search {
          * @param history History object containing information about the search
          * @param ply Distance from root
          */
-        MoveList(const chess::Board &board, const chess::Move &hash_move, const chess::Move &last_move, const History &history, const Ply &ply) : current(0), board(board),
-                                                                                                                                                  hash_move(hash_move), last_move(last_move), history(history), ply(ply) {
+        MoveList(const chess::Board &board, const chess::Move &hash_move, const chess::Move &last_move, const History &history, const Ply &ply, bool captures_only = false) : current(0), board(board),
+                                                                                                                                                                              hash_move(hash_move), last_move(last_move), history(history), ply(ply) {
             size = chess::gen_moves(board, moves, captures_only) - moves;
             std::transform(moves, moves + size, scores, [this](const chess::Move &move) {
                 return score_move(move);

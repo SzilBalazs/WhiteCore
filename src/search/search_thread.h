@@ -305,7 +305,7 @@ namespace search {
             }
 
             if (depth <= 0)
-                return qsearch<node_type>(alpha, beta);
+                return qsearch<node_type>(alpha, beta, ss);
 
             Score static_eval = ss->eval = eval::evaluate(board, nnue);
             bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
@@ -317,7 +317,7 @@ namespace search {
                 depth--;
 
             if (depth <= 3 && static_eval + 150 * depth <= alpha) {
-                Score score = qsearch<NON_PV_NODE>(alpha, beta);
+                Score score = qsearch<NON_PV_NODE>(alpha, beta, ss);
                 if (score <= alpha)
                     return score;
             }
@@ -348,7 +348,7 @@ namespace search {
             }
 
         search_moves:
-            MoveList<false> move_list(board, hash_move, last_move, history, ss->ply);
+            MoveList move_list(board, hash_move, last_move, history, ss->ply);
 
             if (move_list.empty()) {
                 return in_check ? mate_ply : 0;
@@ -477,13 +477,14 @@ namespace search {
         }
 
         template<NodeType node_type>
-        Score qsearch(Score alpha, Score beta) {
+        Score qsearch(Score alpha, Score beta, SearchStack *ss) {
 
             if (!shared.is_searching) {
                 return UNKNOWN_SCORE;
             }
 
-            Score static_eval = eval::evaluate(board, nnue);
+            const bool in_check = board.is_check();
+            const Score static_eval = eval::evaluate(board, nnue);
 
             if (static_eval >= beta) {
                 return beta;
@@ -492,12 +493,16 @@ namespace search {
                 alpha = static_eval;
             }
 
-            MoveList<true> move_list(board, chess::NULL_MOVE, chess::NULL_MOVE, history, 0);
+            MoveList move_list(board, chess::NULL_MOVE, chess::NULL_MOVE, history, 0, !in_check);
+
+            if (in_check && move_list.empty()) {
+                return -MATE_VALUE + ss->ply;
+            }
 
             while (!move_list.empty()) {
                 chess::Move move = move_list.next_move();
 
-                if (alpha > -WORST_MATE && !see(board, move, 0)) {
+                if (alpha > -WORST_MATE && !in_check && !see(board, move, 0)) {
                     stat_tracker::record_success("qsearch_see");
                     break;
                 } else {
@@ -506,7 +511,7 @@ namespace search {
 
                 shared.node_count[id]++;
                 board.make_move(move, &nnue);
-                Score score = -qsearch<node_type>(-beta, -alpha);
+                Score score = -qsearch<node_type>(-beta, -alpha, ss + 1);
                 board.undo_move(move, &nnue);
 
                 if (score == UNKNOWN_SCORE) {
