@@ -21,6 +21,7 @@
 #include "../utils/utilities.h"
 #include "adam.h"
 #include "data_parser.h"
+#include "policy_network.h"
 
 #include <filesystem>
 #include <optional>
