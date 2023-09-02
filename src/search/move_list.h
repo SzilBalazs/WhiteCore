@@ -26,7 +26,8 @@ namespace search {
     class MoveList {
 
         static constexpr int MOVE_SCORE_HASH = 10'000'000;
-        static constexpr int MOVE_SCORE_PROMO = 9'000'000;
+        static constexpr int MOVE_SCORE_GOOD_PROMO = 9'000'000;
+        static constexpr int MOVE_SCORE_BAD_PROMO = -10'000'000;
         static constexpr int MOVE_SCORE_GOOD_CAPTURE = 8'000'000;
         static constexpr int MOVE_SCORE_FIRST_KILLER = 7'000'000;
         static constexpr int MOVE_SCORE_SECOND_KILLER = 6'000'000;
@@ -95,7 +96,7 @@ namespace search {
             if (move == hash_move) {
                 return MOVE_SCORE_HASH;
             } else if (move.is_promo()) {
-                return MOVE_SCORE_PROMO;
+                return move.get_promo_type() == QUEEN ? MOVE_SCORE_GOOD_PROMO : MOVE_SCORE_BAD_PROMO;
             } else if (move.is_capture()) {
                 return (see(board, move, 0) ? MOVE_SCORE_GOOD_CAPTURE : MOVE_SCORE_BAD_CAPTURE) + get_mvv_lva(move);
             } else if (move == history.killer_moves[ply][0]) {
