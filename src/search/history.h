@@ -76,6 +76,19 @@ namespace search {
             return value;
         }
 
+        void decay() {
+            for (int i = 0; i < 64; i++) {
+                for (int j = 0; j < 64; j++) {
+                    for (int k = 0; k < 64; k++) {
+                        for (int pt = 0; pt < 6; pt++) {
+                            conthist[pt][i][j][k] /= 2;
+                        }
+                    }
+                    butterfly[i][j] /= 2;
+                }
+            }
+        }
+
         /**
          * Clears the history.
          */

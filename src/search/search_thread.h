@@ -192,6 +192,8 @@ namespace search {
             static constexpr Score DELTA = 20;
             static constexpr Score BOUND = 1500;
 
+            history.decay();
+
             Score delta = DELTA;
             Score alpha = -INF_SCORE;
             Score beta = INF_SCORE;
