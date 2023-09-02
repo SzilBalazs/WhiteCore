@@ -38,13 +38,13 @@ namespace nn::activations::softmax {
         }
     }
 
-    template<size_t N>
-    void backward(const std::array<float, N> &s, std::array<float, N> &z_grad, size_t target) {
-        std::fill(z_grad.begin(), z_grad.end(), 0.0f);
+    void backward(const std::vector<float> &s, std::vector<float> &z_grad, size_t target) {
+        const size_t N = s.size();
+        z_grad.assign(N, 0.0f);
 
-        std::array<float, N> s_grad;
+        std::vector<float> s_grad(N);
         for (size_t i = 0; i < N; i++) {
-            s_grad[i] = s[i] - (i == target);
+            s_grad[i] = s[i] - float(i == target);
         }
 
         for (size_t i = 0; i < N; i++) {

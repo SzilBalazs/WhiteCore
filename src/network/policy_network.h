@@ -26,10 +26,18 @@ namespace nn {
     class PolicyNetwork {
     public:
         void forward(const std::array<float, IN> &input, const std::vector<chess::Move> &moves, std::vector<float> &output) {
-            std::vector<float> z;
+            l.forward(input, moves, output);
+        }
 
-            l.forward(input, moves, z);
-            activations::softmax::forward(z, output);
+        void backward(const std::array<float, IN> &input, const std::vector<float> &output, const std::vector<chess::Move> &moves, const chess::Move &best_move, layers::PolicyLayerGradient<IN> &gradient) {
+            size_t best_move_index = 0;
+            for (size_t i = 0; i < moves.size(); i++) {
+                if (moves[i] == best_move) {
+                    best_move_index = i;
+                    break;
+                }
+            }
+            l.backward(input, output, moves, best_move_index, gradient);
         }
 
     private:
