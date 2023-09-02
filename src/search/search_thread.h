@@ -57,12 +57,6 @@ namespace search {
         }
     };
 
-    struct SearchStack {
-        Ply ply;
-        chess::Move move;
-        Score eval;
-    };
-
     class SearchThread {
     public:
         SearchThread(SharedMemory &shared_memory, unsigned int thread_id) : nnue(), shared(shared_memory), id(thread_id) {}
@@ -256,7 +250,6 @@ namespace search {
             constexpr bool pv_node = node_type != NON_PV_NODE;
             constexpr bool non_pv_node = !pv_node;
 
-            const chess::Move last_move = ss->ply >= 1 ? (ss - 1)->move : chess::NULL_MOVE;
             const Score mate_ply = -MATE_VALUE + ss->ply;
             const bool in_check = board.is_check();
 
@@ -305,7 +298,7 @@ namespace search {
             }
 
             if (depth <= 0)
-                return qsearch<node_type>(alpha, beta);
+                return qsearch<node_type>(alpha, beta, ss);
 
             Score static_eval = ss->eval = eval::evaluate(board, nnue);
             bool improving = ss->ply >= 2 && ss->eval >= (ss - 2)->eval;
@@ -317,7 +310,7 @@ namespace search {
                 depth--;
 
             if (depth <= 3 && static_eval + 150 * depth <= alpha) {
-                Score score = qsearch<NON_PV_NODE>(alpha, beta);
+                Score score = qsearch<NON_PV_NODE>(alpha, beta, ss);
                 if (score <= alpha)
                     return score;
             }
@@ -348,7 +341,7 @@ namespace search {
             }
 
         search_moves:
-            MoveList<false> move_list(board, hash_move, last_move, history, ss->ply);
+            MoveList<false> move_list(board, hash_move, history, ss);
 
             if (move_list.empty()) {
                 return in_check ? mate_ply : 0;
@@ -363,6 +356,7 @@ namespace search {
             int made_moves = 0;
             while (!move_list.empty()) {
                 chess::Move move = ss->move = move_list.next_move();
+                ss->pt = board.piece_at(move.get_from()).type;
 
                 if (skip_quiets && move.is_quiet() && !move.is_promo()) continue;
 
@@ -406,7 +400,7 @@ namespace search {
 
                     R -= pv_node;
                     R += !improving;
-                    R -= std::clamp(history.butterfly[move.get_from()][move.get_to()] / 4096, -2, 2);
+                    R -= std::clamp(history.get_history(move, ss) / 4096, -2, 2);
 
                     Depth D = std::clamp(new_depth - R, 1, depth - 1);
                     score = -search<NON_PV_NODE>(D, -alpha - 1, -alpha, ss + 1);
@@ -438,9 +432,9 @@ namespace search {
                 if (score >= beta) {
 
                     if (move.is_quiet()) {
-                        history.add_cutoff(move, last_move, depth, ss->ply);
+                        history.add_cutoff(move, depth, ss);
                         for (chess::Move *current_move = quiet_moves; current_move != next_quiet_move; current_move++) {
-                            history.decrease_history(*current_move, depth);
+                            history.decrease_history(*current_move, depth, ss);
                         }
                     }
 
@@ -477,7 +471,7 @@ namespace search {
         }
 
         template<NodeType node_type>
-        Score qsearch(Score alpha, Score beta) {
+        Score qsearch(Score alpha, Score beta, SearchStack *ss) {
 
             if (!shared.is_searching) {
                 return UNKNOWN_SCORE;
@@ -492,7 +486,7 @@ namespace search {
                 alpha = static_eval;
             }
 
-            MoveList<true> move_list(board, chess::NULL_MOVE, chess::NULL_MOVE, history, 0);
+            MoveList<true> move_list(board, chess::NULL_MOVE, history, ss);
 
             while (!move_list.empty()) {
                 chess::Move move = move_list.next_move();
@@ -506,7 +500,7 @@ namespace search {
 
                 shared.node_count[id]++;
                 board.make_move(move, &nnue);
-                Score score = -qsearch<node_type>(-beta, -alpha);
+                Score score = -qsearch<node_type>(-beta, -alpha, ss + 1);
                 board.undo_move(move, &nnue);
 
                 if (score == UNKNOWN_SCORE) {
