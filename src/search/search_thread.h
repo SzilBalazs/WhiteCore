@@ -357,12 +357,18 @@ namespace search {
             while (!move_list.empty()) {
                 chess::Move move = ss->move = move_list.next_move();
                 ss->pt = board.piece_at(move.get_from()).type;
+                const Score history_score = move.is_quiet() ? history.get_history(move, ss) : 0;
 
                 if (skip_quiets && move.is_quiet() && !move.is_promo()) continue;
 
                 if (non_root_node && non_pv_node && !in_check && std::abs(best_score) < WORST_MATE) {
 
                     if (move.is_quiet()) {
+
+                        if (depth <= 3 && history_score < -4096) {
+                            continue;
+                        }
+
                         if (depth <= 6 && !see(board, move, -depth * 100)) {
                             stat_tracker::record_success("pvs_see_quiet");
                             continue;
@@ -400,7 +406,7 @@ namespace search {
 
                     R -= pv_node;
                     R += !improving;
-                    R -= std::clamp(history.get_history(move, ss) / 4096, -2, 2);
+                    R -= std::clamp(history_score / 4096, -2, 2);
 
                     Depth D = std::clamp(new_depth - R, 1, depth - 1);
                     score = -search<NON_PV_NODE>(D, -alpha - 1, -alpha, ss + 1);
