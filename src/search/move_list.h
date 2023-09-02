@@ -105,7 +105,7 @@ namespace search {
             } else if (move == history.counter_moves[last_move.get_from()][last_move.get_to()]) {
                 return MOVE_SCORE_COUNTER;
             } else {
-                return history.get_history(move, ss);
+                return history.butterfly[move.get_from()][move.get_to()];
             }
         }
     };

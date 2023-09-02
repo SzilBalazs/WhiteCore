@@ -71,7 +71,7 @@ namespace search {
         Score get_history(chess::Move move, SearchStack *ss) const {
             Score value = butterfly[move.get_from()][move.get_to()];
             if ((ss - 1)->move.is_ok()) {
-                value += 3 * conthist[(ss - 1)->pt][(ss - 1)->move.get_to()][move.get_from()][move.get_to()];
+                value += 2 * conthist[(ss - 1)->pt][(ss - 1)->move.get_to()][move.get_from()][move.get_to()];
             }
             return value;
         }
