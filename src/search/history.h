@@ -20,12 +20,21 @@
 #include "../chess/move.h"
 
 namespace search {
+
+    struct SearchStack {
+        Ply ply;
+        chess::Move move;
+        PieceType pt;
+        Score eval;
+    };
+
     class History {
 
     public:
         chess::Move killer_moves[MAX_PLY + 10][2];
         chess::Move counter_moves[64][64];
         Score butterfly[64][64];
+        Score counter_history[6][64][64][64];
 
         /**
          * Adds a beta-cutoff to the History.
@@ -35,10 +44,14 @@ namespace search {
          * @param depth Search depth
          * @param ply Distance from root
          */
-        void add_cutoff(chess::Move move, chess::Move last_move, Depth depth, Ply ply) {
-            update_killer_moves(move, ply);
-            update_counter_moves(move, last_move);
-            update_butterfly_history(move, depth * 100);
+        void add_cutoff(chess::Move move, Depth depth, SearchStack *ss) {
+            update_killer_moves(move, ss->ply);
+            update_history(butterfly[move.get_from()][move.get_to()], depth * 100);
+
+            if ((ss - 1)->move.is_ok()) {
+                update_counter_moves(move, (ss - 1)->move);
+                update_history(counter_history[(ss - 1)->pt][(ss - 1)->move.get_to()][move.get_from()][move.get_to()], depth * 100);
+            }
         }
 
         /**
@@ -47,8 +60,20 @@ namespace search {
          * @param move The weak move
          * @param depth Search depth
          */
-        void decrease_history(chess::Move move, Depth depth) {
-            update_butterfly_history(move, -depth * 100);
+        void decrease_history(chess::Move move, Depth depth, SearchStack *ss) {
+            update_history(butterfly[move.get_from()][move.get_to()], -depth * 100);
+
+            if ((ss - 1)->move.is_ok()) {
+                update_history(counter_history[(ss - 1)->pt][(ss - 1)->move.get_to()][move.get_from()][move.get_to()], -depth * 100);
+            }
+        }
+
+        Score get_history(chess::Move move, SearchStack *ss) const {
+            Score value = butterfly[move.get_from()][move.get_to()];
+            if ((ss - 1)->move.is_ok()) {
+                value += counter_history[(ss - 1)->pt][(ss - 1)->move.get_to()][move.get_from()][move.get_to()];
+            }
+            return value;
         }
 
         /**
@@ -60,6 +85,12 @@ namespace search {
             }
             for (int i = 0; i < 64; i++) {
                 for (int j = 0; j < 64; j++) {
+                    for (int k = 0; k < 64; k++) {
+                        for (int pt = 0; pt < 6; pt++) {
+                            counter_history[pt][i][j][k] = 0;
+                        }
+                    }
+
                     butterfly[i][j] = 0;
                     counter_moves[i][j] = chess::NULL_MOVE;
                 }
@@ -76,9 +107,9 @@ namespace search {
             counter_moves[last_move.get_from()][last_move.get_to()] = move;
         }
 
-        void update_butterfly_history(chess::Move move, int bonus) {
-            int scaled = bonus - butterfly[move.get_from()][move.get_to()] * std::abs(bonus) / 32768;
-            butterfly[move.get_from()][move.get_to()] += scaled;
+        static void update_history(Score &entry, Score bonus) {
+            int scaled = bonus - entry * std::abs(bonus) / 32768;
+            entry += scaled;
         }
     };
 } // namespace search

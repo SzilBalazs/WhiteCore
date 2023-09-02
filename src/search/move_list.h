@@ -43,8 +43,8 @@ namespace search {
          * @param history History object containing information about the search
          * @param ply Distance from root
          */
-        MoveList(const chess::Board &board, const chess::Move &hash_move, const chess::Move &last_move, const History &history, const Ply &ply) : current(0), board(board),
-                                                                                                                                                  hash_move(hash_move), last_move(last_move), history(history), ply(ply) {
+        MoveList(const chess::Board &board, const chess::Move &hash_move, const History &history, SearchStack *ss) : current(0), board(board), ss(ss),
+                                                                                                                     hash_move(hash_move), last_move((ss - 1)->move), history(history), ply(ss->ply) {
             size = chess::gen_moves(board, moves, captures_only) - moves;
             std::transform(moves, moves + size, scores, [this](const chess::Move &move) {
                 return score_move(move);
@@ -79,6 +79,7 @@ namespace search {
         unsigned int size, current;
         int scores[200];
         const chess::Board &board;
+        SearchStack *ss;
         const chess::Move &hash_move;
         const chess::Move &last_move;
         const History &history;
@@ -104,7 +105,7 @@ namespace search {
             } else if (move == history.counter_moves[last_move.get_from()][last_move.get_to()]) {
                 return MOVE_SCORE_COUNTER;
             } else {
-                return history.butterfly[move.get_from()][move.get_to()];
+                return history.get_history(move, ss);
             }
         }
     };
