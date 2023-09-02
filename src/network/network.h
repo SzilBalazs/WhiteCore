@@ -27,13 +27,11 @@ namespace nn {
 
     constexpr size_t L1_SIZE = 512;
 
-    struct Gradient {
-        layers::DenseLayerGradient<768, L1_SIZE> l0;
-        layers::DenseLayerBucketGradient<2, L1_SIZE, 1> l1;
+    struct NetworkGradient {
+        layers::DenseLayerGradient<768, L1_SIZE> l0{};
+        layers::DenseLayerBucketGradient<2, L1_SIZE, 1> l1{};
 
-        Gradient() = default;
-
-        void operator+=(const Gradient &g) {
+        void operator+=(const NetworkGradient &g) {
             l0 += g.l0;
             l1 += g.l1;
         }

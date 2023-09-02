@@ -25,9 +25,9 @@ namespace nn {
     public:
         explicit Adam(float learning_rate) : LR(learning_rate), m_gradient(), v_gradient() {}
 
-        void update(const std::vector<Gradient> &gradients, Network &network) {
-            Gradient total;
-            for (const Gradient &g : gradients) {
+        void update(const std::vector<NetworkGradient> &gradients, Network &network) {
+            NetworkGradient total;
+            for (const NetworkGradient &g : gradients) {
                 total += g;
             }
 
@@ -50,7 +50,7 @@ namespace nn {
         static constexpr float EPSILON = 1e-8;
         float LR;
 
-        Gradient m_gradient, v_gradient;
+        NetworkGradient m_gradient, v_gradient;
 
         template<size_t LEN>
         void update(std::array<float, LEN> &target, std::array<float, LEN> &m, std::array<float, LEN> &v, const std::array<float, LEN> &grad) {

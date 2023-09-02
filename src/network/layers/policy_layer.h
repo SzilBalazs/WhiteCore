@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "../activations/softmax.h"
+
 namespace nn::layers {
 
     template<size_t IN>
@@ -27,6 +29,12 @@ namespace nn::layers {
 
         ~PolicyLayerGradient() {
             delete[] weights;
+        }
+
+        void operator+=(const PolicyLayerGradient<IN> &g) {
+            for (size_t i = 0; i < IN * OUT; i++) {
+                weights[i] += g.weights[i];
+            }
         }
 
         float *weights;

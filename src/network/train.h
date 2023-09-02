@@ -77,7 +77,7 @@ namespace nn {
                     entries = entries_next;
                     entries_next = new std::string[batch_size];
 
-                    gradients.assign(thread_count, Gradient());
+                    gradients.assign(thread_count, NetworkGradient());
                     errors.assign(thread_count, 0.0f);
                     accuracy.assign(thread_count, 0);
 
@@ -153,7 +153,7 @@ namespace nn {
         size_t entry_count;
         size_t batch_size, thread_count;
         float eval_influence;
-        std::vector<Gradient> gradients;
+        std::vector<NetworkGradient> gradients;
         std::vector<float> errors;
         std::vector<int> accuracy;
         std::string *entries, *entries_next;
