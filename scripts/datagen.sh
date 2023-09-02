@@ -6,11 +6,12 @@ if [ $# -eq 0 ]
     exit 1
 fi
 
-git clone https://github.com/SzilBalazs/WhiteCore
-make EXE=Binary -C WhiteCore
+rm -rf WhiteCore Binary
+git clone https://github.com/SzilBalazs/WhiteCore || exit 1
+make EXE=Binary -C WhiteCore || exit 1
 cp WhiteCore/Binary Binary
 ./Binary test || exit 1
-./Binary bench
+./Binary bench || exit 1
 rm -rf WhiteCore
 
 while true
