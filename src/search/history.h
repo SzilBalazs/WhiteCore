@@ -50,7 +50,11 @@ namespace search {
 
             if ((ss - 1)->move.is_ok()) {
                 update_counter_moves(move, (ss - 1)->move);
-                update_history(conthist[(ss - 1)->pt][(ss - 1)->move.get_to()][move.get_from()][move.get_to()], depth * 100);
+                update_history(get_conthist_ref<1>(move, ss), depth * 100);
+            }
+
+            if ((ss - 2)->move.is_ok()) {
+                update_history(get_conthist_ref<2>(move, ss), depth * 100);
             }
         }
 
@@ -64,15 +68,25 @@ namespace search {
             update_history(butterfly[move.get_from()][move.get_to()], -depth * 100);
 
             if ((ss - 1)->move.is_ok()) {
-                update_history(conthist[(ss - 1)->pt][(ss - 1)->move.get_to()][move.get_from()][move.get_to()], -depth * 100);
+                update_history(get_conthist_ref<1>(move, ss), -depth * 100);
+            }
+
+            if ((ss - 2)->move.is_ok()) {
+                update_history(get_conthist_ref<2>(move, ss), -depth * 100);
             }
         }
 
         Score get_history(chess::Move move, SearchStack *ss) const {
             Score value = butterfly[move.get_from()][move.get_to()];
+
             if ((ss - 1)->move.is_ok()) {
-                value += 2 * conthist[(ss - 1)->pt][(ss - 1)->move.get_to()][move.get_from()][move.get_to()];
+                value += 2 * get_conthist<1>(move, ss);
             }
+
+            if ((ss - 2)->move.is_ok()) {
+                value += get_conthist<2>(move, ss);
+            }
+
             return value;
         }
 
@@ -105,6 +119,16 @@ namespace search {
 
         void update_counter_moves(chess::Move move, chess::Move last_move) {
             counter_moves[last_move.get_from()][last_move.get_to()] = move;
+        }
+
+        template<Ply ply>
+        Score get_conthist(const chess::Move &move, SearchStack *ss) const {
+            return conthist[(ss - ply)->pt][(ss - ply)->move.get_to()][move.get_from()][move.get_to()];
+        }
+
+        template<Ply ply>
+        Score &get_conthist_ref(const chess::Move &move, SearchStack *ss) {
+            return conthist[(ss - ply)->pt][(ss - ply)->move.get_to()][move.get_from()][move.get_to()];
         }
 
         static void update_history(Score &entry, Score bonus) {
