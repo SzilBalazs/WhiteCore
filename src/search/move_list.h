@@ -32,7 +32,7 @@ namespace search {
         static constexpr int MOVE_SCORE_FIRST_KILLER = 7'000'000;
         static constexpr int MOVE_SCORE_SECOND_KILLER = 6'000'000;
         static constexpr int MOVE_SCORE_COUNTER = 5'000'000;
-        static constexpr int MOVE_SCORE_BAD_CAPTURE = 4'000'000;
+        static constexpr int MOVE_SCORE_BAD_CAPTURE = -1'000'000;
 
     public:
         /**
@@ -98,7 +98,7 @@ namespace search {
             } else if (move.is_promo()) {
                 return move.get_promo_type() == QUEEN ? MOVE_SCORE_GOOD_PROMO : MOVE_SCORE_BAD_PROMO;
             } else if (move.is_capture()) {
-                return (see(board, move, 0) ? MOVE_SCORE_GOOD_CAPTURE : MOVE_SCORE_BAD_CAPTURE) + get_mvv_lva(move);
+                return (see(board, move, -107) ? MOVE_SCORE_GOOD_CAPTURE : MOVE_SCORE_BAD_CAPTURE) + get_mvv_lva(move);
             } else if (move == history.killer_moves[ply][0]) {
                 return MOVE_SCORE_FIRST_KILLER;
             } else if (move == history.killer_moves[ply][1]) {
