@@ -1,5 +1,5 @@
 // WhiteCore is a C++ chess engine
-// Copyright (c) 2022-2023 Balázs Szilágyi
+// Copyright (c) 2022-2024 Balázs Szilágyi
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

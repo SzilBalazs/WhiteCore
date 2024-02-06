@@ -1,15 +1,15 @@
 #ifdef _MSC_VER
-#  define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef PATH_MAX
-#  define PATH_MAX 260
+#define PATH_MAX 260
 #endif
 
 #define SEARCH_PATHS_MAX 64
@@ -21,7 +21,7 @@ static int fline(char **line, size_t *n, FILE *fp) {
     if (!line || !n || !fp)
         return -1;
     if (!*line)
-        if (!(*line = (char *)malloc((*n=64))))
+        if (!(*line = (char *) malloc((*n = 64))))
             return -1;
     chr = *n;
     pos = *line;
@@ -30,7 +30,7 @@ static int fline(char **line, size_t *n, FILE *fp) {
         if (chr < 2) {
             *n += (*n > 16) ? *n : 64;
             chr = *n + *line - pos;
-            if (!(*line = (char *)realloc(*line,*n)))
+            if (!(*line = (char *) realloc(*line, *n)))
                 return -1;
             pos = *n - chr + *line;
         }
@@ -68,8 +68,8 @@ static FILE *open_file(const char *name, const char *mode, const char (*searches
 }
 
 static int strcicmp(const char *s1, const char *s2) {
-    const unsigned char *us1 = (const unsigned char *)s1,
-                        *us2 = (const unsigned char *)s2;
+    const unsigned char *us1 = (const unsigned char *) s1,
+                        *us2 = (const unsigned char *) s2;
     while (tolower(*us1) == tolower(*us2)) {
         if (*us1++ == '\0')
             return 0;
@@ -79,24 +79,33 @@ static int strcicmp(const char *s1, const char *s2) {
 }
 
 /* styles */
-enum { kCamel, kSnake };
+enum { kCamel,
+       kSnake };
 /* identifiers */
-enum { kData, kEnd, kSize };
+enum { kData,
+       kEnd,
+       kSize };
 
 static const char *styled(int style, int ident) {
     switch (style) {
         case kCamel:
             switch (ident) {
-                case kData: return "Data";
-                case kEnd: return "End";
-                case kSize: return "Size";
+                case kData:
+                    return "Data";
+                case kEnd:
+                    return "End";
+                case kSize:
+                    return "Size";
             }
             break;
         case kSnake:
             switch (ident) {
-                case kData: return "_data";
-                case kEnd: return "_end";
-                case kSize: return "_size";
+                case kData:
+                    return "_data";
+                case kEnd:
+                    return "_end";
+                case kSize:
+                    return "_size";
             }
             break;
     }
@@ -136,7 +145,7 @@ int main(int argc, char **argv) {
         if (!strcmp(argv[i], "-o")) {
             if (i + 1 < argc) {
                 strcpy(outfile, argv[i + 1]);
-                memmove(argv+i+1, argv+i+2, (argc-i-2) * sizeof *argv);
+                memmove(argv + i + 1, argv + i + 2, (argc - i - 2) * sizeof *argv);
                 argc--;
                 continue;
             }
@@ -145,17 +154,17 @@ int main(int argc, char **argv) {
              * "-p -" which is another way of saying "no prefix"
              * and "-p <prefix>" for an actual prefix.
              */
-            if (argv[i+1][0] == '-') {
+            if (argv[i + 1][0] == '-') {
                 prefix[0] = '\0';
                 /* is it just a -? */
-                if (i + 1 < argc && !strcmp(argv[i+1], "-")) {
-                    memmove(argv+i+1, argv+i+2, (argc-i-2) * sizeof *argv);
+                if (i + 1 < argc && !strcmp(argv[i + 1], "-")) {
+                    memmove(argv + i + 1, argv + i + 2, (argc - i - 2) * sizeof *argv);
                     argc--;
                 }
                 continue;
             }
             strcpy(prefix, argv[i + 1]);
-            memmove(argv+i+1, argv+i+2, (argc-i-2) * sizeof *argv);
+            memmove(argv + i + 1, argv + i + 2, (argc - i - 2) * sizeof *argv);
             argc--;
             continue;
         } else if (!strncmp(argv[i], "-I", 2)) {
@@ -215,9 +224,9 @@ int main(int argc, char **argv) {
             char *inc, *beg, *sep, *end, *name, *file;
             FILE *f;
             if (!(inc = strstr(line, "INCBIN"))) continue;
-            if (!(beg = strchr(inc, '(')))       continue;
-            if (!(sep = strchr(beg, ',')))       continue;
-            if (!(end = strchr(sep, ')')))       continue;
+            if (!(beg = strchr(inc, '('))) continue;
+            if (!(sep = strchr(beg, ','))) continue;
+            if (!(end = strchr(sep, ')'))) continue;
             name = beg + 1;
             file = sep + 1;
             while (isspace(*name)) name++;
@@ -242,7 +251,7 @@ int main(int argc, char **argv) {
                 fseek(f, 0, SEEK_END);
                 size = ftell(f);
                 fseek(f, 0, SEEK_SET);
-                if (!(data = (unsigned char *)malloc(size))) {
+                if (!(data = (unsigned char *) malloc(size))) {
                     fprintf(stderr, "out of memory\n");
                     fclose(f);
                     ret = 1;
