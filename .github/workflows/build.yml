@@ -55,10 +55,9 @@ jobs:
           echo "Commit bench = $COMMIT_BENCH"
 
       - name: Invalid bench
-        if: steps.obtain_bench.outputs.BENCH != steps.obtain_bench.outputs.COMMIT_BENCH &&
-          matrix.os == 'ubuntu-latest'
+        if: env.BENCH != env.COMMIT_BENCH && matrix.os == 'ubuntu-latest'
         run: |
-          echo "::error::The commit bench ${{steps.obtain_bench.outputs.COMMIT_BENCH}} is not equal to the actual bench ${{steps.obtain_bench.outputs.BENCH}}!"
+          echo "::error::The commit bench $COMMIT_BENCH is not equal to the actual bench $BENCH!"
           exit 1
 
       - name: Run Valgrind
