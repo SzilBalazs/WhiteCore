@@ -25,7 +25,7 @@ jobs:
             exe-suffix: ".exe"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install required packages
         if: matrix.os == 'ubuntu-latest'
@@ -67,7 +67,7 @@ jobs:
           valgrind --error-exitcode=1 --errors-for-leak-kinds=all --leak-check=full ./WhiteCore-${{matrix.arch}}${{matrix.suffix}} bench
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: WhiteCore-${{matrix.arch}}-${{matrix.compiler}}${{matrix.suffix}}${{matrix.exe-suffix}}
           path: ./WhiteCore-${{matrix.arch}}${{matrix.suffix}}${{matrix.exe-suffix}}

@@ -21,7 +21,7 @@ int main() {
         output_data[i].close();
     }
     for (int i = 0; i < CNT; i++) {
-        system(("shuf block"+ to_string(i) + ".plain -o shuffled_block" + to_string(i) + ".plain").c_str());
+        system(("shuf block" + to_string(i) + ".plain -o shuffled_block" + to_string(i) + ".plain").c_str());
     }
     for (int i = 0; i < CNT; i++) {
         system(("rm -f block" + to_string(i) + ".plain").c_str());
